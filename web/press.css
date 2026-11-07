@@ -99,6 +99,7 @@ button { font: inherit; color: inherit; }
 .plate-art canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .plate-dot { position: absolute; width: 22%; aspect-ratio: 1; border-radius: 50%; background: var(--red); right: -5%; top: -7%; mix-blend-mode: multiply; z-index: 2; pointer-events: none; }
 .plate-cap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 16px; margin-top: 18px; align-items: start; }
+.plate-k { display: block; margin-bottom: 2px; line-height: 28px; }
 .plate-cap h2 { font: 700 1.25rem/1.35 var(--head); }
 .plate-cap h2 small { font: 500 12px var(--mono); letter-spacing: .1em; color: var(--text-3); margin-left: 8px; text-transform: uppercase; }
 .plate-cap p { grid-column: 2; color: var(--text-2); font-size: 15px; max-width: 34em; }
