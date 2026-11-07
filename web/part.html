@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>PsychoPilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;500;700;800&family=IBM+Plex+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="press.css">
+</head>
+<body>
+  <div class="wrap">
+    <header class="mast">
+      <a class="back" href="index.html#volumes"><span class="num" aria-hidden="true">←</span>PsychoPilot</a>
+      <span class="lab" id="v-tag"></span>
+    </header>
+
+    <section class="v-hero">
+      <div id="v-art"></div>
+      <div>
+        <p class="lab" id="v-over"></p>
+        <h1 id="v-title"></h1>
+        <p class="lede" id="v-desc"></p>
+        <div class="facts" id="v-facts"></div>
+      </div>
+    </section>
+
+    <main class="toc" id="toc"></main>
+
+    <nav class="v-nav" id="v-nav" aria-label="其他卷"></nav>
+
+    <footer class="foot">
+      <span class="logo" style="font-size:16px"><i aria-hidden="true"></i>PsychoPilot</span>
+      <p>PsychoPilot 是教育平台，不提供心理诊断或治疗。课程中的测验与模拟仅用于学习，不能替代专业评估。如果你正处于困境，请联系当地的专业心理健康服务。</p>
+    </footer>
+  </div>
+
+  <script src="curriculum.js"></script>
+  <script src="ink.js"></script>
+  <script>
+    (() => {
+      'use strict';
+      const PP = window.PP, Ink = window.PPInk;
+      const $ = (s) => document.querySelector(s);
+      const esc = (s) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+      const qs = new URLSearchParams(location.search);
+      const topic = PP.topics.find((t) => t.id === qs.get('topic'));
+      const part = topic ? null : (PP.parts.find((p) => String(p.id) === qs.get('p')) || PP.parts[0]);
+      const stages = topic ? topic.stages.map((id) => PP.stages[id]) : part.stages;
+      const count = stages.reduce((n, s) => n + s.courses.length, 0);
+
+      /* a cover as an element: same object as on the homepage shelf */
+      const cover = (p, tag = 'div', href = '') => {
+        const c = Ink.COVERS[p.id], el = document.createElement(tag);
+        el.className = 'cover' + (c.bg === 'paper' ? '' : ' on-' + c.bg);
+        if (href) el.href = href;
+        el.innerHTML = `<span class="top"><span>PsychoPilot</span><span>${p.courseCount} 讲</span></span>
+          <span class="vol">${p.numeral}</span><canvas aria-hidden="true"></canvas>
+          <h3>${esc(p.short)}</h3><span class="fig">${c.fig}</span>`;
+        return el;
+      };
+
+      if (part) {
+        document.title = `第 ${part.numeral} 卷 ${part.title} · PsychoPilot`;
+        $('#v-tag').textContent = `Volume ${part.numeral} / VI`;
+        $('#v-over').textContent = `第 ${part.numeral} 卷`;
+        $('#v-title').textContent = part.title;
+        $('#v-desc').textContent = part.desc;
+        $('#v-facts').innerHTML = `<span class="r">${count} 讲</span><span>${stages.length} 个阶段</span><span>封面：${esc(Ink.COVERS[part.id].fig.split('— ')[1])}</span>`;
+        const el = cover(part);
+        el.setAttribute('aria-hidden', 'true');
+        $('#v-art').replaceWith(el);
+        Ink.attach(el, el.querySelector('canvas'), part.id, { auto: true });
+      } else {
+        const ps = [...new Set(stages.map((s) => s.part))];
+        document.title = `${topic.label} · PsychoPilot`;
+        $('#v-tag').textContent = 'By interest';
+        $('#v-over').textContent = '兴趣路线';
+        $('#v-title').textContent = topic.label;
+        $('#v-desc').textContent = `把散落在 ${ps.map((p) => '第 ' + p.numeral + ' 卷').join('、')} 里的相关内容放在一起读。`;
+        $('#v-facts').innerHTML = `<span class="r">${count} 讲</span><span>${stages.length} 个阶段</span>`;
+        const stack = document.createElement('div');
+        stack.className = 'stack';
+        ps.forEach((p, i) => {
+          const el = cover(p, 'a', PP.partUrl(p));
+          el.setAttribute('aria-label', `第 ${p.numeral} 卷 ${p.title}`);
+          el.style.left = `${i * (42 / Math.max(1, ps.length - 1))}%`;
+          el.style.top = `${i * 7}%`;
+          el.style.transform = `rotate(${(i - (ps.length - 1) / 2) * 5}deg)`;
+          el.style.zIndex = String(10 - i);
+          stack.appendChild(el);
+          Ink.attach(el, el.querySelector('canvas'), p.id);
+        });
+        $('#v-art').replaceWith(stack);
+      }
+
+      $('#toc').innerHTML = stages.map((st) => `
+        <section class="chap" aria-labelledby="st-${st.id}">
+          <div class="chap-head">
+            <span class="big" aria-hidden="true">${st.id}</span>
+            <h2 id="st-${st.id}">${esc(st.title)}</h2>
+            ${topic ? `<a class="from lab" href="${PP.partUrl(st.part)}">Volume ${st.part.numeral} · ${esc(st.part.short)}</a>` : `<span class="from lab">Stage ${st.id} · ${st.courses.length} lessons</span>`}
+          </div>
+          <ol class="lessons">${st.courses.map((c) => `
+            <li><a class="lesson" href="${PP.courseUrl(c)}">
+              <span class="lid">${c.id}</span>
+              <span><span class="lt">${esc(c.title)}</span>${c.sub ? `<span class="ls">${esc(c.sub)}</span>` : ''}</span>
+              <span class="go" aria-hidden="true">→</span>
+            </a></li>`).join('')}
+          </ol>
+        </section>`).join('');
+
+      const nav = $('#v-nav');
+      if (part) {
+        const i = PP.parts.indexOf(part);
+        const link = (p, next) => {
+          const a = document.createElement('a');
+          a.href = PP.partUrl(p);
+          if (next) a.className = 'next';
+          const c = cover(p);
+          c.setAttribute('aria-hidden', 'true');
+          a.appendChild(c);
+          a.insertAdjacentHTML('beforeend', `<span><span class="lab">${next ? 'Next volume →' : '← Previous volume'}</span><span class="t">${esc(p.title)}</span></span>`);
+          Ink.attach(a, c.querySelector('canvas'), p.id);
+          return a;
+        };
+        nav.append(PP.parts[i - 1] ? link(PP.parts[i - 1], false) : document.createElement('span'));
+        if (PP.parts[i + 1]) nav.append(link(PP.parts[i + 1], true));
+      } else {
+        nav.innerHTML = `<div class="links"><p class="lab" style="margin-bottom:10px">Other interests</p>${PP.topics.filter((t) => t !== topic)
+          .map((t) => `<a href="${PP.topicUrl(t)}">${esc(t.label)}</a>`).join('<span class="sep">/</span>')}</div>`;
+      }
+    })();
+  </script>
+</body>
+</html>

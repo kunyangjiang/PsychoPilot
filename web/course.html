@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>课程 · PsychoPilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;500;700;800&family=IBM+Plex+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="press.css">
+</head>
+<body>
+  <!-- Placeholder lesson page: fixes the URL scheme (course.html?id=XX-YY) and navigation.
+       The real lesson layout belongs to the course-page design phase. -->
+  <div class="wrap">
+    <header class="mast">
+      <a class="back" id="back" href="index.html#volumes"><span class="num" aria-hidden="true">←</span><span id="back-t">PsychoPilot</span></a>
+      <a class="logo" href="index.html"><i aria-hidden="true"></i>PsychoPilot</a>
+    </header>
+
+    <article>
+      <div class="l-hero">
+        <div>
+          <div class="crumb lab" id="crumb"></div>
+          <h1 id="title">课程</h1>
+          <p class="lede" id="sub"></p>
+        </div>
+        <div class="stamp" aria-label="状态：制作中">制作中<small>In preparation</small></div>
+      </div>
+      <div class="l-note">
+        <p>这一讲正在制作中。课程页的版式、互动实验和证据等级标注，将在下一阶段设计。</p>
+      </div>
+    </article>
+
+    <nav class="pager" aria-label="上一讲与下一讲">
+      <a id="prev" hidden><span class="lab">← Previous</span><span class="t"></span></a>
+      <a class="next" id="next" hidden><span class="lab">Next →</span><span class="t"></span></a>
+    </nav>
+
+    <footer class="foot">
+      <span class="logo" style="font-size:16px"><i aria-hidden="true"></i>PsychoPilot</span>
+      <p>PsychoPilot 是教育平台，不提供心理诊断或治疗。课程中的测验与模拟仅用于学习，不能替代专业评估。如果你正处于困境，请联系当地的专业心理健康服务。</p>
+    </footer>
+  </div>
+
+  <script src="curriculum.js"></script>
+  <script>
+    (() => {
+      const { courses, byId, courseUrl, partUrl } = window.PP;
+      const c = byId(new URLSearchParams(location.search).get('id')) || courses[0];
+      const p = c.stage.part;
+      const $ = (s) => document.querySelector(s);
+      document.title = `${c.id} ${c.title} · PsychoPilot`;
+      $('#back').href = partUrl(p);
+      $('#back-t').textContent = `第 ${p.numeral} 卷 · ${p.short}`;
+      const crumb = $('#crumb');
+      [[`Lesson ${c.id}`], [`Volume ${p.numeral}`, partUrl(p)], [`Stage ${c.stage.id}`, `${partUrl(p)}#st-${c.stage.id}`], [`${c.index + 1} / ${courses.length}`]]
+        .forEach(([t, href]) => { const el = document.createElement(href ? 'a' : 'span'); if (href) el.href = href; el.textContent = t; crumb.appendChild(el); });
+      $('#title').textContent = c.title;
+      $('#sub').textContent = c.sub;
+      try { localStorage.setItem('pp.last', c.id); } catch {}
+      [['#prev', courses[c.index - 1]], ['#next', courses[c.index + 1]]].forEach(([sel, n]) => {
+        if (!n) return;
+        const a = $(sel);
+        a.hidden = false;
+        a.href = courseUrl(n);
+        a.querySelector('.t').textContent = `${n.id} ${n.title}`;
+      });
+    })();
+  </script>
+</body>
+</html>
