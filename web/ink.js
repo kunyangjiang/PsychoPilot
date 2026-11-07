@@ -124,10 +124,14 @@ window.PPInk = (() => {
       ctx.beginPath(); ctx.arc(x, y - s * .55, s * .2, 0, TAU); ctx.fill();
       ctx.beginPath(); ctx.roundRect(x - s * .24, y - s * .3, s * .48, s * .72, [s * .2, s * .2, s * .05, s * .05]); ctx.fill();
     };
-    for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) person(cw * (q + .8), ch * (r + .95), Math.min(cw, ch) * .92, c.fg);
+    // a figure spans 1.17 s vertically (head top to feet), so size it by both
+    // column and row pitch to keep a clear gap between neighbours
+    const s = Math.min(cw * .9, ch * .74);
+    // the last slot of the bottom row stays empty: the one who differs steps into it
+    for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) if (r < rows - 1 || q < cols - 1) person(cw * (q + .8), ch * (r + .95), s, c.fg);
     const k = st.k, e = k * k * (3 - 2 * k);
-    const x = cw * (cols + .55) * (1 - e) + cw * (cols - .2) * e, y = ch * (rows - .05) * (1 - e) + ch * (rows + .35) * e;
-    person(x, y, Math.min(cw, ch) * .92, e > .5 ? c.fg : c.ink2);
+    const x = cw * (cols + .55) * (1 - e) + cw * (cols - .2) * e, y = ch * (rows - .05);
+    person(x, y, s, e > .5 ? c.fg : c.ink2);
   }
 
   /* V — hand-ruled lines: no break anywhere between "normal" and "disorder" */
