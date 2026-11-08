@@ -11,8 +11,8 @@
   <link rel="stylesheet" href="press.css">
 </head>
 <body>
-  <!-- Placeholder lesson page: fixes the URL scheme (course.html?id=XX-YY) and navigation.
-       The real lesson layout belongs to the course-page design phase. -->
+  <!-- Lesson page (course.html?id=XX-YY). Lessons with a manuscript in lessons/ are loaded by
+       lesson.js into #lesson; the others show the "in preparation" note. -->
   <div class="wrap">
     <header class="mast">
       <a class="back" id="back" href="index.html#volumes"><span class="num" aria-hidden="true">←</span><span id="back-t">PsychoPilot</span></a>
@@ -31,6 +31,7 @@
       <div class="l-note">
         <p>这一讲还在写。写完时，它会带着实验、互动，和每条结论的证据等级一起来。</p>
       </div>
+      <div id="lesson"></div>
     </article>
 
     <nav class="pager" aria-label="上一讲与下一讲">
@@ -69,5 +70,7 @@
       });
     })();
   </script>
+  <script src="lesson.js"></script>
+  <script src="top.js"></script>
 </body>
 </html>
