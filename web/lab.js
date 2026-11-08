@@ -583,5 +583,299 @@
     draw();
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change };
+  /* =====================================================================
+     Stage 05 · learning models. Each demo runs a small, stated rule and plots it
+     on the same kind of chart (lc below). The numbers come from the rule, not from
+     any experiment, and every demo says so on screen.
+     ===================================================================== */
+  const MODEL = 'Model · 模型演示';
+  // shared frame for a learning curve; returns the scales. yTicks: [[value, label], ...]
+  const lc = (svg, W, H, { xMax, yMax, xTicks, yTicks, xLab, yLab, L = 40, R = 12, T = 30, B = 40 }) => {
+    const X = (v) => L + (v / xMax) * (W - L - R), Y = (v) => H - B - (Math.min(v, yMax) / yMax) * (H - T - B);
+    yTicks.forEach(([v]) => { if (v) el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), class: 'fx-hair fx-dash' }, svg); });
+    el('line', { x1: L, x2: W - R, y1: Y(0), y2: Y(0), class: 'lab-axis' }, svg);
+    el('line', { x1: L, x2: L, y1: T - 6, y2: Y(0), class: 'lab-axis' }, svg);
+    yTicks.forEach(([v, s]) => text(svg, L - 6, Y(v) + 4, s, 'lab-tick', 'end'));
+    xTicks.forEach((v) => text(svg, X(v), H - B + 17, String(v), 'lab-tick', 'middle'));
+    text(svg, 0, 13, yLab, 'lab-tick');
+    text(svg, W - R, H - 4, xLab, 'lab-tick', 'end');
+    return { X, Y, L, R, T, B };
+  };
+  const line = (svg, pts, cls) => el('path', { d: pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' '), class: cls }, svg);
+  const tidy = (n, step) => Math.max(step, Math.ceil(n / step) * step);
+  const ticksTo = (max, step) => Array.from({ length: Math.floor(max / step) + 1 }, (_, i) => i * step);
+
+  /* 05-01 · pavlov: acquisition, extinction, spontaneous recovery and generalization.
+     Rule: the response on a trial is R = E − I (never below 0). Bell + food raises E by
+     0.3 × (1 − R); bell alone raises an inhibitory association I by 0.3 × R, so the old
+     learning E is kept; a day's rest loses half of I. A test tone evokes R × similarity. */
+  function pavlov(host) {
+    const { fig, out, actions } = shell(host, '让铃声“学会”预告食物',
+      '每点一次按钮，模拟的狗就经历 5 次试验。先让铃声和食物配对，再只给铃声，然后让它休息一天，看看反应怎样变化。你也可以随时换一个音调测试。',
+      [],
+      '这是一个简化模型：曲线由一条事先写好的学习规则计算出来，不是巴甫洛夫或任何真实实验的数据。真实的反应会有起伏，各个现象的大小也因实验而异。', MODEL);
+    const MAXT = 60, NEAR = 0.6, FAR = 0.15;
+    let E, I, trials, rests, tests, note;
+    const reset = () => { E = 0; I = 0; trials = []; rests = []; tests = []; note = '先点“铃声 + 食物”。在这之前，铃声只是一个普通的声音，狗听到它不会流口水。'; draw(); };
+    const R = () => Math.max(0, E - I);
+    const block = (kind) => {
+      if (trials.length >= MAXT) return;
+      for (let k = 0; k < 5; k++) {
+        const r = R();
+        trials.push({ r, kind });
+        if (kind === 'pair') E += 0.3 * (1 - r); else I += 0.3 * r;
+      }
+      const r = R();
+      if (kind === 'pair') {
+        note = I > 0.05
+          ? '重新配对以后，反应恢复得比第一次学习时快。这说明消退没有抹掉原来的学习。'
+          : `每次配对，反应都会增加，但增加的幅度越来越小：铃声越能预告食物，新的配对带来的“意外”就越少（下一讲会讲到这一点）。现在铃声引起的反应是 <b>${fmt(r * 100, 0)}</b>（满分 100）。`;
+      } else {
+        note = E < 0.05
+          ? '铃声还从来没有和食物一起出现过，所以单独给铃声什么也不会发生。'
+          : `只给铃声、不给食物，反应逐渐减弱，这叫<b>消退</b>。现在的反应是 <b>${fmt(r * 100, 0)}</b>。不过在这个模型里，原来学到的联结仍然保留着，只是被新学到的“铃声之后没有食物”压住了。试试“休息一天”。`;
+      }
+      draw();
+    };
+    const rest = () => {
+      if (!trials.length || trials.length >= MAXT) return;
+      const before = R();
+      I *= 0.5; rests.push(trials.length);
+      const after = R();
+      note = after - before > 0.03
+        ? `休息一天之后，铃声又引起了反应，从 <b>${fmt(before * 100, 0)}</b> 回升到 <b>${fmt(after * 100, 0)}</b>，但没有回到最初的水平。这叫<b>自发恢复</b>：消退学到的东西比原来的学习更容易“过期”。`
+        : '还没有经历消退，休息不会改变什么。先“只给铃声”几次，再来休息。';
+      draw();
+    };
+    const test = () => {
+      if (!trials.length) { note = '狗还没有学过任何东西，换什么音调都不会引起反应。'; draw(); return; }
+      const r = R();
+      tests.push({ at: trials.length, near: r * NEAR, far: r * FAR });
+      note = `用原来的铃声，反应是 <b>${fmt(r * 100, 0)}</b>；换一个相近的音调，反应是 <b>${fmt(r * NEAR * 100, 0)}</b>；换一个很不一样的音调，只有 <b>${fmt(r * FAR * 100, 0)}</b>。越相似的刺激，引起的反应越强，这叫<b>泛化</b>。如果继续训练，只让原来的铃声跟着食物、相近的音调不跟食物，狗会逐渐学会区分两者，这叫<b>辨别</b>。（这里的测试只是查看，不计入训练。）`;
+      draw();
+    };
+    const draw = () => {
+      const W = widthOf(fig), H = 250, n = trials.length, xMax = tidy(n + (tests.length ? 2 : 0), 10);
+      fig.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型结果：一共 ${n} 次试验，现在铃声引起的反应是 ${fmt(R() * 100, 0)}（满分 100）。` }, fig);
+      const { X, Y } = lc(svg, W, H, { xMax, yMax: 1, xTicks: ticksTo(xMax, xMax > 30 ? 20 : 10), yTicks: [[0, '0'], [0.5, '50'], [1, '100']], xLab: '试验次数', yLab: '流口水的反应（模型单位）' });
+      rests.forEach((t) => { el('line', { x1: X(t + 0.5), x2: X(t + 0.5), y1: 24, y2: Y(0), class: 'fx-hair' }, svg); text(svg, X(t + 0.5) + 4, 40, '休息', 'lab-tick fx-halo'); });
+      if (n) line(svg, trials.map((d, i) => [X(i + 1), Y(d.r)]), 'fx-hair');
+      trials.forEach((d, i) => el('circle', { cx: X(i + 1), cy: Y(d.r), r: n > 40 ? 3.5 : 4.5, class: d.kind === 'pair' ? 'fx-dot hi' : 'fx-dot lo' }, svg));
+      tests.forEach((t) => [[t.near, '近'], [t.far, '远']].forEach(([v, s]) => {
+        const x = X(t.at + 0.5), y = Y(v);
+        el('rect', { x: x - 4, y: y - 4, width: 8, height: 8, class: 'lab-red' }, svg);
+        text(svg, x + 7, y + 4, s, 'lab-s b');
+      }));
+      out.innerHTML = `<p class="fx-keys"><span><i class="k lo"></i>铃声 + 食物</span><span><i class="k ho"></i>只有铃声</span><span><i class="k hi"></i>换一个音调测试（近 / 远）</span></p><p>${note}</p>${n >= MAXT ? '<p>已经做了 60 次试验。点“重新开始”可以再做一遍。</p>' : ''}`;
+      host.querySelectorAll('.lab-actions .lab-act:not(.lab-clear)').forEach((b) => { b.disabled = n >= MAXT; });
+    };
+    action(actions, '铃声 + 食物 ×5', () => block('pair'));
+    action(actions, '只有铃声 ×5', () => block('ext'));
+    action(actions, '休息一天', rest);
+    action(actions, '换一个音调测试', test);
+    action(actions, '重新开始', reset, 'lab-clear');
+    reset();
+    onResize(draw);
+  }
+
+  /* 05-02 · rw: the Rescorla–Wagner rule, run trial by trial, in a blocking design.
+     On each trial every cue present changes by 0.3 × (λ − sum of the present cues). */
+  function rw(host) {
+    const o = { design: 'block' };
+    const D = {
+      control: ['对照组', '第一阶段不做训练；第二阶段，铃声和灯光一起出现，后面跟着食物。'],
+      block: ['阻断组', '第一阶段，铃声单独出现，后面跟着食物；第二阶段，铃声和灯光一起出现，后面跟着同样的食物。'],
+      up: ['阻断组，第二阶段奖励加倍', '和阻断组一样，只是第二阶段的食物变成了两倍。'],
+      over: ['过度预期', '第一阶段，铃声和灯光轮流单独出现，各自后面跟着食物；第二阶段，两者一起出现，后面跟着同样多的食物。'],
+    };
+    const { fig, out, actions } = shell(host, '一步一步看预测误差',
+      '选择一种实验设计，然后一次一次地进行试验。每次试验，模型先算出“预测”：在场的线索各自的联结强度之和；再和实际得到的食物比较，得到<b>预测误差</b>。在场的线索按照这个误差调整。最后，单独呈现灯光，看它学到了多少。',
+      [['design', '实验设计', [['control', '对照组'], ['block', '阻断组'], ['up', '阻断组 + 奖励加倍'], ['over', '过度预期']]]],
+      '这是雷斯科拉–瓦格纳模型的计算演示，学习速度设为 0.3，两种线索同样显眼。数值由公式算出，不是卡明实验或任何真实研究的数据。', MODEL);
+    const N1 = 10, N2 = 10, A = 0.3;
+    let t, vA, vX, hist, last;
+    const reset = () => { t = 0; vA = 0; vX = 0; hist = [{ a: 0, x: 0 }]; last = null; draw(); };
+    const step = () => {
+      if (t >= N1 + N2) return;
+      t += 1;
+      const p1 = t <= N1;
+      if (p1 && o.design === 'control') { last = { p1, skip: true }; hist.push({ a: vA, x: vX }); return draw(); }
+      const lam = !p1 && o.design === 'up' ? 2 : 1;
+      const solo = p1 && o.design === 'over' && t % 2 === 0 ? 'x' : 'a'; // over-expectation: the two cues take turns in phase 1
+      const pred = !p1 ? vA + vX : solo === 'x' ? vX : vA, err = lam - pred;
+      if (!p1 || solo === 'a') vA += A * err;
+      if (!p1 || solo === 'x') vX += A * err;
+      hist.push({ a: vA, x: vX });
+      last = { p1, pred, lam, err, solo };
+      draw();
+    };
+    const run = () => { while (t < N1 + N2) step(); };
+    const draw = () => {
+      const W = widthOf(fig), H = 260, ym = o.design === 'up' ? 2 : 1;
+      fig.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `第 ${t} 次试验后：铃声的联结强度 ${fmt(vA, 2)}，灯光的联结强度 ${fmt(vX, 2)}。` }, fig);
+      const { X, Y } = lc(svg, W, H, { xMax: N1 + N2, yMax: ym, xTicks: [0, 5, 10, 15, 20], yTicks: ym === 2 ? [[0, '0'], [1, '1'], [2, '2']] : [[0, '0'], [0.5, '0.5'], [1, '1']], xLab: '试验次数', yLab: '联结强度', T: 52 });
+      el('line', { x1: X(N1), x2: X(N1), y1: 30, y2: Y(0), class: 'fx-hair' }, svg);
+      text(svg, X(N1 / 2), 36, '第一阶段', 'lab-tick', 'middle'); text(svg, X(N1 + N2 / 2), 36, '第二阶段', 'lab-tick', 'middle');
+      line(svg, hist.map((h, i) => [X(i), Y(h.a)]), 'fx-ln fx-lb fx-curve');
+      line(svg, hist.map((h, i) => [X(i), Y(h.x)]), 'fx-ln fx-lr fx-curve');
+      const e = hist[hist.length - 1];
+      el('circle', { cx: X(t), cy: Y(e.a), r: 4.5, class: 'fx-node b' }, svg);
+      el('circle', { cx: X(t), cy: Y(e.x), r: 4.5, class: 'fx-node r' }, svg);
+      const keys = '<p class="fx-keys"><span><i class="k lo"></i>铃声的联结强度</span><span><i class="k hi"></i>灯光的联结强度</span></p>';
+      let msg;
+      if (!last) msg = `<p><b>${D[o.design][0]}</b>：${D[o.design][1]}点“进行一次试验”开始。</p>`;
+      else if (last.skip) msg = `<p>第 ${t} 次试验（第一阶段）：对照组这一阶段不训练，两种线索都还没有学到任何东西。</p>`;
+      else {
+        const cues = last.p1 ? (last.solo === 'x' ? '灯光' : '铃声') : '铃声 + 灯光';
+        msg = `<p>第 ${t} 次试验（${last.p1 ? '第一' : '第二'}阶段，${cues} → ${last.lam === 2 ? '两倍的' : ''}食物）：预测 <b>${fmt(last.pred, 2)}</b>，实际 <b>${last.lam}</b>，预测误差 <b>${fmt(last.err, 2)}</b>。在场的线索各自${last.err < 0 ? '改变' : '增加'} 0.3 × ${fmt(last.err, 2)} = <b>${fmt(A * last.err, 2)}</b>。</p>`;
+      }
+      if (t >= N1 + N2) {
+        msg += `<p>测试：单独呈现灯光。它的联结强度是 <b>${fmt(vX, 2)}</b>。` + ({
+          control: '两种线索一起学，平分了食物能支持的联结强度，灯光学到了不少。',
+          block: '灯光和食物一起出现了 10 次，却几乎什么也没学到：铃声已经完全预告了食物，第二阶段几乎没有预测误差可以分配给灯光。这就是<b>阻断</b>。',
+          up: '奖励加倍以后，铃声的预测不够用了，出现了新的预测误差，灯光也就学到了东西。决定学习的不是配对的次数，而是意外的大小。',
+          over: `第一阶段结束时，灯光的联结强度是 <b>${fmt(hist[N1].x, 2)}</b>。第二阶段，两种线索一起出现，预测之和超过了实际的食物，预测误差是负的，于是两者都<b>减弱</b>了，尽管它们每次仍然和食物一起出现。这就是<b>过度预期</b>效应。`,
+        })[o.design] + '</p>';
+      }
+      out.innerHTML = keys + msg;
+      bStep.disabled = bRun.disabled = t >= N1 + N2;
+    };
+    bindControls(host, o, reset);
+    const bStep = action(actions, '进行一次试验', step);
+    const bRun = action(actions, '一直做到结束', run);
+    action(actions, '重新开始', reset, 'lab-clear');
+    reset();
+    onResize(draw);
+  }
+
+  /* 05-03 · schedules: a cumulative record under five reinforcement rules, then extinction.
+     The response patterns are written in by hand to match the textbook descriptions; the
+     extinction rule is a simplified "discrimination" account: the simulated animal slows down
+     only once its current run of unrewarded responses is longer than any it met in training. */
+  function schedules(host) {
+    const o = { s: 'vr' };
+    const NAME = { crf: '每次都奖励', fr: '固定比率 FR 10', vr: '可变比率 VR 10', fi: '固定间隔 FI 60 秒', vi: '可变间隔 VI 60 秒' };
+    const { fig, out, actions } = shell(host, '五种奖励规则下的“累积记录”',
+      '模拟一只鸽子在实验箱里啄键 10 分钟，然后停止奖励，再观察 5 分钟。曲线越陡，啄得越快；曲线变平，说明停下来了。红色短线标出每一次奖励。换一种规则后，上一种的曲线会以灰色保留，方便比较。',
+      [['s', '奖励规则', Object.entries(NAME)]],
+      '这是一个程序模拟：各种规则下的反应模式是按照教科书中描述的典型模式写进程序的，停止奖励后的变化用了一个简化的规则（见下方说明）。曲线不是真实动物的记录，每次运行都会略有不同。', MODEL);
+    const TR = 600, EX = 300;
+    let cur = null, prev = null;
+    const sim = (s) => {
+      let n = 0, sinceN = 0, lastR = 0, avail = s === 'vi' ? -Math.log(1 - Math.random()) * 60 : 60, need = s === 'vr' ? 1 + Math.floor(Math.random() * 19) : 10;
+      let pause = 0, maxRun = 1, exN = 0;
+      const pts = [[0, 0]], rf = [];
+      for (let sec = 1; sec <= TR + EX; sec++) {
+        const ext = sec > TR, since = sec - lastR;
+        let rate = { crf: 0.45, fr: 1.3, vr: 1.2, fi: Math.min(1.2, 1.25 * (since / 60) ** 2), vi: 0.6 }[s];
+        if (s === 'fr' && since <= pause) rate = 0;
+        if (ext) { const over = sinceN - maxRun; if (over > 0) rate *= Math.exp(-over / (4 + maxRun * 0.6)); }
+        if (Math.random() < rate) {
+          n += 1; sinceN += 1; if (ext) exN += 1;
+          let win = false;
+          if (!ext) {
+            if (s === 'crf') win = true;
+            else if (s === 'fr' || s === 'vr') win = sinceN >= need;
+            else win = since >= (s === 'fi' ? 60 : avail);
+          }
+          if (win) {
+            rf.push([sec, n]); maxRun = Math.max(maxRun, sinceN); sinceN = 0; lastR = sec;
+            if (s === 'vr') need = 1 + Math.floor(Math.random() * 19);
+            if (s === 'vi') avail = -Math.log(1 - Math.random()) * 60;
+            if (s === 'fr') pause = 4 + Math.random() * 10;
+          }
+        }
+        if (s === 'crf' && !ext) maxRun = 1;
+        pts.push([sec, n]);
+      }
+      return { s, pts, rf, trainN: pts[TR][1], exN, maxRun };
+    };
+    const run = (keepPrev) => { if (keepPrev && cur && cur.s !== o.s) prev = cur; cur = sim(o.s); draw(); };
+    const draw = () => {
+      const W = widthOf(fig), H = 280, top = Math.max(cur.pts[TR + EX][1], prev ? prev.pts[TR + EX][1] : 0), yMax = tidy(top, 200);
+      fig.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模拟结果：${NAME[cur.s]}，训练 10 分钟内啄键 ${cur.trainN} 次，得到 ${cur.rf.length} 次奖励；停止奖励后 5 分钟内又啄了 ${cur.exN} 次。` }, fig);
+      const { X, Y } = lc(svg, W, H, { xMax: (TR + EX) / 60, yMax, xTicks: [0, 5, 10, 15], yTicks: ticksTo(yMax, yMax > 800 ? 400 : 200).map((v) => [v, String(v)]), xLab: '时间（分钟）', yLab: '累计啄键次数', L: 44 });
+      el('rect', { x: X(TR / 60), y: 24, width: X((TR + EX) / 60) - X(TR / 60), height: Y(0) - 24, class: 'fx-band2' }, svg);
+      text(svg, X(TR / 60) + 6, 40, '停止奖励', 'lab-tick fx-halo');
+      const path = (r, cls) => line(svg, r.pts.filter((p, i) => i % 2 === 0 || i === r.pts.length - 1).map(([s, v]) => [X(s / 60), Y(v)]), cls);
+      if (prev) path(prev, 'fx-ln fx-faint fx-curve');
+      path(cur, 'fx-ln fx-curve');
+      cur.rf.forEach(([s, v]) => el('line', { x1: X(s / 60), x2: X(s / 60) + 5, y1: Y(v), y2: Y(v) + 7, class: 'fx-ln fx-lr' }, svg));
+      const per = cur.rf.length ? cur.trainN / cur.rf.length : 0;
+      const tip = {
+        crf: '每一次啄键都有奖励。停止奖励后，“没有奖励”与训练时的经验截然不同，反应很快就停了下来。',
+        fr: '每啄 10 次得到一次奖励。典型模式是：得到奖励后先停一会儿，然后快速地连续啄键，曲线呈现“停顿—冲刺”的台阶。',
+        vr: '平均啄 10 次得到一次奖励，但每次需要多少下无法预知。反应又快又稳，几乎没有停顿。',
+        fi: '距离上次奖励满 60 秒后的第一次啄键才有奖励。刚得到奖励时几乎不啄，越接近 60 秒啄得越快，曲线呈“扇贝形”。',
+        vi: '平均 60 秒才有一次奖励机会，但具体什么时候无法预知。反应速度中等而平稳，因为任何时刻都可能“有了”。',
+      }[cur.s];
+      out.innerHTML = `<ul class="lab-parts"><li><span>训练 10 分钟：啄键次数</span><b>${cur.trainN}</b></li><li><span>得到的奖励</span><b>${cur.rf.length} 次</b></li>${per ? `<li><span>平均多少次啄键换来一次奖励</span><b>${fmt(per, 1)}</b></li>` : ''}<li><span>停止奖励后 5 分钟：又啄了</span><b>${cur.exN} 次</b></li></ul>
+        <p>${tip}</p>${prev ? `<p>灰色曲线是上一次的规则：${NAME[prev.s]}。</p>` : ''}
+        <p>停止奖励后的规则：模拟的鸽子只有在“连续没有奖励的次数”超出训练时经历过的最长一段之后，才会逐渐慢下来。这是对部分强化消退效应的一种简化解释，真实的原因还包括挫折等其他因素。</p>
+        <p>比较不同规则时，请注意两点。第一，训练时反应得快（曲线陡），和停止奖励后能坚持多久，是两个不同的指标。第二，这里各种规则之间“停止奖励后又啄了多少次”的高低，取决于模型的设定（比如它按连续没有奖励的<em>次数</em>来判断，参数也是设定的），换一套假设，排序就可能不同。它不能说明哪一种规则在现实中普遍更难消退。</p>`;
+    };
+    bindControls(host, o, () => run(true));
+    action(actions, '再模拟一次', () => run(false));
+    action(actions, '清除灰色曲线', () => { prev = null; draw(); }, 'lab-clear');
+    run(false);
+    onResize(draw);
+  }
+
+  /* 05-04 · habit: an illustrative automaticity model for three simulated people.
+     Each day the behaviour is done, automaticity A moves a fraction r of the way to that
+     person's ceiling; r differs between people and is smaller when the context keeps changing.
+     A missed day costs 0.5% of A; each day of a two-week break costs 3%. */
+  function habit(host) {
+    const o = { ctx: 'stable', gap: 'none' };
+    const P = [['较快的人', 0.14, 78], ['中等的人', 0.045, 88], ['较慢的人', 0.018, 95]];
+    const DAYS = 150, B0 = 50, B1 = 64;
+    const { fig, out, actions } = shell(host, '“自动化程度”怎样随重复增加',
+      '三个模拟的人，每天在早餐后做同一件事（比如吃一份水果）。他们学习的速度和最终能达到的水平各不相同。你可以改变情境是否稳定，以及中间有没有中断。',
+      [['ctx', '情境', [['stable', '固定：每天早餐后'], ['vary', '经常变化：时间地点不固定']]],
+       ['gap', '中断', [['none', '没有中断'], ['miss', '每周漏掉一天'], ['break', '第 50 天起中断两周']]]],
+      '这是一个说明原理的简化模型，不是纵向研究的数据。曲线“先快后慢、逐渐趋平”的形状参考了拉莉等人（2010）的描述；三个人的速度、上限、情境和中断的影响，都是为了演示而设定的数字。', MODEL);
+    const curve = ([, r0, top], gap = o.gap) => {
+      const r = r0 * (o.ctx === 'vary' ? 0.4 : 1);
+      let A = 0, hit = null;
+      const pts = [[0, 0]];
+      for (let d = 1; d <= DAYS; d++) {
+        const off = (gap === 'miss' && d % 7 === 4) || (gap === 'break' && d >= B0 && d < B1);
+        if (off) A *= gap === 'break' ? 0.97 : 0.995; else A += r * (top - A);
+        if (hit === null && A >= 0.95 * top) hit = d;
+        pts.push([d, A]);
+      }
+      return { pts, hit, top };
+    };
+    const draw = () => {
+      const W = widthOf(fig), H = 270;
+      fig.innerHTML = '';
+      const cs = P.map((p) => curve(p)), base = curve(P[1], 'none').hit;
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型结果：${P.map((p, i) => `${p[0]}${cs[i].hit ? `在第 ${cs[i].hit} 天达到自己上限的 95%` : `在 ${DAYS} 天内没有达到自己上限的 95%`}`).join('；')}。` }, fig);
+      const { X, Y } = lc(svg, W, H, { xMax: DAYS, yMax: 100, xTicks: [0, 30, 60, 90, 120, 150], yTicks: [[0, '0'], [50, '50'], [100, '100']], xLab: '天数', yLab: '自动化程度（模型单位）' });
+      if (o.gap === 'break') { el('rect', { x: X(B0), y: 24, width: X(B1) - X(B0), height: Y(0) - 24, class: 'fx-band2' }, svg); text(svg, X(B1) + 4, 56, '中断', 'lab-tick fx-halo'); }
+      el('line', { x1: X(21), x2: X(21), y1: 24, y2: Y(0), class: 'fx-hair fx-dash' }, svg);
+      text(svg, X(21) + 4, 40, '“21 天”', 'lab-tick fx-halo');
+      const cls = ['fx-ln fx-lr fx-curve', 'fx-ln fx-curve', 'fx-ln fx-lb fx-dash fx-curve'];
+      cs.forEach((c, i) => {
+        line(svg, c.pts.map(([d, v]) => [X(d), Y(v)]), cls[i]);
+        if (c.hit) el('circle', { cx: X(c.hit), cy: Y(c.pts[c.hit][1]), r: 4.5, class: ['fx-node r', 'fx-node', 'fx-node b'][i] }, svg);
+      });
+      const tips = [];
+      tips.push(o.ctx === 'vary' ? '情境经常变化时，同样的重复建立的“情境—行为”联结更弱，三条曲线都上升得更慢。' : '在固定的情境中重复，情境线索和行为之间的联结逐渐加强，行为也越来越不需要刻意去想。');
+      if (o.gap === 'miss') tips.push(`在这个模型里，每周固定漏掉一天，三条曲线都上升得更慢${base && cs[1].hit ? `，比如中等的人从第 ${base} 天推迟到第 ${cs[1].hit} 天` : ''}，但并没有“前功尽弃”。这些天数只是模型设定的结果：每漏掉一天就少一次重复，自动化程度还会稍有回落。拉莉等人的研究报告的是另一件事：偶尔错过一次机会，对习惯形成的过程没有实质影响；那项研究没有检验每周固定漏掉一天会怎样，也没有报告类似的天数变化。`);
+      if (o.gap === 'break') tips.push('在这个模型里，较长的中断会让自动化程度明显回落；恢复重复后，它会重新上升。真实生活中中断的影响有多大，目前的研究还不足以给出具体数字。');
+      out.innerHTML = `<p class="fx-keys"><span><i class="k hi"></i>${P[0][0]}</span><span><i class="k tn"></i>${P[1][0]}</span><span><i class="k dash"></i>${P[2][0]}</span></p>
+        <ul class="lab-parts">${P.map((p, i) => `<li><span>${p[0]}：达到自己上限的 95%</span><b>${cs[i].hit ? `第 ${cs[i].hit} 天` : `${DAYS} 天内没有达到`}</b></li>`).join('')}</ul>
+        <p>${tips.join('')}</p><p>圆点标出每个人达到自己上限 95% 的那一天。同一套规则下，不同的人需要的时间可以相差好几倍；而且“上限”本身也因人而异。“中等的人”在默认设置下大约需要 66 天，这是有意设定得与拉莉等人报告的中位数相近，便于对照，并不是对那项研究的复现。</p>`;
+    };
+    bindControls(host, o, draw);
+    action(actions, '恢复默认设置', () => { o.ctx = 'stable'; o.gap = 'none'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o[b.dataset.k]))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit };
 })();

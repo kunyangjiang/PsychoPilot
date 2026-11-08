@@ -1194,5 +1194,128 @@
     }, { dur: 1800, ctrls: { value: 'normal', items: [['normal', '正常作息'], ['allnight', '熬一夜']], onChange: (v) => { S.mode = v; } } });
   };
 
+  /* ---------- Stage 05 · learning: diagrams and qualitative result patterns ---------- */
+  // wrap, but never start a line with closing punctuation (it stays at the end of the line before)
+  const wrapZh = (t, maxW, size) => wrap(t, maxW, size).reduce((a, l) => { const m = l.match(/^[。，、；：！？）”』」]+/); if (m && a.length) { a[a.length - 1] += m[0]; l = l.slice(m[0].length); } if (l) a.push(l); return a; }, []);
+  // a two-line label box: main text and a smaller note under it
+  const pill = (p, x, y, w, h, main, sub, cls) => {
+    const g = el('g', {}, p);
+    el('rect', { x, y, width: w, height: h, rx: 6, class: 'fx-pill ' + cls }, g);
+    tx(g, x + w / 2, y + (sub ? h / 2 - 3 : h / 2 + 5), main, 'fx-h', 'middle');
+    if (sub) tx(g, x + w / 2, y + h / 2 + 15, sub, 'fx-n', 'middle');
+    return g;
+  };
+  // horizontal bars with the label above each bar; values are 0–1 and qualitative
+  const hbars = (p, x, y, w, title, rows) => {
+    const bars = [];
+    const tl = wrapZh(title, w, 15); lines(p, x, y + 15, tl, 'fx-h', 21); y += tl.length * 21 + 9;
+    rows.forEach(([lab, v, cls]) => {
+      tx(p, x, y + 13, lab, 'fx-s'); y += 20;
+      el('rect', { x, y, width: w, height: 14, class: 'fx-c' }, p);
+      bars.push([el('rect', { x, y, width: 0, height: 14, class: cls }, p), v * w]);
+      y += 26;
+    });
+    return { h: y, set: (t) => bars.forEach(([b, full]) => b.setAttribute('width', (full * t).toFixed(1))) };
+  };
+  // two panels side by side when there is room, otherwise one above the other
+  const panels = (fig, dur, specs, note) => figure(fig, (box, w, api) => {
+    const two = w >= 520, pw = two ? (w - 32) / 2 : w;
+    const probe = el('svg', {}, box), hs = specs.map(([t, r]) => hbars(probe, 0, 0, pw, t, r).h);
+    box.innerHTML = '';
+    const h = two ? Math.max(...hs) : hs[0] + hs[1] + 10, s = svgIn(box, w, h, fig);
+    const sets = specs.map(([t, r], i) => hbars(s, two && i ? pw + 32 : 0, !two && i ? hs[0] + 10 : 0, pw, t, r).set);
+    api.out.innerHTML = note;
+    return (t) => sets.forEach((f) => f(ease(t)));
+  }, { dur, replay: true });
+
+  /* ===== 05-01 · Pavlov's procedure in three steps ===== */
+  F.pavlov = (fig) => figure(fig, (box, w) => {
+    const ROWS = [
+      ['1　条件作用之前', [[['食物', '无条件刺激 US', 'b'], ['流口水', '无条件反应 UR', 'b']], [['铃声', '中性刺激', 'm'], ['没有特别的反应', '', 'm']]]],
+      ['2　条件作用之中', [[['铃声 ＋ 食物', '反复配对', 'b'], ['流口水', '无条件反应 UR', 'b']]]],
+      ['3　条件作用之后', [[['铃声', '条件刺激 CS', 'r'], ['流口水', '条件反应 CR', 'r']]]],
+    ];
+    const pw = Math.min(210, (w - 44) / 2), ph = 50, gap = 44, x0 = (w - (pw * 2 + gap)) / 2;
+    let y = 0;
+    const layout = ROWS.map(([t, pairs]) => { const r = { t, pairs, y }; y += 30 + pairs.length * (ph + 12) + 14; return r; });
+    const s = svgIn(box, w, y - 14, fig);
+    const gs = layout.map(({ t, pairs, y: y0 }) => {
+      const g = el('g', {}, s);
+      tx(g, x0, y0 + 16, t, 'fx-h');
+      pairs.forEach(([a, b], k) => {
+        const py = y0 + 30 + k * (ph + 12);
+        pill(g, x0, py, pw, ph, a[0], a[1], a[2] === 'm' ? 'm' : a[2]);
+        arrow(g, x0 + pw + 6, py + ph / 2, x0 + pw + gap - 6, py + ph / 2, a[2] === 'r' ? 'r' : '');
+        pill(g, x0 + pw + gap, py, pw, ph, b[0], b[1], b[2] === 'm' ? 'm' : b[2]);
+      });
+      return g;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.4)));
+  }, { dur: 1800, replay: true });
+
+  /* ===== 05-01 · reinforcement and punishment: what happens to the behaviour, and how ===== */
+  F.quadrant = (fig) => figure(fig, (box, w, api) => {
+    const COLS = ['给予一个刺激（“正”）', '移除一个刺激（“负”）'];
+    const ROWS = [
+      ['行为以后变得更频繁：强化', 'r', [['正强化', '按时交作业后得到老师的表扬，以后更常按时交作业。'], ['负强化', '系上安全带，刺耳的提示音就停了，以后上车更快系好安全带。']]],
+      ['行为以后变得更少：惩罚', 'b', [['正惩罚', '伸手去摸热锅，被烫了一下，以后很少再直接去摸。'], ['负惩罚', '孩子打人以后，玩具被收走一段时间，打人的次数减少。']]],
+    ];
+    const gap = 12, cw = (w - gap) / 2, fs = 14, lh = 20, pad = 12;
+    const hh = Math.max(...COLS.map((c) => wrap(c, cw, 13.5).length)) * 18 + 8;
+    let y = hh;
+    const s = svgIn(box, w, 10, fig);
+    COLS.forEach((c, i) => lines(s, i * (cw + gap) + cw / 2, 14, wrap(c, cw, 13.5), 'fx-n', 18, 'middle'));
+    ROWS.forEach(([title, cls, cells]) => {
+      tx(s, 0, y + 18, title, 'fx-h'); y += 30;
+      const ls = cells.map(([, t]) => wrapZh(t, cw - pad * 2, fs)), ch = Math.max(...ls.map((l) => l.length)) * lh + 46;
+      cells.forEach(([name], i) => {
+        const x = i * (cw + gap);
+        el('rect', { x, y, width: cw, height: ch, rx: 6, class: 'fx-pill ' + cls }, s);
+        tx(s, x + pad, y + 26, name, cls === 'r' ? 'fx-h fx-r' : 'fx-h fx-b');
+        lines(s, x + pad, y + 50, ls[i], 'fx-t', lh);
+      });
+      y += ch + 14;
+    });
+    s.setAttribute('viewBox', `0 0 ${w} ${y - 14}`); s.setAttribute('height', y - 14);
+    api.out.innerHTML = '<p>“正”和“负”说的是给予还是移除一个刺激，不是好坏；“强化”和“惩罚”说的是行为以后变多还是变少。负强化让行为<b>增加</b>，它不是惩罚。</p>';
+    return () => {};
+  });
+
+  /* ===== 05-02 · Garcia & Koelling (1966): which cue gets linked to which consequence ===== */
+  F.garcia = (fig) => figure(fig, (box, w, api) => {
+    const COLS = ['线索：水的甜味', '线索：喝水时的光和声音'];
+    const ROWS = [['后果：之后生病（X 射线或毒物）', [1, 0.15]], ['后果：之后受到电击', [0.15, 1]]];
+    const gap = 12, cw = (w - gap) / 2, pad = 12, ch = 74;
+    const hh = Math.max(...COLS.map((c) => wrap(c, cw, 13.5).length)) * 18 + 8;
+    let y = hh;
+    const s = svgIn(box, w, hh + ROWS.length * (ch + 44), fig), bars = [];
+    COLS.forEach((c, i) => lines(s, i * (cw + gap) + cw / 2, 14, wrap(c, cw, 13.5), 'fx-n', 18, 'middle'));
+    ROWS.forEach(([title, vals]) => {
+      tx(s, 0, y + 18, title, 'fx-h'); y += 30;
+      vals.forEach((v, i) => {
+        const x = i * (cw + gap), hi = v > 0.5;
+        el('rect', { x, y, width: cw, height: ch, rx: 6, class: hi ? 'fx-pill r' : 'fx-pill m' }, s);
+        tx(s, x + pad, y + 26, hi ? '学会了回避' : '几乎没有学会', hi ? 'fx-h fx-r' : 'fx-h');
+        el('rect', { x: x + pad, y: y + 44, width: cw - pad * 2, height: 12, class: 'fx-c' }, s);
+        bars.push([el('rect', { x: x + pad, y: y + 44, width: 0, height: 12, class: hi ? 'fx-bar' : 'fx-col' }, s), v * (cw - pad * 2)]);
+      });
+      y += ch + 14;
+    });
+    api.out.innerHTML = '<p>四种情况下，线索和后果的配对方式完全相同，结果却取决于<b>哪一种线索</b>配<b>哪一种后果</b>。图中的长短只表示结果的方向，是定性示意，不是原始数据。</p>';
+    return (t) => bars.forEach(([b, full]) => b.setAttribute('width', (full * ease(t)).toFixed(1)));
+  }, { dur: 1000, replay: true });
+
+  /* ===== 05-03 · Bandura (1965): learning versus performance in observational learning ===== */
+  F.bandura = (fig) => panels(fig, 1000, [
+    ['看完影片后，自由玩耍时', [['榜样受到奖励', 0.62, 'fx-bar b'], ['榜样没有受到任何后果', 0.6, 'fx-bar b'], ['榜样受到惩罚', 0.3, 'fx-bar']]],
+    ['随后承诺奖励，请孩子做出看到的动作', [['榜样受到奖励', 0.86, 'fx-bar b'], ['榜样没有受到任何后果', 0.85, 'fx-bar b'], ['榜样受到惩罚', 0.84, 'fx-bar']]],
+  ], '<p>条形的长度表示孩子做出了多少模仿的攻击动作。看到榜样受惩罚的孩子，自发模仿得较少；可一旦有了奖励，三组做出的动作差不多。他们其实都学会了，只是没有表现出来。图中的长短是定性示意，不是原始数据。</p>');
+
+  /* ===== 05-04 · outcome devaluation: goal-directed action versus habit ===== */
+  F.devalue = (fig) => panels(fig, 1000, [
+    ['训练较少', [['奖励没有被“贬值”', 0.8, 'fx-bar b'], ['奖励被“贬值”（吃完会不舒服）', 0.3, 'fx-bar']]],
+    ['训练很多', [['奖励没有被“贬值”', 0.82, 'fx-bar b'], ['奖励被“贬值”（吃完会不舒服）', 0.74, 'fx-bar']]],
+  ], '<p>条形的长度表示测试时（不再给奖励）大鼠按压杠杆的多少。训练较少时，奖励一旦变得不受欢迎，按压就明显减少：行为受目标控制。训练很多以后，即使奖励已经不受欢迎，大鼠仍然照常按压：行为变成了习惯。图中的长短是定性示意，不是原始数据。</p>');
+
   window.PPFig = F;
 })();

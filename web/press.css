@@ -591,3 +591,8 @@ button.lab-cellbtn:hover { border-color: var(--text); }
 .lab-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; }
 .lab-pair .lab-grid { width: 100%; gap: 4px; }
 .lab-pair .lab-k { margin-bottom: 4px; }
+
+/* ---------- Stage 05 · learning: hollow key, neutral box, blue bar ---------- */
+.k.ho { box-shadow: inset 0 0 0 1.5px var(--blue); }
+.fx-pill.m { fill: var(--paper); stroke: var(--text-3); stroke-width: 1.5; stroke-dasharray: 4 4; }
+.fx-bar.b { fill: var(--blue); }
