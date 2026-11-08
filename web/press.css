@@ -631,3 +631,64 @@ button.lab-cellbtn:hover { border-color: var(--text); }
 .lab-stroop.lab-seq { padding: 10px 14px; font-size: 26px; line-height: 1.35; letter-spacing: .04em; text-align: center; text-wrap: balance; }
 /* course.html: the "in preparation" stamp and note stay hidden until lesson.js finds no manuscript */
 .l-wait .stamp, .l-wait .l-note { display: none; }
+
+/* ---------- Page transitions (transit.js) ----------
+   Like a saccade: the old page leaves quickly, a beat of blank paper, the new page settles in.
+   Direction comes from the transition type: pp-next / pp-prev sideways, pp-down (going in) and
+   pp-up (going out) vertically. The masthead, logo and floating buttons are named, so they stay put;
+   a lesson title or a volume cover morphs between the two pages. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
+@keyframes pp-out   { to   { opacity: 0; transform: translate(var(--pp-ox, 0), var(--pp-oy, 0)); } }
+@keyframes pp-in    { from { opacity: 0; transform: translate(var(--pp-ix, 0), var(--pp-iy, 0)); } }
+::view-transition-old(root) { animation: pp-out 150ms cubic-bezier(.4, 0, 1, 1) both; mix-blend-mode: normal; }
+::view-transition-new(root) { animation: pp-in 300ms cubic-bezier(.2, .7, .2, 1) 90ms both; mix-blend-mode: normal; }
+html:active-view-transition-type(pp-next), html[data-pp-vt="pp-next"] { --pp-ox: -16px; --pp-ix: 16px; }
+html:active-view-transition-type(pp-prev), html[data-pp-vt="pp-prev"] { --pp-ox: 16px;  --pp-ix: -16px; }
+html:active-view-transition-type(pp-down), html[data-pp-vt="pp-down"] { --pp-oy: -12px; --pp-iy: 16px; }
+html:active-view-transition-type(pp-up),   html[data-pp-vt="pp-up"]   { --pp-oy: 12px;  --pp-iy: -16px; }
+html:active-view-transition-type(pp-fade), html[data-pp-vt="pp-fade"] { --pp-iy: 6px; }
+
+/* named parts: the masthead and buttons hold still; the title and cover morph */
+::view-transition-group(*) { animation-duration: 380ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
+::view-transition-old(*), ::view-transition-new(*) { animation-duration: 260ms; }
+::view-transition-group(pp-title), ::view-transition-group(pp-cover) { animation-duration: 440ms; }
+::view-transition-old(pp-title), ::view-transition-new(pp-title) { height: 100%; width: auto; object-fit: contain; object-position: left top; }
+::view-transition-group(pp-title) { overflow: clip; }
+/* a named part with no partner on the other page leaves or arrives with the page itself */
+::view-transition-old(*):only-child { animation: pp-out 150ms cubic-bezier(.4, 0, 1, 1) both; }
+::view-transition-new(*):only-child { animation: pp-in 300ms cubic-bezier(.2, .7, .2, 1) 90ms both; }
+
+/* lesson text that arrives during or after the transition fades in instead of popping */
+@keyframes pp-body { from { opacity: 0; transform: translateY(8px); } }
+.l-body { animation: pp-body 360ms cubic-bezier(.2, .7, .2, 1) backwards; }
+html.pp-vt .l-body { animation-play-state: paused; }
+html.pp-held .l-body { animation: none; } /* the text was in place before the page moved in */
+
+/* the logo mark while something is slow: the next page, or a lesson manuscript */
+@keyframes pp-fuse-l { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(-9px); } }
+@keyframes pp-fuse-r { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(9px); } }
+@keyframes pp-show { from { opacity: 0; } to { opacity: 1; } }
+.pp-wait {
+  position: fixed; inset: 0; z-index: 60; display: grid; place-content: center; justify-items: center; gap: 14px;
+  background: color-mix(in srgb, var(--paper) 90%, transparent); opacity: 0; transition: opacity .25s;
+  font: 500 11px/1 var(--mono); letter-spacing: .14em; color: var(--text-3); pointer-events: none;
+}
+.pp-wait.is-on { opacity: 1; }
+.pp-wait i { position: relative; display: block; width: 34px; height: 22px; }
+.pp-wait i::before, .pp-wait i::after, .l-wait #lesson::before, .l-wait #lesson::after {
+  content: ""; position: absolute; top: 2px; width: 18px; height: 18px; border-radius: 50%; mix-blend-mode: multiply;
+}
+.pp-wait i::before { left: 2px; background: var(--blue); animation: pp-fuse-l 1.2s cubic-bezier(.45, 0, .55, 1) infinite; }
+.pp-wait i::after { right: 2px; background: var(--red); animation: pp-fuse-r 1.2s cubic-bezier(.45, 0, .55, 1) infinite; }
+/* in a lesson page whose text is still on its way; appears only after 0.3 s */
+.l-wait #lesson { position: relative; min-height: 120px; }
+.l-wait #lesson::before, .l-wait #lesson::after { top: 48px; left: 50%; opacity: 0; }
+.l-wait #lesson::before { margin-left: -16px; background: var(--blue); animation: pp-show .25s .3s both, pp-fuse-l 1.2s .3s cubic-bezier(.45, 0, .55, 1) infinite; }
+.l-wait #lesson::after { margin-left: -2px; background: var(--red); animation: pp-show .25s .3s both, pp-fuse-r 1.2s .3s cubic-bezier(.45, 0, .55, 1) infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .l-body { animation: none; }
+  .pp-wait i::before, .pp-wait i::after { animation: none; }
+  .l-wait #lesson::before, .l-wait #lesson::after { animation: pp-show .25s .3s both; }
+}

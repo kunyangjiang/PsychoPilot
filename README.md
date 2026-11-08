@@ -16,13 +16,13 @@ A plain static site in `web/`: HTML, CSS and vanilla JavaScript (canvas drawings
 
 ## Run locally
 
-Any static file server works, for example with Python 3:
+Any static file server works. With Python 3, `serve.py` serves `web/` and tells the browser to check for changes on every load (a plain `python -m http.server` lets the browser keep showing an old copy of a page after the files change):
 
 ```bash
-python -m http.server 5173 --directory web
+python serve.py
 ```
 
-Then open <http://localhost:5173>.
+Then open <http://localhost:8000>.
 
 ## Production build
 

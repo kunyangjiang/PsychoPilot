@@ -18,7 +18,9 @@
   const save = (st) => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch {} };
   const state = load();
 
-  fetch(src).then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); }).then((html) => {
+  // transit.js's gate: during a page transition, insert the text only once the old page has gone
+  const gate = (x) => (window.PPTransit?.gate || Promise.resolve()).then(() => x);
+  fetch(src).then((r) => { if (!r.ok) throw new Error(r.status); return r.text(); }).then(gate).then((html) => {
     const body = document.createElement('div');
     body.className = 'l-text';
     body.innerHTML = html;

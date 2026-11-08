@@ -30,10 +30,13 @@ window.PPInk = (() => {
     return { ctx, w, h };
   }
 
+  // a page transition is running (transit.js): hold the drawing still so the move stays smooth
+  const moving = () => document.documentElement.classList.contains('pp-vt');
+
   /* run `tick` with rAF only while `el` is on screen and the tab is visible */
   function loop(el, tick) {
     let on = false, raf = 0, last = 0;
-    const step = (now) => { const dt = Math.min(0.033, (now - last) / 1000 || 0.016); last = now; tick(now / 1000, dt); raf = requestAnimationFrame(step); };
+    const step = (now) => { const dt = Math.min(0.033, (now - last) / 1000 || 0.016); last = now; if (!moving()) tick(now / 1000, dt); raf = requestAnimationFrame(step); };
     const sync = () => {
       const run = on && !document.hidden && !reduce;
       if (run && !raf) { last = performance.now(); raf = requestAnimationFrame(step); }
@@ -205,7 +208,7 @@ window.PPInk = (() => {
     let raf = 0, last = 0;
     const step = (now) => {
       const t = now / 1000, dt = Math.min(.033, t - last || .016); last = t;
-      render(t, dt);
+      if (!moving()) render(t, dt);
       raf = act || t < until ? requestAnimationFrame(step) : 0;
     };
     const start = () => { act = true; if (!raf) { last = performance.now() / 1000; raf = requestAnimationFrame(step); } };

@@ -9,6 +9,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@300;500;700;800&family=IBM+Plex+Mono:wght@500&display=swap" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="press.css">
+  <!-- page transitions: the first frame waits for #pp-end, after every script, so the move shows a finished page -->
+  <link rel="expect" href="#pp-end" blocking="render">
+  <script src="transit.js"></script>
 </head>
 <body>
   <!-- Lesson page (course.html?id=XX-YY). Lessons with a manuscript in lessons/ are loaded by
@@ -55,8 +58,27 @@
       const p = c.stage.part;
       const $ = (s) => document.querySelector(s);
       document.title = `${c.id} ${c.title} · PsychoPilot`;
-      $('#back').href = partUrl(p);
-      $('#back-t').textContent = `第 ${p.numeral} 卷 · ${p.short}`;
+      // Back goes to the page the reader entered the lessons from (home, a volume, an interest route),
+      // and keeps pointing there while they step through next / previous lessons. Opened directly
+      // or from elsewhere: the lesson's own volume.
+      let back = { href: partUrl(p), t: `第 ${p.numeral} 卷 · ${p.short}` };
+      try {
+        const ref = document.referrer ? new URL(document.referrer) : null;
+        const path = ref && ref.origin === location.origin ? ref.pathname.replace(/\.html$/, '') : null;
+        if (path !== null && !/\/course$/.test(path)) {
+          const q = ref.searchParams;
+          const part = /\/part$/.test(path) && window.PP.parts.find((x) => String(x.id) === q.get('p'));
+          const topic = /\/part$/.test(path) && window.PP.topics.find((x) => x.id === q.get('topic'));
+          const from = part ? { href: partUrl(part), t: `第 ${part.numeral} 卷 · ${part.short}` }
+            : topic ? { href: window.PP.topicUrl(topic), t: topic.label }
+            : /(^|\/)(index)?$/.test(path) ? { href: 'index.html', t: 'PsychoPilot' } : null;
+          if (from) sessionStorage.setItem('pp.from', JSON.stringify(from)); else sessionStorage.removeItem('pp.from');
+        } else if (path === null) sessionStorage.removeItem('pp.from');
+        const saved = JSON.parse(sessionStorage.getItem('pp.from'));
+        if (saved && saved.href && saved.t) back = saved;
+      } catch {}
+      $('#back').href = back.href;
+      $('#back-t').textContent = back.t;
       const crumb = $('#crumb');
       [[`Lesson ${c.id}`], [`Volume ${p.numeral}`, partUrl(p)], [`Stage ${c.stage.id}`, `${partUrl(p)}#st-${c.stage.id}`], [`${c.index + 1} / ${courses.length}`]]
         .forEach(([t, href]) => { const el = document.createElement(href ? 'a' : 'span'); if (href) el.href = href; el.textContent = t; crumb.appendChild(el); });
@@ -77,5 +99,6 @@
   <script src="lesson.js"></script>
   <script src="top.js"></script>
   <script src="nav.js"></script>
+  <i id="pp-end" hidden></i>
 </body>
 </html>

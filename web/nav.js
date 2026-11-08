@@ -54,6 +54,8 @@
   const sessionY = json(sessionStorage, KEY)[here]; // a number, or { y, m } on a lesson
   const wantBack = (flagged || navType === 'back_forward' || navType === 'reload') && sessionY != null; // beats a #hash in the address
   const record = lessonId && !wantBack && !location.hash ? json(localStorage, READ)[lessonId] : null;
+  // tell transit.js this lesson will jump into the text, so it does not morph the title (which scrolls away)
+  if (lessonId && ((wantBack && (typeof sessionY === 'object' ? sessionY.y : sessionY) > 200) || record || location.hash)) document.documentElement.dataset.ppJump = '1';
 
   let touched = false;
   ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => { touched = true; settled = true; }, { once: true, passive: true }));
