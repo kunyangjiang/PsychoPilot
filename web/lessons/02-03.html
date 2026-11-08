@@ -1,0 +1,134 @@
+<!-- PsychoPilot · 02-03 · 相关不等于因果：如何通过观察研究、纵向研究和自然实验理解因果？
+     Manuscript of the lesson body. Loaded by lesson.js into course.html.
+     Conventions: each <section> has an <h2> (numbered by the reader); [n] marks link to #ref-n;
+     <div data-demo="…"> is filled in by lab.js, <div data-quiz> by lesson.js. -->
+
+<p class="l-open">“研究发现：每天使用社交媒体时间越长的青少年，抑郁症状越多。”这样的新闻标题，你可能见过不止一次。读到这里，很多人会自然地得出结论：社交媒体让青少年抑郁。</p>
+<p>可是，同样的数据至少还能讲出另外几个故事：也许是情绪低落的孩子更喜欢躲进手机里；也许是家庭关系紧张这样的第三个因素，既让孩子更依赖手机，又让他们更不快乐；也许是参与调查的样本本身就有偏差。</p>
+<p>上一讲说过，随机对照实验是判断因果关系最有力的工具。但很多重要的问题，没有办法用实验来回答：我们不能随机安排孩子在什么样的家庭长大，也不能随机决定谁贫困、谁富裕。这一讲要回答的问题是：<strong>两件事同时出现，为什么不一定是一件导致另一件？在不能做实验的时候，研究者又怎样一步步接近因果的答案？</strong></p>
+
+<section id="s1">
+  <h2>什么是相关</h2>
+  <p>如果两个变量倾向于一起变化，我们就说它们之间存在<strong>相关</strong>（correlation）。一个变量越高，另一个也往往越高，是<em>正相关</em>；一个越高，另一个往往越低，是<em>负相关</em>；两者之间看不出规律，则是<em>零相关</em>。</p>
+  <figure class="l-fig" data-fig="scatter">
+    <div class="l-tg-grid l-tg-3" role="img" aria-label="三张模拟散点图：正相关、负相关和零相关">
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 140 140"><rect class="fig-frame" x="6" y="6" width="128" height="128"/><circle class="fig-pt" cx="126.1" cy="42.1" r="3.6"/><circle class="fig-pt" cx="79.5" cy="60.9" r="3.6"/><circle class="fig-pt" cx="90.0" cy="80.0" r="3.6"/><circle class="fig-pt" cx="60.0" cy="89.8" r="3.6"/><circle class="fig-pt" cx="44.2" cy="102.5" r="3.6"/><circle class="fig-pt" cx="57.7" cy="83.5" r="3.6"/><circle class="fig-pt" cx="48.2" cy="78.0" r="3.6"/><circle class="fig-pt" cx="56.9" cy="132.4" r="3.6"/><circle class="fig-pt" cx="98.6" cy="56.7" r="3.6"/><circle class="fig-pt" cx="52.2" cy="77.9" r="3.6"/><circle class="fig-pt" cx="75.5" cy="65.2" r="3.6"/><circle class="fig-pt" cx="49.5" cy="81.1" r="3.6"/><circle class="fig-pt" cx="33.1" cy="71.1" r="3.6"/><circle class="fig-pt" cx="39.6" cy="94.8" r="3.6"/><circle class="fig-pt" cx="70.5" cy="65.9" r="3.6"/><circle class="fig-pt" cx="64.1" cy="65.9" r="3.6"/><circle class="fig-pt" cx="7.6" cy="132.4" r="3.6"/><circle class="fig-pt" cx="63.1" cy="84.5" r="3.6"/><circle class="fig-pt" cx="103.6" cy="65.4" r="3.6"/><circle class="fig-pt" cx="64.9" cy="110.7" r="3.6"/><circle class="fig-pt" cx="73.4" cy="97.8" r="3.6"/><circle class="fig-pt" cx="29.0" cy="60.4" r="3.6"/><circle class="fig-pt" cx="83.8" cy="62.7" r="3.6"/><circle class="fig-pt" cx="71.0" cy="96.5" r="3.6"/><circle class="fig-pt" cx="41.4" cy="85.0" r="3.6"/><circle class="fig-pt" cx="15.5" cy="105.7" r="3.6"/><circle class="fig-pt" cx="24.7" cy="101.9" r="3.6"/><circle class="fig-pt" cx="39.8" cy="62.9" r="3.6"/><circle class="fig-pt" cx="91.6" cy="66.1" r="3.6"/><circle class="fig-pt" cx="20.8" cy="120.3" r="3.6"/><circle class="fig-pt" cx="65.5" cy="92.7" r="3.6"/><circle class="fig-pt" cx="73.7" cy="52.4" r="3.6"/><circle class="fig-pt" cx="65.5" cy="83.0" r="3.6"/><circle class="fig-pt" cx="85.9" cy="66.3" r="3.6"/><circle class="fig-pt" cx="87.5" cy="65.5" r="3.6"/><circle class="fig-pt" cx="106.2" cy="51.7" r="3.6"/><circle class="fig-pt" cx="41.0" cy="90.8" r="3.6"/><circle class="fig-pt" cx="51.4" cy="101.6" r="3.6"/><circle class="fig-pt" cx="63.8" cy="63.5" r="3.6"/><circle class="fig-pt" cx="14.2" cy="112.1" r="3.6"/></svg><b>正相关（r ≈ ＋0.7）</b><span>一个越高，另一个往往也越高</span></div>
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 140 140"><rect class="fig-frame" x="6" y="6" width="128" height="128"/><circle class="fig-pt" cx="71.0" cy="62.7" r="3.6"/><circle class="fig-pt" cx="58.9" cy="56.2" r="3.6"/><circle class="fig-pt" cx="92.2" cy="78.5" r="3.6"/><circle class="fig-pt" cx="107.5" cy="111.4" r="3.6"/><circle class="fig-pt" cx="71.6" cy="83.2" r="3.6"/><circle class="fig-pt" cx="51.2" cy="60.0" r="3.6"/><circle class="fig-pt" cx="75.3" cy="66.5" r="3.6"/><circle class="fig-pt" cx="82.2" cy="40.3" r="3.6"/><circle class="fig-pt" cx="90.7" cy="111.8" r="3.6"/><circle class="fig-pt" cx="74.9" cy="84.1" r="3.6"/><circle class="fig-pt" cx="57.6" cy="38.9" r="3.6"/><circle class="fig-pt" cx="64.6" cy="99.7" r="3.6"/><circle class="fig-pt" cx="77.5" cy="80.2" r="3.6"/><circle class="fig-pt" cx="41.8" cy="66.1" r="3.6"/><circle class="fig-pt" cx="55.0" cy="59.9" r="3.6"/><circle class="fig-pt" cx="59.8" cy="61.6" r="3.6"/><circle class="fig-pt" cx="114.1" cy="114.6" r="3.6"/><circle class="fig-pt" cx="50.6" cy="60.7" r="3.6"/><circle class="fig-pt" cx="96.3" cy="100.5" r="3.6"/><circle class="fig-pt" cx="104.4" cy="116.5" r="3.6"/><circle class="fig-pt" cx="45.2" cy="53.6" r="3.6"/><circle class="fig-pt" cx="49.3" cy="66.1" r="3.6"/><circle class="fig-pt" cx="80.8" cy="65.2" r="3.6"/><circle class="fig-pt" cx="72.7" cy="76.6" r="3.6"/><circle class="fig-pt" cx="102.3" cy="85.7" r="3.6"/><circle class="fig-pt" cx="64.4" cy="45.2" r="3.6"/><circle class="fig-pt" cx="48.4" cy="52.0" r="3.6"/><circle class="fig-pt" cx="85.8" cy="81.3" r="3.6"/><circle class="fig-pt" cx="56.2" cy="54.3" r="3.6"/><circle class="fig-pt" cx="57.0" cy="71.1" r="3.6"/><circle class="fig-pt" cx="45.5" cy="30.5" r="3.6"/><circle class="fig-pt" cx="56.8" cy="41.0" r="3.6"/><circle class="fig-pt" cx="79.1" cy="80.9" r="3.6"/><circle class="fig-pt" cx="86.0" cy="76.6" r="3.6"/><circle class="fig-pt" cx="73.2" cy="95.8" r="3.6"/><circle class="fig-pt" cx="71.7" cy="55.9" r="3.6"/><circle class="fig-pt" cx="81.7" cy="61.1" r="3.6"/><circle class="fig-pt" cx="105.8" cy="88.0" r="3.6"/><circle class="fig-pt" cx="117.4" cy="129.1" r="3.6"/><circle class="fig-pt" cx="64.2" cy="109.2" r="3.6"/></svg><b>负相关（r ≈ −0.7）</b><span>一个越高，另一个往往越低</span></div>
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 140 140"><rect class="fig-frame" x="6" y="6" width="128" height="128"/><circle class="fig-pt" cx="100.9" cy="35.2" r="3.6"/><circle class="fig-pt" cx="71.6" cy="88.3" r="3.6"/><circle class="fig-pt" cx="43.8" cy="69.2" r="3.6"/><circle class="fig-pt" cx="45.5" cy="104.5" r="3.6"/><circle class="fig-pt" cx="74.8" cy="66.8" r="3.6"/><circle class="fig-pt" cx="83.1" cy="91.9" r="3.6"/><circle class="fig-pt" cx="70.1" cy="71.6" r="3.6"/><circle class="fig-pt" cx="33.9" cy="57.1" r="3.6"/><circle class="fig-pt" cx="77.7" cy="12.7" r="3.6"/><circle class="fig-pt" cx="74.9" cy="73.5" r="3.6"/><circle class="fig-pt" cx="99.6" cy="65.2" r="3.6"/><circle class="fig-pt" cx="91.8" cy="78.8" r="3.6"/><circle class="fig-pt" cx="75.2" cy="45.4" r="3.6"/><circle class="fig-pt" cx="86.7" cy="66.9" r="3.6"/><circle class="fig-pt" cx="44.0" cy="59.3" r="3.6"/><circle class="fig-pt" cx="71.8" cy="52.7" r="3.6"/><circle class="fig-pt" cx="75.2" cy="43.9" r="3.6"/><circle class="fig-pt" cx="68.8" cy="65.2" r="3.6"/><circle class="fig-pt" cx="86.0" cy="96.1" r="3.6"/><circle class="fig-pt" cx="60.4" cy="82.0" r="3.6"/><circle class="fig-pt" cx="117.5" cy="72.2" r="3.6"/><circle class="fig-pt" cx="85.7" cy="55.1" r="3.6"/><circle class="fig-pt" cx="63.3" cy="107.2" r="3.6"/><circle class="fig-pt" cx="93.2" cy="79.8" r="3.6"/><circle class="fig-pt" cx="87.2" cy="101.3" r="3.6"/><circle class="fig-pt" cx="59.5" cy="39.8" r="3.6"/><circle class="fig-pt" cx="104.3" cy="101.3" r="3.6"/><circle class="fig-pt" cx="38.0" cy="71.1" r="3.6"/><circle class="fig-pt" cx="87.5" cy="66.1" r="3.6"/><circle class="fig-pt" cx="77.3" cy="93.7" r="3.6"/><circle class="fig-pt" cx="84.1" cy="43.2" r="3.6"/><circle class="fig-pt" cx="59.5" cy="104.4" r="3.6"/><circle class="fig-pt" cx="51.8" cy="51.7" r="3.6"/><circle class="fig-pt" cx="28.4" cy="72.2" r="3.6"/><circle class="fig-pt" cx="46.2" cy="73.1" r="3.6"/><circle class="fig-pt" cx="64.1" cy="69.6" r="3.6"/><circle class="fig-pt" cx="106.0" cy="59.9" r="3.6"/><circle class="fig-pt" cx="102.0" cy="73.4" r="3.6"/><circle class="fig-pt" cx="58.5" cy="60.9" r="3.6"/><circle class="fig-pt" cx="7.6" cy="71.0" r="3.6"/></svg><b>零相关（r ≈ 0）</b><span>两者之间看不出线性关系</span></div>
+    </div>
+    <figcaption>图 1　三种相关。每个点代表一个人在两个变量上的得分。数据为程序生成的示意数据。</figcaption>
+  </figure>
+  <p>研究者常用<strong>相关系数</strong>（通常写作 r）来表示相关的方向和强弱。它的取值在 −1 到 ＋1 之间：越接近 ±1，点就越集中在一条直线附近；越接近 0，点就越分散。需要注意两点。第一，相关系数描述的是“一起变化的程度”，而不是“一个变量对另一个影响有多大”。第二，它只衡量直线式的关系，如果两个变量之间是先升后降的曲线关系，相关系数可能接近 0，但两者并非没有关系。</p>
+  <p>相关本身是一个很有价值的发现：它告诉我们哪里可能存在值得研究的关系，也可以用来做预测。问题只在于，相关<em>本身</em>不能告诉我们这种关系是怎样产生的。</p>
+  <p>还有一点容易被忽略：相关系数的大小，和样本覆盖的范围有关。比如，在普通人群中，身高和打篮球的水平有比较明显的关系；可是如果只看职业篮球运动员，他们几乎个个都很高，身高的差别变小了，身高和球技之间的相关就可能变得很弱，甚至看不出来。这并不说明身高对篮球不重要，只是因为样本的范围被限制住了。同样，在一所只招收高分学生的大学里，入学成绩和大学成绩之间的相关，往往比在全体学生中弱。所以，看到“某因素和某结果关系很弱”时，还要看看研究的样本是不是只覆盖了很窄的一段范围。这种现象叫作<strong>全距限制</strong>（range restriction），和下一节将要讨论的选择偏差有着相近的道理。</p>
+</section>
+
+<section id="s2">
+  <h2>相关背后的几种可能</h2>
+  <p>当我们观察到 A 和 B 相关时，至少要考虑以下几种可能：</p>
+  <ol class="l-points">
+    <li><b>A 导致 B。</b>这是我们最容易想到的解释，但只是其中之一。</li>
+    <li><b>B 导致 A，也就是反向因果。</b>比如，是抑郁让人更多地使用社交媒体，而不是反过来。</li>
+    <li><b>第三个变量同时导致 A 和 B，也就是混淆。</b>比如，家庭压力既可能增加孩子使用手机的时间，也可能加重他们的情绪问题。</li>
+    <li><b>样本的选择方式制造了相关，也就是选择偏差。</b>比如，只在心理门诊里调查，看到的是已经寻求帮助的人，他们和普通人群在很多方面都不同；在这样的样本里发现的关系，不一定在全体人群中成立。</li>
+    <li><b>纯属偶然。</b>样本较小、又同时比较了很多变量时，总会有一些变量碰巧相关。</li>
+  </ol>
+  <figure class="l-fig" data-fig="causal">
+    <div class="l-tg-grid l-tg-5" role="img" aria-label="五张小图：A 导致 B；B 导致 A；第三变量 C 同时导致 A 和 B；A 和 B 都影响是否进入样本 S；以及纯属偶然。后三种情况下，A 和 B 之间观察到的相关都不是因果。">
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 160 100"><line class="fig-ca" x1="44.0" y1="74.0" x2="107.0" y2="74.0"/><path class="fig-cah" d="M116.0,74.0 L107.0,79.0 L107.0,69.0 Z"/><circle class="fig-cn" cx="28" cy="74" r="15"/><text class="fig-cl" x="28" y="80" text-anchor="middle">A</text><circle class="fig-cn" cx="132" cy="74" r="15"/><text class="fig-cl" x="132" y="80" text-anchor="middle">B</text></svg><b>A 导致 B</b><span>最容易想到的解释</span></div>
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 160 100"><line class="fig-ca" x1="116.0" y1="74.0" x2="53.0" y2="74.0"/><path class="fig-cah" d="M44.0,74.0 L53.0,69.0 L53.0,79.0 Z"/><circle class="fig-cn" cx="28" cy="74" r="15"/><text class="fig-cl" x="28" y="80" text-anchor="middle">A</text><circle class="fig-cn" cx="132" cy="74" r="15"/><text class="fig-cl" x="132" y="80" text-anchor="middle">B</text></svg><b>B 导致 A</b><span>反向因果</span></div>
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 160 100"><line class="fig-cr" x1="44" y1="74" x2="116" y2="74"/><line class="fig-ca" x1="68.5" y1="35.1" x2="46.0" y2="56.7"/><path class="fig-cah" d="M39.5,62.9 L42.6,53.1 L49.5,60.3 Z"/><line class="fig-ca" x1="91.5" y1="35.1" x2="114.0" y2="56.7"/><path class="fig-cah" d="M120.5,62.9 L110.5,60.3 L117.4,53.1 Z"/><circle class="fig-cn" cx="28" cy="74" r="15"/><text class="fig-cl" x="28" y="80" text-anchor="middle">A</text><circle class="fig-cn" cx="132" cy="74" r="15"/><text class="fig-cl" x="132" y="80" text-anchor="middle">B</text><circle class="fig-cn" cx="80" cy="24" r="15"/><text class="fig-cl" x="80" y="30" text-anchor="middle">C</text></svg><b>C 导致两者</b><span>第三变量混淆</span></div>
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 160 100"><line class="fig-cr" x1="44" y1="74" x2="116" y2="74"/><line class="fig-ca" x1="39.5" y1="62.9" x2="62.0" y2="41.3"/><path class="fig-cah" d="M68.5,35.1 L65.4,44.9 L58.5,37.7 Z"/><line class="fig-ca" x1="120.5" y1="62.9" x2="98.0" y2="41.3"/><path class="fig-cah" d="M91.5,35.1 L101.5,37.7 L94.6,44.9 Z"/><circle class="fig-cn" cx="28" cy="74" r="15"/><text class="fig-cl" x="28" y="80" text-anchor="middle">A</text><circle class="fig-cn" cx="132" cy="74" r="15"/><text class="fig-cl" x="132" y="80" text-anchor="middle">B</text><rect class="fig-cn s" x="65" y="9" width="30" height="30" rx="3"/><text class="fig-cl" x="80" y="30" text-anchor="middle">S</text></svg><b>筛选制造相关</b><span>选择偏差</span></div>
+      <div class="l-tg" aria-hidden="true"><svg viewBox="0 0 160 100"><line class="fig-cr" x1="44" y1="74" x2="116" y2="74"/><text class="fig-cq" x="80" y="66" text-anchor="middle">?</text><circle class="fig-cn" cx="28" cy="74" r="15"/><text class="fig-cl" x="28" y="80" text-anchor="middle">A</text><circle class="fig-cn" cx="132" cy="74" r="15"/><text class="fig-cl" x="132" y="80" text-anchor="middle">B</text></svg><b>纯属偶然</b><span>小样本、多次比较</span></div>
+    </div>
+    <p class="l-legend">A：社交媒体使用　B：抑郁症状　C：第三变量，如家庭压力　S：是否进入样本。蓝色箭头表示因果作用，红色虚线表示数据中观察到、但并非 A 与 B 之间因果作用的相关。</p>
+    <figcaption>图 2　同一个相关，五种来历。本课示意图。</figcaption>
+  </figure>
+  <p>其中，第三个变量最容易被忽视，因为它往往没有出现在我们看到的数据里。下面这个模拟用一个经典的例子说明它是怎样制造出相关的：</p>
+  <div data-demo="confound"></div>
+  <p>这个模拟的要点在于：两个变量之间的相关是真实存在的，数据并没有错；错的是我们对相关的解释。按气温分组，相当于在比较时把第三个变量“固定”住。研究者在分析中“控制”某个变量，背后也是类似的思路。不过，控制只能处理已经想到、并且测量了的变量；那些没有想到或无法测量的混淆变量，仍然可能藏在结果里。这正是观察研究最根本的局限，也是上一讲中随机分配的价值所在。</p>
+  <p>第四种可能，也就是选择偏差，比看上去更隐蔽。1946 年，美国统计学家伯克森指出，如果只研究住院病人，两种疾病之间可能出现一种在普通人群中并不存在的关系。[1] 原因在于，一个人只要患有其中任何一种病，就更可能住院；于是“住院”这个筛选条件本身，就改变了两种疾病在样本中的组合方式。这种现象后来被称为<strong>伯克森悖论</strong>。</p>
+  <p>举一个假设的例子。某所学校录取学生时，只要考试成绩很高，<em>或者</em>有突出的艺术特长，二者满足其一就能入学。在全体申请人中，成绩和艺术特长可能毫无关系；但在被录取的学生中，你会发现成绩越高的人，艺术特长往往越普通。这是因为成绩一般又没有特长的人根本没有被录取，而成绩不够高的人，大多是靠特长进来的。这个负相关完全是录取规则制造出来的。日常生活中也有类似的情况：有人抱怨“长得好看的人性格往往不好”，可能只是因为一个人既不好看、性格也不好，你根本不会注意到他。</p>
+  <figure class="l-fig" data-figure="berkson" data-alt="散点图：240 名申请人的考试成绩与艺术特长毫无关系（r = 0）；只看成绩过线或特长过线而被录取的学生时，两者呈现明显的负相关。">
+    <figcaption>图 3　伯克森悖论：录取规则制造出来的负相关。切换两种情况，比较拟合线和相关系数。模拟数据，由程序按固定的随机种子生成；在全部申请人中，两者的相关被设定为恰好 0。</figcaption>
+  </figure>
+</section>
+
+<section id="s3">
+  <h2>横断研究与纵向研究</h2>
+  <p>最简单的观察研究，是在同一个时间点调查一批人，看几个变量之间的关系，这叫<strong>横断研究</strong>（cross-sectional study）。它的优点是快速、成本低，可以覆盖很大的样本；缺点是只有一个时间点的数据，分不清谁先谁后。</p>
+  <p>以社交媒体为例。2019 年，牛津大学的研究者分析了美国和英国三个大型调查数据库，涉及超过 35 万名青少年。他们发现，数字技术使用和青少年幸福感之间确实存在负相关，但这种关系非常弱，最多只能解释幸福感差异的 0.4%。[2] 这项研究还指出了一个方法上的问题：大型数据库中有很多变量，研究者在分析时有很多选择，不同的选择会得出强弱不一的结果。他们因此把成千上万种合理的分析方式都做了一遍，看结果的整体分布。这个问题本阶段第 5 讲还会讨论。</p>
+  <p>为了弄清时间上的先后，研究者会使用<strong>纵向研究</strong>（longitudinal study）：在多个时间点追踪同一批人。2019 年的一项纵向研究分别追踪了一批平均约 12 岁的青少年（每年一次，共 2 年）和一批大学生（每年一次，共 6 年）。结果发现，在两个样本中，社交媒体的使用都不能预测之后的抑郁症状；反过来，在青少年女生中，抑郁症状更多的人，之后使用社交媒体更频繁。[3] 至少在这项研究中，数据更符合“抑郁导致更多使用”，而不是相反。</p>
+  <p>但是，纵向数据也不能自动证明因果。即使 A 发生在 B 之前，也可能是某个稳定的第三变量，比如性格或家庭环境，同时影响了 A 和后来的 B。方法学家指出，如果不把“人与人之间的稳定差异”和“同一个人自身随时间的变化”区分开来，常用的纵向分析模型可能会得出错误的因果结论。[4] 时间顺序是因果关系的必要条件，但不是充分条件。</p>
+  <p>为了处理那些稳定的第三变量，研究者还有一种常用的办法：在家庭内部做比较。兄弟姐妹在同一个家庭里长大，共享许多家庭条件，同卵双胞胎还拥有几乎相同的基因。如果某种关系在比较兄弟姐妹、甚至同卵双胞胎时依然存在，那么家庭环境和遗传这类混淆就很难解释它。</p>
+  <p>收入和幸福感的关系就是一个例子。人们通常认为，收入更高会让人更快乐。但也可能反过来：快乐的人更乐观、更容易与人合作，于是工作上更成功。2012 年，两位经济学家利用一项长期追踪美国青少年的调查发现，青少年时期生活满意度和积极情绪更高的人，在大约十年后收入更高；即使只比较同一个家庭里的兄弟姐妹，这种关系依然存在。[5] 这并不否认收入会影响幸福感，但它提醒我们，两者之间的因果关系可能是双向的。</p>
+</section>
+
+<section id="s4">
+  <h2>自然实验：等待一次“随机分配”</h2>
+  <p>如果研究者不能亲自随机分配，有时可以等待现实世界提供一个接近随机的机会。某个外部事件让一部分人受到影响，另一部分人没有受到影响，而且受不受影响和人们原有的特点关系不大，这种情况就叫<strong>自然实验</strong>（natural experiment）。更广义地说，利用这类情境来推断因果的研究，常被称为<strong>准实验</strong>（quasi-experiment）。</p>
+  <p>收入和儿童心理健康的关系，就是一个很难用实验回答的问题。贫困家庭的孩子心理问题更多，这可能是因为贫困带来的压力，也可能是因为某些家庭本身的特点，既让他们更难摆脱贫困，又让孩子更容易出现问题。美国北卡罗来纳州的一项研究恰好遇到了一个机会。研究者原本就在每年评估当地 1400 多名儿童的心理状况。研究进行到一半时，一个印第安部落的保留地开设了赌场，此后每位部落成员都定期获得一笔收入补贴，这使一部分家庭摆脱了贫困，而非部落家庭的收入不受影响。结果显示：在赌场开设之前，贫困家庭孩子的心理症状比从未贫困的家庭多；开设之后，脱贫家庭孩子的品行问题和对立违抗等行为症状下降到了与从未贫困家庭相当的水平，而仍然贫困的家庭则没有变化。不过，焦虑和抑郁症状没有受到影响。[6]</p>
+  <p>社交媒体也有类似的研究。Facebook 最初并不是同时向所有大学开放的，而是在几年之间分批进入不同的美国高校。研究者利用这一点，比较了 Facebook 进入某所大学前后，该校学生心理健康状况的变化，并与当时还没有 Facebook 的学校对比。结果发现，Facebook 的进入增加了学生的心理健康问题，尤其是抑郁症状。[7]</p>
+  <p>自然实验的说服力，取决于一个关键的假设：受影响的群体和未受影响的群体，除了这个外部事件之外，没有其他系统性的差异。比如，Facebook 进入各校的先后顺序，是否和学校本身的某些特点有关？研究者需要用各种方法检验这个假设，但永远无法像真正的随机分配那样完全排除它。</p>
+  <p>还有一类自然实验来自制度规定的“分界线”。很多地方规定，在某个日期之前出生的孩子当年入学，之后出生的则推迟一年。于是，同一个班里，最大和最小的孩子可能相差将近一岁；而出生在分界日期前后几天的孩子，其他方面几乎没有差别，只是在班里的相对年龄截然不同。2012 年，加拿大不列颠哥伦比亚省的一项研究分析了近百万名 6 到 12 岁儿童的记录，那里的入学分界日期是 12 月 31 日。结果发现，12 月出生、在班里年龄最小的男孩，被诊断为注意缺陷多动障碍的可能性，比 1 月出生、年龄最大的男孩高出大约 30%；女孩中的差别更大，大约 70%。[8] 出生月份不会导致大脑发育异常，更合理的解释是：老师和家长把一部分“年龄小、还不够成熟”的正常表现，误当成了障碍的症状。</p>
+  <p>有些自然实验来自历史上的重大事件。1944 年冬到 1945 年春，第二次世界大战末期，德国占领军封锁了荷兰西部地区的粮食运输。在几个月的时间里，当地居民的口粮急剧减少，许多人每天只能获得远低于正常需要的热量。这场饥荒被称为“荷兰饥饿之冬”。由于饥荒开始和结束的时间都很明确，而且是外部强加的，研究者可以比较在饥荒最严重时期受孕的孩子与在其他时期受孕的孩子。1996 年的一项研究发现，在饥荒高峰期受孕的那一批人，成年后患精神分裂症的风险大约是其他时期出生者的两倍。[9] 研究者当然不可能为了研究产前营养而让孕妇挨饿，这样的历史事件提供了唯一可行的比较。不过，饥荒同时带来了寒冷、压力和疾病，所以这项研究能说明“产前经历这场饥荒”与风险有关，具体是哪一种因素在起作用，还需要其他证据。</p>
+</section>
+
+<section id="s5">
+  <h2>把不同的证据拼在一起</h2>
+  <p>在某些问题上，研究者也可以做真正的实验。2018 年，一项研究招募了数千名美国 Facebook 用户，把他们随机分成两组：一组停用 Facebook 四周，另一组照常使用。结果，停用组的主观幸福感有所提高，花在线下社交等活动上的时间也增加了。[10] 这是随机实验，因果推断更有力；但它也有局限：四周的停用和多年的使用不是一回事，参与者是愿意为了报酬停用账号的成年人，结论不一定适用于青少年。</p>
+  <p>把这些研究放在一起，可以看到一幅比任何单项研究都更完整的图景：横断研究显示相关存在但很弱；纵向研究提示可能存在反向因果；自然实验和随机实验则显示，至少在某些人群和情境中，社交媒体可能对心理健康产生不利影响。每一种研究设计都有自己的弱点，但它们的弱点各不相同。当不同设计的研究指向相同的方向时，我们对结论的信心就会增加；当它们相互矛盾时，就说明问题比我们想象的更复杂。这种思路被称为<strong>三角互证</strong>（triangulation）。</p>
+  <p class="l-aside">这一节只借社交媒体来说明方法。关于社交媒体对心理健康的影响究竟有多大、对谁影响更大，学界仍有不少争论，第 20 阶段会专门讨论。</p>
+</section>
+
+<section id="s6">
+  <h2>从相关走向因果判断</h2>
+  <p>“相关不等于因果”是一句重要的提醒，但它常常被简化成“相关研究证明不了任何事”。这种说法同样是错误的。吸烟导致肺癌的结论，主要就是从观察研究中得出的，因为没有人会随机安排一部分人吸烟几十年。</p>
+  <p>这段历史很能说明问题。20 世纪上半叶，肺癌的发病率迅速上升，原因众说纷纭。1950 年，英国流行病学家多尔和希尔发表了一项研究：他们比较了伦敦多家医院里的肺癌病人和患其他疾病的病人，发现肺癌病人中吸烟者，尤其是重度吸烟者的比例明显更高，而且吸烟越多，患肺癌的可能性越大。[11] 但是，这样的研究并没有立刻说服所有人。正是那位提出随机实验原则的统计学家费希尔，对这个结论提出了公开质疑。他认为，可能存在某种遗传体质，既让人更想吸烟，又让人更容易患肺癌；如果是这样，吸烟和肺癌之间的相关就是混淆的结果。[12] 这个质疑在逻辑上并没有错，它正是本讲第 2 节所说的“第三个变量”。</p>
+  <p>后来的证据一步步回应了这种质疑：吸烟者戒烟之后，患肺癌的风险会逐渐下降，而遗传体质是不会随着戒烟改变的；吸烟量与风险之间有清楚的剂量关系；动物实验和对烟草中致癌物质的研究，也提供了可能的作用机制。1965 年，希尔总结了一组在判断观察到的关联是否为因果时值得考虑的方面，包括关联的强度、在不同研究中是否一致、时间顺序、是否存在剂量关系、在生物学上是否说得通、能否得到实验证据的支持等。[13] 希尔特别强调，这些并不是必须逐条满足的硬性标准，而是帮助我们权衡证据的角度。吸烟与肺癌的例子说明，在无法做实验的问题上，只要证据足够多样、彼此一致，观察研究同样可以得出可靠的因果结论。观察研究可以为因果推断提供证据，前提是研究者认真处理了其他可能的解释。</p>
+  <p>当你读到一项观察研究时，可以依次问这样几个问题：</p>
+  <ol class="l-points">
+    <li><b>关系是否有剂量差别？</b>比如，接触得越多，结果是否越明显？剂量关系不能单独证明因果，但能增加因果解释的可信度。</li>
+    <li><b>时间顺序清楚吗？</b><li><b>时间顺序清楚吗？</b>被认为是“原因”的变量，是否发生在“结果”之前？</li>
+    <li><b>想到并处理了哪些第三变量？</b>还有哪些重要的混淆因素没有考虑？</li>
+    <li><b>样本是怎样选出来的？</b>选择方式本身会不会制造或掩盖相关？</li>
+    <li><b>有没有利用自然实验之类的机会，</b>让比较的双方尽可能相似？</li>
+    <li><b>不同设计的研究，结论是否一致？</b></li>
+    <li><b>关系有多强？</b>一个统计上可靠、但非常微弱的相关，即使是因果关系，实际意义也可能有限。效应大小的问题，下一讲会专门讨论。</li>
+  </ol>
+  <p>这些问题的答案很少是简单的“是”或“否”。因果判断往往不是一项研究就能完成的，而是随着证据积累，信心逐渐增强或减弱的过程。</p>
+</section>
+
+<section id="s7" class="l-sum">
+  <h2>本讲要点</h2>
+  <ul>
+    <li>两个变量相关，可能是 A 导致 B，也可能是反向因果、第三变量混淆、样本选择偏差或偶然。第三变量能制造出完全真实、却容易被误读的相关。</li>
+    <li>横断研究分不清先后；纵向研究能确定时间顺序，但稳定的第三变量仍可能造成误导。自然实验利用外部事件形成近似随机的比较，其说服力取决于“两组本来相似”这一假设。</li>
+    <li>相关不等于因果，但观察研究并非毫无用处。处理好其他解释、结合多种设计相互印证，观察证据也能为因果判断做出重要贡献。</li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <h2>检验一下</h2>
+  <p>下面三道题，考的不是你记住了多少术语，而是你能不能判断一项研究能支持什么样的因果结论。选择之后会立即显示解释，你也可以修改自己的答案。</p>
+  <div data-quiz></div>
+</section>
+
+<section id="refs" class="l-refs">
+  <h2>参考文献</h2>
+  <ol>
+    <li id="ref-1">Berkson, J. (1946). Limitations of the application of fourfold table analysis to hospital data. <i>Biometrics Bulletin, 2</i>(3), 47–53. <a href="https://doi.org/10.2307/3002000">doi:10.2307/3002000</a></li>
+    <li id="ref-2">Orben, A., &amp; Przybylski, A. K. (2019). The association between adolescent well-being and digital technology use. <i>Nature Human Behaviour, 3</i>(2), 173–182. <a href="https://doi.org/10.1038/s41562-018-0506-1">doi:10.1038/s41562-018-0506-1</a></li>
+    <li id="ref-3">Heffer, T., Good, M., Daly, O., MacDonell, E., &amp; Willoughby, T. (2019). The longitudinal association between social-media use and depressive symptoms among adolescents and young adults: An empirical reply to Twenge et al. (2018). <i>Clinical Psychological Science, 7</i>(3), 462–470. <a href="https://doi.org/10.1177/2167702618812727">doi:10.1177/2167702618812727</a></li>
+    <li id="ref-4">Hamaker, E. L., Kuiper, R. M., &amp; Grasman, R. P. P. P. (2015). A critique of the cross-lagged panel model. <i>Psychological Methods, 20</i>(1), 102–116. <a href="https://doi.org/10.1037/a0038889">doi:10.1037/a0038889</a></li>
+    <li id="ref-5">De Neve, J.-E., &amp; Oswald, A. J. (2012). Estimating the influence of life satisfaction and positive affect on later income using sibling fixed effects. <i>Proceedings of the National Academy of Sciences, 109</i>(49), 19953–19958. <a href="https://doi.org/10.1073/pnas.1211437109">doi:10.1073/pnas.1211437109</a></li>
+    <li id="ref-6">Costello, E. J., Compton, S. N., Keeler, G., &amp; Angold, A. (2003). Relationships between poverty and psychopathology: A natural experiment. <i>JAMA, 290</i>(15), 2023–2029. <a href="https://doi.org/10.1001/jama.290.15.2023">doi:10.1001/jama.290.15.2023</a></li>
+    <li id="ref-7">Braghieri, L., Levy, R., &amp; Makarin, A. (2022). Social media and mental health. <i>American Economic Review, 112</i>(11), 3660–3693. <a href="https://doi.org/10.1257/aer.20211218">doi:10.1257/aer.20211218</a></li>
+    <li id="ref-8">Morrow, R. L., Garland, E. J., Wright, J. M., Maclure, M., Taylor, S., &amp; Dormuth, C. R. (2012). Influence of relative age on diagnosis and treatment of attention-deficit/hyperactivity disorder in children. <i>Canadian Medical Association Journal, 184</i>(7), 755–762. <a href="https://doi.org/10.1503/cmaj.111619">doi:10.1503/cmaj.111619</a></li>
+    <li id="ref-9">Susser, E., Neugebauer, R., Hoek, H. W., Brown, A. S., Lin, S., Labovitz, D., &amp; Gorman, J. M. (1996). Schizophrenia after prenatal famine: Further evidence. <i>Archives of General Psychiatry, 53</i>(1), 25–31. <a href="https://doi.org/10.1001/archpsyc.1996.01830010027005">doi:10.1001/archpsyc.1996.01830010027005</a></li>
+    <li id="ref-10">Allcott, H., Braghieri, L., Eichmeyer, S., &amp; Gentzkow, M. (2020). The welfare effects of social media. <i>American Economic Review, 110</i>(3), 629–676. <a href="https://doi.org/10.1257/aer.20190658">doi:10.1257/aer.20190658</a></li>
+    <li id="ref-11">Doll, R., &amp; Hill, A. B. (1950). Smoking and carcinoma of the lung: Preliminary report. <i>British Medical Journal, 2</i>(4682), 739–748. <a href="https://doi.org/10.1136/bmj.2.4682.739">doi:10.1136/bmj.2.4682.739</a></li>
+    <li id="ref-12">Fisher, R. A. (1958). Cancer and smoking. <i>Nature, 182</i>(4635), 596. <a href="https://doi.org/10.1038/182596a0">doi:10.1038/182596a0</a></li>
+    <li id="ref-13">Hill, A. B. (1965). The environment and disease: Association or causation? <i>Proceedings of the Royal Society of Medicine, 58</i>(5), 295–300. <a href="https://doi.org/10.1177/003591576505800503">doi:10.1177/003591576505800503</a></li>
+  </ol>
+</section>

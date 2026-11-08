@@ -1,0 +1,131 @@
+<!-- PsychoPilot · 02-05 · 为什么研究结果会不可靠？——统计推断、复制危机、样本偏差与开放科学
+     Manuscript of the lesson body. Loaded by lesson.js into course.html.
+     Conventions: each <section> has an <h2> (numbered by the reader); [n] marks link to #ref-n;
+     <div data-demo="…"> is filled in by lab.js, <div data-quiz> by lesson.js. -->
+
+<p class="l-open">2010 年，一项研究报告说：只要摆出两分钟舒展、有力的“高能量姿势”，人体内的睾酮水平就会上升，压力激素皮质醇会下降，人也会更愿意冒险。[1] 这个“能量姿势”的说法很快走红，被许多人当作面试和演讲前的秘诀。</p>
+<p>2015 年，另一个研究团队用多得多的参与者重做了这项研究。结果，摆姿势并没有改变激素水平，也没有让人更愿意冒险；唯一得到重复的，是参与者<em>自己报告</em>感觉更有力量了。[2]</p>
+<p>一项发表在重要期刊上的研究，为什么会在重复时站不住脚？这是否意味着心理学研究不可信？这一讲要回答的问题是：<strong>已经发表的科学发现为什么有时会失败？心理学又是怎样发现并纠正这些问题的？</strong>前面四讲介绍了研究设计、测量、因果推断和统计，这一讲要把它们串起来，看看研究从设计到发表的每个环节可能在哪里出错。</p>
+  <figure class="l-fig" data-figure="pipeline" data-alt="一项研究的六个环节：选择研究对象、决定样本量、收集和分析数据、撰写论文、投稿与发表、后续研究；每个环节都列出了可能出的问题和对应的改进。">
+    <figcaption>图 1　一项研究从设计到发表，每个环节可能出的问题，以及心理学界的对应改进。本讲依次讨论这些环节。</figcaption>
+  </figure>
+
+<section id="s1">
+  <h2>研究的是谁？样本与推广</h2>
+  <p>第一个问题出在研究对象身上。长期以来，心理学研究的参与者主要来自西方国家，尤其是美国的大学生。一项对美国心理学会六本主要期刊的分析发现，论文的作者、样本和编委都以美国人为主，而美国人口只占世界人口的不到 5%。[3]</p>
+  <p>2010 年，三位研究者用一个缩写概括了这个问题：心理学的研究对象大多来自 WEIRD 社会，也就是西方的（Western）、受过教育的（Educated）、工业化的（Industrialized）、富裕的（Rich）和民主的（Democratic）社会。他们回顾了视觉知觉、公平观念、合作、空间推理等多个领域的跨文化研究，发现不同人群的结果有相当大的差异，而 WEIRD 人群在很多方面恰恰是人类中的“例外”。[4]</p>
+  <p>这个问题和“研究做错了”不一样。一项以美国大学生为对象的研究，完全可能准确地描述了美国大学生；问题在于，它的结论能不能推广到其他人群，需要另外的证据。这就是本阶段第 1 讲所说的外部效度问题。样本的局限会<em>降低</em>我们对结论普遍性的信心，但并不<em>证明</em>结论是错的。</p>
+</section>
+
+<section id="s2">
+  <h2>发表偏差：看不见的“抽屉”</h2>
+  <p>第二个问题出在发表环节。设想有 20 个团队分别研究同一个问题，其中 1 个团队得到了“显著”的结果，另外 19 个没有。如果只有那 1 项显著的研究被发表，读者看到的，就是一个“有证据支持”的效应。</p>
+  <p>早在 1979 年，心理学家罗森塔尔就把这个问题称为“文件抽屉问题”：没有得到显著结果的研究，被锁进了研究者的抽屉，从未公开。[5] 这个问题有多严重？2014 年，一项研究找到了一个难得的机会：美国一个资助项目记录了所有获批实施的社会科学调查实验，研究者因此可以追踪每一项研究最后有没有发表。结果发现，结果明确的研究比没有发现效应的研究，被发表的可能性高出 40 个百分点，被写成论文的可能性高出 60 个百分点。问题主要不在于期刊拒稿，而在于研究者自己根本没有把无效结果写出来。[6]</p>
+  <p>下面的模拟可以让你看到，发表偏差会怎样扭曲我们看到的证据：</p>
+  <div data-demo="studies" data-mode="pub"></div>
+  <p>当只有显著的研究被“发表”时，读者看到的平均效果会明显高于真实效果；而当真实效果为零时，被发表的却全是“发现了效应”的研究。人数越少，这种夸大越严重，因为小样本研究只有在估计碰巧偏高时，才能达到显著。</p>
+</section>
+
+<section id="s3">
+  <h2>研究者的自由度：太多的岔路</h2>
+  <p>第三个问题出在分析环节。在收集和分析数据的过程中，研究者要做很多决定：测哪几个指标？收集多少人的数据后停止？要不要排除某些异常的参与者？要不要考虑年龄、性别等因素？每一个决定单独看都合情合理，但如果研究者在看到数据之后，才根据“哪种做法能得到显著结果”来做这些决定，误报的风险就会大大增加。</p>
+  <p>人们常把 2011 年看作心理学开始认真反思的转折点，其中一个导火索相当出人意料。这一年，美国康奈尔大学的社会心理学家贝姆在顶级期刊《人格与社会心理学杂志》上发表了一篇论文，报告了 9 个实验、1000 多名参与者的结果，声称人能够“预感”未来。[7] 比如，在其中一个实验里，屏幕上有左右两块“帘子”，其中一块后面藏着图片，位置在参与者做出选择<em>之后</em>才由计算机随机决定；结果，参与者猜中藏有色情图片那一侧的比例略高于一半。9 个实验中，除了一个以外都达到了统计显著。</p>
+  <p>这篇论文引起了轩然大波。大多数心理学家并不相信人能感知尚未发生的事件，但问题在于，贝姆使用的都是当时心理学的常规方法和常规标准，论文也通过了正常的同行评审。不久，三位英国研究者严格按照原来的方案，重复了其中一个实验三次，都没有发现任何预感效应。[8] 很多人因此意识到：如果按照领域内公认的标准，能够“证明”一件几乎不可能的事情，那么出问题的可能不是这一项研究，而是这些标准本身。</p>
+  <p>同样在 2011 年，三位心理学家用一个刻意荒谬的例子展示了这个问题。他们做了一个真实的实验，让参与者听不同的歌曲，然后利用分析上的灵活性，得出了一个“统计显著”的结论：听了披头士乐队的《当我六十四岁》之后，参与者的实际年龄变年轻了。这显然不可能是真的。他们的计算机模拟也显示，几种常见的灵活做法组合在一起，可以让误报的概率远远超过名义上的 5%。[9]</p>
+  <figure class="l-fig" data-figure="forks" data-alt="一棵分叉的决策树：在指标、排除异常值、控制变量和样本量四个决定上各有两种选择，一共 16 种分析方式；其中个别分析碰巧得到 p 小于 0.05，研究者只报告了这一条。">
+    <figcaption>图 2　“分叉的小径”。四个看似合理的决定，组合出 16 种分析方式；如果只报告碰巧显著的那一种，读者就看不到另外 15 种。示意图，p 值不是真实数据。</figcaption>
+  </figure>
+  <p>与此密切相关的是<strong>多重比较</strong>问题。如果一项研究同时检验 20 个彼此无关的结果，而每一个实际上都没有效果，那么按照 5% 的标准，至少有一个碰巧“显著”的可能性超过六成。如果研究者只报告那个显著的结果，而不提其余 19 个，读者就会被误导。这就是<strong>选择性报告</strong>。</p>
+  <p>需要说明的是，这些问题大多并不是有意造假。研究者往往真诚地相信自己的选择是合理的；问题在于，人很难意识到自己的决定受到了结果的影响。这与第 1 阶段第 2 讲讨论的确认偏差是同一个道理。</p>
+  <p>这些做法有多普遍？2012 年，三位研究者对 2000 多名美国心理学家进行了匿名调查，询问他们是否用过一些“有问题的研究做法”，比如没有报告研究中测量过的所有指标、看到结果之后再决定是否继续收集数据、只报告“成功”的那几个实验等。为了鼓励如实回答，调查还设计了激励诚实作答的机制。结果，承认至少用过其中某些做法的人，比例出乎意料地高。[10] 研究者把这些做法比作一片“灰色地带”：它们不像造假那样明显违规，却会系统地增加误报。</p>
+  <p>当然，也存在真正的学术不端。同样在 2011 年，荷兰社会心理学家斯塔佩尔被发现长期编造数据：他声称在学校和街头收集了数据，实际上许多数据是他自己凭空编出来的。这件事最初是由几位年轻的研究者发现异常并举报的。随后的调查委员会认定，他的数十篇论文存在欺诈，这些论文后来陆续被撤回。[11] 调查报告还指出，合作者、审稿人和期刊都没能及时发现那些“好得不像真的”的数据，这本身就反映了当时研究文化的问题。不过，需要把造假和前面说的“灰色做法”区分开来：前者是极少数人的故意欺骗，后者则是许多诚实的研究者都可能陷入的陷阱，而对整个文献可靠性影响更大的，往往是后者。</p>
+</section>
+
+<section id="s4">
+  <h2>样本太小：统计效力不足</h2>
+  <p>第四个问题与样本大小有关。一项研究在效应真实存在时能够检测出它的概率，叫作<strong>统计效力</strong>（statistical power）。样本越小、效应越小，统计效力就越低。</p>
+  <p>效力不足带来的问题不只是“容易漏掉真实的效应”。研究者指出，它还有两个不那么明显的后果：第一，在效力很低的研究领域里，一个显著的结果是真实效应的可能性会降低；第二，那些碰巧达到显著的小样本研究，往往会高估效应的大小。[12] 你在上一讲和这一讲的模拟中都能看到这一点：每组 20 人时，只有估计值偏高很多的研究才会显著。这也解释了为什么一个效应在最初的小型研究中看起来很大，到了大规模重复研究中却缩小了很多。</p>
+  <p>2005 年，医学研究者约阿尼迪斯发表了一篇标题极具冲击力的论文：《为什么大多数已发表的研究发现是错误的》。[13] 他的推理用到的，正是上一讲讲过的基础比率。我们可以用一组示意数字来理解：假设一个领域里研究者检验了 1000 个假设，其中只有 10%，也就是 100 个，是真实存在的效应。如果研究的统计效力只有 35%，那么这 100 个真实效应中大约有 35 个会被检测出来；另外 900 个不存在的效应中，按照 5% 的误报率，大约会有 45 个碰巧“显著”。于是，在所有 80 个显著结果中，真正的效应只有 35 个，还不到一半。如果再加上发表偏差和分析上的灵活性，情况会更糟。约阿尼迪斯的结论并不是说每个领域都是如此，而是提醒人们：在效力低、新奇假设多、分析灵活的领域里，一个“显著”的发现是真的可能性，远比 95% 低得多。</p>
+  <figure class="l-fig" data-figure="ppv" data-alt="树状图：1000 个假设中 100 个真实、900 个不存在；效力 35% 时检测出 35 个真实效应，误报率 5% 时有 45 个误报；80 个显著结果中只有 35 个是真的。">
+    <figcaption>图 3　为什么一个“显著”的结果不一定是真的。数字为正文中的示意数据。</figcaption>
+  </figure>
+</section>
+
+<section id="s5">
+  <h2>重复研究：怎样解读“失败”</h2>
+  <p>检验一个发现是否可靠，最直接的办法就是重复做一遍。第 1 阶段第 1 讲提到，2015 年一项大型合作重复了 100 项心理学研究，只有三分之一多一点得到了同样明确的结果。这里再看两个例子，它们能帮助我们更细致地理解“重复”意味着什么。</p>
+  <p>2014 年的“众多实验室”项目，在 36 个不同的样本中、共 6000 多名参与者身上，同时重复了 13 个经典和较新的心理学效应。结果，10 个效应得到了稳定的重复，1 个只得到了微弱的支持，2 个没有得到重复。研究者还发现，在美国还是其他国家、在实验室还是网上进行，对结果的影响并不大；一个效应能否重复，更多地取决于效应本身。[14]</p>
+  <p>另一个例子是“自我损耗”：这种理论认为，自我控制像肌肉一样会疲劳，做完一件需要克制的事情之后，接下来的自我控制能力就会下降。早期的元分析发现了中等大小的效应。2016 年，23 个实验室按照事先公开登记的统一方案，对 2000 多名参与者进行了重复实验，得到的效应量非常接近零，置信区间也包含零。[15]</p>
+  <p>怎样才算“重复成功”，本身也有争论。最简单的标准是：重复研究也得到了同方向、统计显著的结果。但这个标准会受到样本大小的影响，一项人数不够多的重复研究，即使效应真实存在，也可能不显著。所以研究者还会使用其他标准，比如原始研究报告的效应量，是否落在重复研究的置信区间之内；或者把原始研究和重复研究合并起来，看总的效应有多大。不同的标准，有时会给出不同的答案。</p>
+  <p>另一种常见的回应是“隐藏的调节变量”：重复失败，也许是因为重复研究的人群、时间或细节与原始研究不同，而效应只在特定条件下出现。这种可能确实存在，也值得认真检验；但如果每一次失败都用一个事后才想到的条件来解释，这个效应就变得无法被检验了。前面提到的“众多实验室”项目，正好对这种说法做了一个检验：在美国和其他国家、在实验室和网上，效应的大小差别并不大。更好的做法是，原始研究者事先说明效应应该在什么条件下出现，再由重复研究去检验。</p>
+  <p>面对这些结果，需要仔细区分几种不同的情况：</p>
+  <div class="l-table" role="region" aria-label="重复研究结果的几种不同解读" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">情况</th><th scope="col">例子</th><th scope="col">意味着什么</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">某个具体结果没能重复</th><td>能量姿势对激素的影响</td><td>原来报告的这个具体效应很可能不存在或非常小；但同一研究中的其他结果（如主观感受）需要单独评价</td></tr>
+        <tr><th scope="row">对某种理论解释的不利证据</th><td>自我损耗的大规模重复</td><td>对“自我控制是有限资源”这一模型构成了严重挑战；但它检验的是一种具体实验方案，关于自我控制的其他理论问题仍在研究</td></tr>
+        <tr><th scope="row">正常的结果波动</th><td>同一效应在不同样本中大小略有不同</td><td>正如抽样波动所预期的，单个研究之间存在差异，并不说明哪一项研究错了</td></tr>
+        <tr><th scope="row">方法上的局限</th><td>只用西方大学生做研究</td><td>降低我们对结论普遍性的信心，但并不证明结论是错的</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="s6">
+  <h2>心理学怎样修正自己</h2>
+  <p>认识到这些问题之后，心理学界在过去十多年里推行了一系列改革。</p>
+  <p><strong>预注册</strong>（preregistration）：在收集数据之前，把研究假设、样本量、测量指标和分析方法写下来，公开登记。这样，事先计划的检验和看到数据之后的探索性分析就能被清楚地区分开来。[16] 探索性分析并非没有价值，但它的结果需要在新的研究中得到验证。</p>
+  <p><strong>注册报告</strong>（Registered Reports）更进一步：期刊在研究者收集数据<em>之前</em>，就根据研究问题和方法的质量决定是否发表，结果如何不影响发表。2021 年的一项比较发现，在普通心理学论文中，第一个假设得到支持的比例高达 96%；而在注册报告中，这个比例只有 44%。[17] 这么大的差异提示，普通文献中的“阳性结果”，有相当一部分可能来自发表偏差和分析上的灵活性。</p>
+  <p>此外，越来越多的期刊鼓励或要求研究者公开数据和研究材料，以便他人核查和重复；研究者也越来越多地开展多实验室合作，用更大的样本进行研究。在汇总证据时，研究者会使用<strong>元分析</strong>（meta-analysis），把多项研究的结果合并起来分析。但元分析也有局限：如果被汇总的研究本身就受到发表偏差的影响，合并的结果同样会被夸大，自我损耗早期的元分析就是一个例子。所以，元分析也需要检查和校正发表偏差。</p>
+  <p>怎样检查发表偏差？一种常用的工具是<strong>漏斗图</strong>（funnel plot）。它把每项研究画成一个点，横轴是研究发现的效应大小，纵轴是研究的样本量或精确程度。如果没有发表偏差，大样本研究的估计会集中在真实效果附近，小样本研究则向两侧散开，但左右大致对称，整体看起来像一个倒置的漏斗。如果效应偏小、不显著的小样本研究没有被发表，漏斗的一侧就会出现明显的“缺口”，形状变得不对称。这和你在本讲模拟中切换到“只显示‘显著’的研究”时看到的情形道理相同：被藏起来的，正是那些估计偏小的研究。不过，漏斗图不对称也可能有其他原因，比如小型研究的参与者本来就和大型研究不同，所以它只是一个提示，而不是定论。</p>
+  <figure class="l-fig" data-figure="funnel" data-alt="漏斗图：每个点是一项研究，横轴为估计的效应量，纵轴为样本量。全部研究左右对称地分布在真实效果 0.2 周围；只看已发表的研究时，左下角的小样本研究消失，平均估计偏高。">
+    <figcaption>图 4　漏斗图与发表偏差。红点是显著的研究；切换到“只看发表了的研究”，看看哪些点消失了，平均估计又怎样移动。模拟数据，由程序按固定的随机种子生成。</figcaption>
+  </figure>
+</section>
+
+<section id="s7">
+  <h2>证据是怎样积累起来的</h2>
+  <p>把这一讲的内容放在一起，可以得到一个看待心理学发现的实用框架：<strong>对一个结论的信心，应该像一个可以调节的旋钮，而不是一个只有“对”和“错”两档的开关。</strong></p>
+  <p>一项新奇的单个研究，特别是样本较小、没有预注册的研究，只能让我们稍微提高一点信心。如果它在独立的重复研究中得到验证，信心就可以增加；如果大规模、预注册的多实验室研究也支持它，并且在不同人群中都能观察到，我们就可以比较有把握地接受它。反过来，如果设计良好的重复研究一再失败，信心就应该相应地降低。</p>
+  <p>所以，一个著名的实验，很少能单独确立一条普遍的心理学规律。读到“研究发现……”的新闻时，可以问几个问题：这是一项研究还是许多研究？样本有多大，来自什么人群？有没有被独立重复过？效应有多大？</p>
+  <p>最后，复制危机常常被拿来说明“心理学不是科学”。这个结论恰恰弄反了。发现问题、公开讨论、改进方法，正是第 1 阶段所说的科学的自我纠错机制在起作用。一个能够系统地检查自己的错误，并为此改变研究规范的学科，比一个从不怀疑自己的学科更值得信任。关于哪些著名发现被修正、心理学的未来走向，第 21 阶段还会回到这个主题。</p>
+</section>
+
+<section id="s8" class="l-sum">
+  <h2>本讲要点</h2>
+  <ul>
+    <li>研究结论可能因为多种原因而不可靠：样本局限影响推广，发表偏差让无效结果消失，研究者的分析灵活性和选择性报告增加误报，统计效力不足则让显著结果更可能是夸大的。</li>
+    <li>重复失败需要细致解读：某个具体结果没能重复、对某种理论的不利证据、正常的结果波动、降低信心的方法局限，是几种不同的情况。</li>
+    <li>预注册、注册报告、公开数据、多实验室合作和元分析，是心理学自我纠错的工具。对结论的信心应随证据的积累而调整，复制危机正说明科学的纠错机制在发挥作用。</li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <h2>检验一下</h2>
+  <p>下面三道题，考的不是你记住了多少术语，而是你能不能判断一项研究结果有多可靠。选择之后会立即显示解释，你也可以修改自己的答案。</p>
+  <div data-quiz></div>
+</section>
+
+<section id="refs" class="l-refs">
+  <h2>参考文献</h2>
+  <ol>
+    <li id="ref-1">Carney, D. R., Cuddy, A. J. C., &amp; Yap, A. J. (2010). Power posing: Brief nonverbal displays affect neuroendocrine levels and risk tolerance. <i>Psychological Science, 21</i>(10), 1363–1368. <a href="https://doi.org/10.1177/0956797610383437">doi:10.1177/0956797610383437</a></li>
+    <li id="ref-2">Ranehill, E., Dreber, A., Johannesson, M., Leiberg, S., Sul, S., &amp; Weber, R. A. (2015). Assessing the robustness of power posing: No effect on hormones and risk tolerance in a large sample of men and women. <i>Psychological Science, 26</i>(5), 653–656. <a href="https://doi.org/10.1177/0956797614553946">doi:10.1177/0956797614553946</a></li>
+    <li id="ref-3">Arnett, J. J. (2008). The neglected 95%: Why American psychology needs to become less American. <i>American Psychologist, 63</i>(7), 602–614. <a href="https://doi.org/10.1037/0003-066X.63.7.602">doi:10.1037/0003-066X.63.7.602</a></li>
+    <li id="ref-4">Henrich, J., Heine, S. J., &amp; Norenzayan, A. (2010). The weirdest people in the world? <i>Behavioral and Brain Sciences, 33</i>(2–3), 61–83. <a href="https://doi.org/10.1017/S0140525X0999152X">doi:10.1017/S0140525X0999152X</a></li>
+    <li id="ref-5">Rosenthal, R. (1979). The file drawer problem and tolerance for null results. <i>Psychological Bulletin, 86</i>(3), 638–641. <a href="https://doi.org/10.1037/0033-2909.86.3.638">doi:10.1037/0033-2909.86.3.638</a></li>
+    <li id="ref-6">Franco, A., Malhotra, N., &amp; Simonovits, G. (2014). Publication bias in the social sciences: Unlocking the file drawer. <i>Science, 345</i>(6203), 1502–1505. <a href="https://doi.org/10.1126/science.1255484">doi:10.1126/science.1255484</a></li>
+    <li id="ref-7">Bem, D. J. (2011). Feeling the future: Experimental evidence for anomalous retroactive influences on cognition and affect. <i>Journal of Personality and Social Psychology, 100</i>(3), 407–425. <a href="https://doi.org/10.1037/a0021524">doi:10.1037/a0021524</a></li>
+    <li id="ref-8">Ritchie, S. J., Wiseman, R., &amp; French, C. C. (2012). Failing the future: Three unsuccessful attempts to replicate Bem’s “retroactive facilitation of recall” effect. <i>PLoS ONE, 7</i>(3), e33423. <a href="https://doi.org/10.1371/journal.pone.0033423">doi:10.1371/journal.pone.0033423</a></li>
+    <li id="ref-9">Simmons, J. P., Nelson, L. D., &amp; Simonsohn, U. (2011). False-positive psychology: Undisclosed flexibility in data collection and analysis allows presenting anything as significant. <i>Psychological Science, 22</i>(11), 1359–1366. <a href="https://doi.org/10.1177/0956797611417632">doi:10.1177/0956797611417632</a></li>
+    <li id="ref-10">John, L. K., Loewenstein, G., &amp; Prelec, D. (2012). Measuring the prevalence of questionable research practices with incentives for truth telling. <i>Psychological Science, 23</i>(5), 524–532. <a href="https://doi.org/10.1177/0956797611430953">doi:10.1177/0956797611430953</a></li>
+    <li id="ref-11">Levelt Committee, Noort Committee, &amp; Drenth Committee. (2012). <i>Flawed science: The fraudulent research practices of social psychologist Diederik Stapel</i>. Tilburg University.</li>
+    <li id="ref-12">Button, K. S., Ioannidis, J. P. A., Mokrysz, C., Nosek, B. A., Flint, J., Robinson, E. S. J., &amp; Munafò, M. R. (2013). Power failure: Why small sample size undermines the reliability of neuroscience. <i>Nature Reviews Neuroscience, 14</i>(5), 365–376. <a href="https://doi.org/10.1038/nrn3475">doi:10.1038/nrn3475</a></li>
+    <li id="ref-13">Ioannidis, J. P. A. (2005). Why most published research findings are false. <i>PLoS Medicine, 2</i>(8), e124. <a href="https://doi.org/10.1371/journal.pmed.0020124">doi:10.1371/journal.pmed.0020124</a></li>
+    <li id="ref-14">Klein, R. A., Ratliff, K. A., Vianello, M., Adams, R. B., Jr., Bahník, Š., Bernstein, M. J., … Nosek, B. A. (2014). Investigating variation in replicability: A “many labs” replication project. <i>Social Psychology, 45</i>(3), 142–152. <a href="https://doi.org/10.1027/1864-9335/a000178">doi:10.1027/1864-9335/a000178</a></li>
+    <li id="ref-15">Hagger, M. S., Chatzisarantis, N. L. D., Alberts, H., Anggono, C. O., Batailler, C., Birt, A. R., … Zwienenberg, M. (2016). A multilab preregistered replication of the ego-depletion effect. <i>Perspectives on Psychological Science, 11</i>(4), 546–573. <a href="https://doi.org/10.1177/1745691616652873">doi:10.1177/1745691616652873</a></li>
+    <li id="ref-16">Nosek, B. A., Ebersole, C. R., DeHaven, A. C., &amp; Mellor, D. T. (2018). The preregistration revolution. <i>Proceedings of the National Academy of Sciences, 115</i>(11), 2600–2606. <a href="https://doi.org/10.1073/pnas.1708274114">doi:10.1073/pnas.1708274114</a></li>
+    <li id="ref-17">Scheel, A. M., Schijen, M. R. M. J., &amp; Lakens, D. (2021). An excess of positive results: Comparing the standard psychology literature with Registered Reports. <i>Advances in Methods and Practices in Psychological Science, 4</i>(2), 25152459211007467. <a href="https://doi.org/10.1177/25152459211007467">doi:10.1177/25152459211007467</a></li>
+  </ol>
+</section>

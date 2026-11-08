@@ -408,3 +408,109 @@ button { font: inherit; color: inherit; }
 .l-rule-guess .choice { padding: 6px 16px; font-size: 14.5px; }
 .l-tag.is-m { background: transparent; color: var(--blue); box-shadow: inset 0 0 0 1.5px var(--blue); }
 .l-table .l-tag { margin: 0 0 4px; white-space: nowrap; }
+
+/* simulation demos (lab.js, Stage 02) */
+.lab-sim { font-size: 13.5px !important; color: var(--red) !important; }
+.lab-ctrls { margin-top: 16px; display: grid; gap: 10px; }
+.lab-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 8px 12px; align-items: center; }
+.lab-k { font: 500 12px/1.4 var(--mono); letter-spacing: .06em; color: var(--text-3); }
+.lab-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.lab .choice { padding: 5px 14px; font-size: 14px; }
+.lab-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.lab .lab-act { background: var(--blue); color: var(--on-blue); border-color: var(--blue); }
+.lab .lab-act.lab-clear { background: var(--paper); color: var(--text); border-color: var(--text); }
+.lab-fig { margin-top: 16px; }
+.lab-fig svg { display: block; width: 100%; height: auto; }
+.lab-axis { stroke: var(--text); stroke-width: 1.5; }
+.lab-tick { fill: var(--text-3); font: 500 13px var(--mono); }
+.lab-red { fill: var(--red); }
+.lab-t { font: 700 15px var(--head); }
+.lab-t.a, .lab-s.a { fill: var(--blue); } .lab-t.b, .lab-s.b { fill: var(--red); }
+.lab-s { font: 600 12.5px var(--mono); }
+.lab-dot { stroke: none; opacity: .55; }
+.lab-dot.a, .lab-dot.c1 { fill: var(--blue); } .lab-dot.b, .lab-dot.c3 { fill: var(--red); }
+.lab-dot.n { fill: var(--text); opacity: .45; } .lab-dot.c2 { fill: var(--mid); opacity: .85; }
+.lab-mean { stroke-width: 3; } .lab-mean.a { stroke: var(--blue); } .lab-mean.b { stroke: var(--red); }
+.lab-zero { stroke: var(--text-3); stroke-width: 1.5; }
+.lab-true { stroke: var(--red); stroke-width: 2; stroke-dasharray: 5 4; }
+.lab-ci { stroke: var(--text-3); stroke-width: 1.5; } .lab-ci.sig { stroke: var(--red); }
+.lab-est { fill: var(--text-2); } .lab-est.sig { fill: var(--red); }
+.lab-out { margin-top: 12px; font-size: 15.5px; line-height: 1.75; }
+.lab-out p + p, .lab-out ul + p { margin-top: 8px; }
+.lab-parts { list-style: none; margin: 8px 0 0; padding: 0; }
+.lab-parts li { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.lab-parts b { font-family: var(--mono); white-space: nowrap; }
+.lab-key { display: inline-block; width: 10px; height: 10px; margin-right: 8px; border-radius: 50%; vertical-align: 0; }
+.lab-key.c1 { background: var(--blue); } .lab-key.c2 { background: var(--mid); } .lab-key.c3 { background: var(--red); }
+@media (max-width: 600px) { .lab-row { grid-template-columns: 1fr; gap: 4px; } }
+.fig-tg { fill: none; stroke: var(--rule); stroke-width: 2; } .fig-tg.t0 { fill: var(--paper); stroke: var(--text-3); } .fig-tg.t3 { fill: var(--blue); stroke: none; }
+.fig-hit { fill: var(--red); stroke: var(--paper); stroke-width: 1.5; }
+.l-tg-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+.l-tg { text-align: center; line-height: 1.5; }
+.l-tg svg { display: block; width: 100%; max-width: 150px; margin: 0 auto 6px; }
+.l-tg b { display: block; font: 700 15px/1.4 var(--head); }
+.l-tg span { font-size: 13px; color: var(--text-2); }
+@media (max-width: 600px) { .l-tg-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.l-tg-grid.l-tg-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.fig-frame { fill: var(--paper); stroke: var(--rule); stroke-width: 1.5; }
+.fig-pt { fill: var(--blue); opacity: .7; }
+@media (max-width: 600px) { .l-tg-grid.l-tg-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; } .l-tg-3 .l-tg span { display: none; } }
+
+/* explanatory figures (figs.js, Stage 02): line drawings in the two inks, drawn at real width */
+.fx-ctrl { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.fx-ctrl .choice { padding: 5px 14px; font-size: 14px; }
+.fx-ctrl .fx-replay { margin-left: auto; border-color: var(--rule); color: var(--text-2); }
+.fx svg { display: block; width: 100%; height: auto; overflow: visible; }
+.fx-out:not(:empty) { margin-top: 12px; font-size: 15px; line-height: 1.7; color: var(--text-2); }
+.fx-out b { font-family: var(--mono); color: var(--text); }
+.fx-out p + p { margin-top: 6px; }
+.fx-keys { display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 13.5px; }
+.fx-keys .k { display: inline-block; width: 10px; height: 10px; margin-right: 7px; border-radius: 2px; vertical-align: 0; }
+.k.tp, .k.hi { background: var(--red); } .k.fp, .k.lo { background: var(--blue); }
+.k.fn { box-shadow: inset 0 0 0 1.5px var(--red); } .k.tn { background: var(--text); height: 2px; vertical-align: 3px; }
+.fx-keys .k.tn { width: 14px; }
+.fx-h { font: 700 15px var(--head); fill: var(--text); }
+.fx-t { font: 400 14px var(--body); fill: var(--text); }
+.fx-s { font: 400 12.5px var(--body); fill: var(--text-2); }
+.fx-n { font: 500 12px var(--mono); fill: var(--text-3); }
+.fx-num { font: 600 19px var(--mono); fill: var(--text); }
+.fx-strong { fill: var(--text); font-weight: 700; }
+.fx-svg-b, .fx-b { fill: var(--blue); } .fx-r { fill: var(--red); } .fx-inv { fill: var(--paper); }
+.fx-ln { stroke: var(--text); stroke-width: 1.5; fill: none; }
+.fx-hair { stroke: var(--text-3); stroke-width: 1; fill: none; opacity: .7; }
+.fx-dash { stroke-dasharray: 4 4; }
+.fx-ln.fx-lr { stroke: var(--red); } .fx-ln.fx-lb { stroke: var(--blue); }
+.fx-arrow line { stroke: var(--text); stroke-width: 1.4; } .fx-arrow path { fill: var(--text); }
+.fx-arrow.r line { stroke: var(--red); } .fx-arrow.r path { fill: var(--red); }
+.fx-ghost { fill: none; stroke: var(--rule); stroke-width: 1.5; stroke-dasharray: 2 3; }
+.fx-dot.hi { fill: var(--blue); } .fx-dot.lo { fill: var(--paper); stroke: var(--blue); stroke-width: 2; }
+.fx-pill.r { fill: rgba(226, 83, 58, .12); stroke: var(--red); stroke-width: 1.5; }
+.fx-pill.b { fill: var(--paper); stroke: var(--blue); stroke-width: 1.5; }
+.fx-bar { fill: var(--red); }
+.fx-node { fill: var(--text); } .fx-node.r { fill: var(--red); } .fx-node.b { fill: var(--blue); } .fx-node.m { fill: var(--paper); stroke: var(--text-3); stroke-width: 1.5; }
+.fx-latent { fill: var(--paper); stroke: var(--blue); stroke-width: 2; }
+.fx-box { fill: none; stroke: var(--text); stroke-width: 1.5; }
+.fx-err { fill: none; stroke: var(--red); stroke-width: 1.3; }
+.fx-opt { fill: none; stroke: var(--text-3); stroke-width: 1.5; } .fx-pick { fill: var(--blue); }
+.fx-sc { fill: var(--blue); opacity: .55; } .fx-sc.out { fill: var(--text-3); }
+.fx-sc.mid { fill: var(--text-3); opacity: .45; } .fx-sc.hi, .fx-sc.sig { fill: var(--red); opacity: .85; } .fx-sc.lo { fill: var(--blue); opacity: .85; }
+.fx-fit { stroke: var(--red); stroke-width: 2.5; }
+.fx-band1 { fill: rgba(34, 48, 90, .22); } .fx-band2 { fill: rgba(34, 48, 90, .09); } .fx-tail { fill: rgba(226, 83, 58, .55); }
+.fx-curve { stroke-width: 2.5; }
+.fx-c { fill: rgba(34, 48, 90, .11); } .fx-c.tp { fill: var(--red); } .fx-c.fp { fill: var(--blue); }
+.fx-c.fn { fill: var(--paper); stroke: var(--red); stroke-width: 1.2; }
+.fx-col { fill: var(--text-3); opacity: .55; } .fx-col.r { fill: var(--red); opacity: 1; }
+.fx-step { fill: var(--text); }
+.fx-edge.on { stroke-width: 3; }
+.fx-seg.b { fill: var(--blue); } .fx-seg.r { fill: var(--red); }
+/* five small causal diagrams (02-03), static */
+.l-tg-grid.l-tg-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.l-tg-5 .l-tg svg { max-width: 170px; }
+.fig-cn { fill: var(--paper); stroke: var(--text); stroke-width: 2; } .fig-cn.s { stroke: var(--red); }
+.fig-cl { font: 700 17px var(--head); fill: var(--text); }
+.fig-ca { stroke: var(--blue); stroke-width: 2.2; } .fig-cah { fill: var(--blue); }
+.fig-cr { stroke: var(--red); stroke-width: 2; stroke-dasharray: 5 4; }
+.fig-cq { font: 700 17px var(--head); fill: var(--red); }
+.l-legend { margin-top: 10px; font-size: 13.5px; line-height: 1.7; color: var(--text-2); }
+@media (max-width: 600px) { .l-tg-grid.l-tg-5 { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px 8px; } }
+.fx-halo { paint-order: stroke; stroke: var(--paper); stroke-width: 4px; stroke-linejoin: round; }
