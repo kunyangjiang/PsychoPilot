@@ -33,7 +33,7 @@
 
     <footer class="foot">
       <span class="logo" style="font-size:16px"><i aria-hidden="true"></i>PsychoPilot</span>
-      <p>PsychoPilot 是教育平台，不提供心理诊断或治疗。课程中的测验与模拟仅用于学习，不能替代专业评估。如果你正处于困境，请联系当地的专业心理健康服务。</p>
+      <p>PsychoPilot 是学习平台，不做心理诊断，也不提供治疗。课程里的测验和模拟只用于学习，不能代替专业评估。如果你正处在困境中，请联系当地的专业心理健康服务。</p>
     </footer>
   </div>
 
@@ -80,7 +80,7 @@
         $('#v-tag').textContent = 'By interest';
         $('#v-over').textContent = '兴趣路线';
         $('#v-title').textContent = topic.label;
-        $('#v-desc').textContent = `把散落在 ${ps.map((p) => '第 ' + p.numeral + ' 卷').join('、')} 里的相关内容放在一起读。`;
+        $('#v-desc').textContent = `这些内容原本散在${ps.map((p) => '第 ' + p.numeral + ' 卷').join('、')}，在这里连成一条线。`;
         $('#v-facts').innerHTML = `<span class="r">${count} 讲</span><span>${stages.length} 个阶段</span>`;
         const stack = document.createElement('div');
         stack.className = 'stack';

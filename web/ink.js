@@ -117,7 +117,9 @@ window.PPInk = (() => {
   /* IV — Isotype figures; the one who differs joins the crowd when you look */
   function crowd(ctx, w, h, t, act, c, dt, st) {
     st.k = st.k || 0;
-    st.k += ((act ? 1 : 0) - st.k) * Math.min(1, (dt || 0) * 2.2);
+    // follow the real hover state, not `act` (which stays on while the cover winds down)
+    st.k += ((st.hover ? 1 : 0) - st.k) * Math.min(1, (dt || 0) * 2.6);
+    if (!st.hover && st.k < .02) st.k = 0;
     const cols = 5, rows = 4, cw = w / (cols + 1.6), ch = h / (rows + .9);
     const person = (x, y, s, col) => {
       ctx.fillStyle = col;
@@ -153,7 +155,7 @@ window.PPInk = (() => {
 
   /* VI — the prospect-theory value curve, drawn in points: losses loom larger than gains */
   const PTS = (() => { const R = rng(31); return Array.from({ length: 150 }, () => [R() * 2 - 1, (R() - .5), R()]); })();
-  function prospect(ctx, w, h, t, act, c) {
+  function prospect(ctx, w, h, t, act, c, dt, st) {
     const cx = w * .5, cy = h * .34, sx = w * .46, sy = h * .3;
     ctx.strokeStyle = c.fg; ctx.globalAlpha = .45; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(w * .04, cy); ctx.lineTo(w * .96, cy); ctx.moveTo(cx, h * .04); ctx.lineTo(cx, h * .92); ctx.stroke();
@@ -164,6 +166,20 @@ window.PPInk = (() => {
       ctx.fillStyle = x < 0 ? c.accent : c.fg;
       ctx.beginPath(); ctx.arc(cx + x * sx, cy - y * sy, (.8 + s * 2.2) * w / 200, 0, TAU); ctx.fill();
     });
+    // on hover: the same amount won and lost, side by side; the loss drops much further
+    st.a = (st.a || 0) + ((st.hover ? 1 : 0) - (st.a || 0)) * Math.min(1, (dt || 0) * 4);
+    if (!st.hover && st.a < .02) st.a = 0;
+    if (st.a < .01) return;
+    const m = .3 + .5 * (.5 + .5 * Math.sin(t * .9 - Math.PI / 2));
+    ctx.globalAlpha = st.a; ctx.lineWidth = Math.max(1.5, w / 130); ctx.lineCap = 'round';
+    for (const [x, col] of [[m, c.fg], [-m, c.accent]]) {
+      const px = cx + x * sx, py = cy - v(x) * sy;
+      ctx.strokeStyle = col; ctx.setLineDash([w / 70, w / 90]);
+      ctx.beginPath(); ctx.moveTo(px, cy); ctx.lineTo(px, py); ctx.stroke();
+      ctx.setLineDash([]); ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(px, py, w / 38, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
   }
 
   /* draw a Part's cover figure into `canvas`; animate while `host` is hovered/focused,
@@ -180,7 +196,7 @@ window.PPInk = (() => {
         faint: onBlue || scheme.matches ? 'rgba(236,229,216,.16)' : 'rgba(34,48,90,.12)',
       };
     };
-    const render = (t, dt) => { const { ctx, w, h } = fit(canvas); ctx.clearRect(0, 0, w, h); conf.draw(ctx, w, h, t, act || t < until, colors(), dt, st); };
+    const render = (t, dt) => { st.hover = act; const { ctx, w, h } = fit(canvas); ctx.clearRect(0, 0, w, h); ctx.lineCap = 'butt'; ctx.setLineDash([]); conf.draw(ctx, w, h, t, act || t < until, colors(), dt, st); };
     render(0, 0);
     new ResizeObserver(() => render(performance.now() / 1000, 0)).observe(canvas);
     onScheme.push(() => render(0, 0));
@@ -193,7 +209,7 @@ window.PPInk = (() => {
       raf = act || t < until ? requestAnimationFrame(step) : 0;
     };
     const start = () => { act = true; if (!raf) { last = performance.now() / 1000; raf = requestAnimationFrame(step); } };
-    const stop = () => { if (!act) return; act = false; until = performance.now() / 1000 + 1.2; };
+    const stop = () => { if (!act) return; act = false; until = performance.now() / 1000 + 1.8; };
     host.addEventListener('pointerenter', (e) => { if (e.pointerType === 'mouse') start(); });
     host.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') stop(); });
     host.addEventListener('focus', start); host.addEventListener('blur', stop);

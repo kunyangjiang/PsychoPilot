@@ -12,7 +12,7 @@
     const last = PP.byId(store.get('pp.last') || '');
     const c = last || PP.courses[0];
     $('#continue').href = PP.courseUrl(c);
-    $('#continue-k').textContent = last ? `继续学习 · ${c.id} · ${c.index + 1}/${PP.courses.length}` : `从这里开始 · ${c.id}`;
+    $('#continue-k').textContent = last ? `接着读 · ${c.id} · ${c.index + 1}/${PP.courses.length}` : `从第一讲开始 · ${c.id}`;
     $('#continue-t').textContent = c.title;
   }
 
@@ -48,7 +48,7 @@
         ? hits.map((c, i) => `<li role="none"><a role="option" id="r${i}" href="${PP.courseUrl(c)}" aria-selected="${i === sel}">
             <span class="rid">${c.id}</span><span class="rt">${mark(c.title, ql)}</span>
             <span class="rs">${c.sub ? mark(c.sub, ql) + ' · ' : ''}${esc(c.stage.title)}</span></a></li>`).join('')
-        : `<li class="empty">没有找到与“${esc(q)}”相关的课程。试试更短的关键词。</li>`;
+        : `<li class="empty">没找到“${esc(q)}”。换个短一点的词试试。</li>`;
       list.hidden = false;
       input.setAttribute('aria-expanded', 'true');
       if (sel >= 0) input.setAttribute('aria-activedescendant', 'r0');
@@ -89,15 +89,15 @@
     const grid = (i) => [(i % COLS + .5) / COLS, (Math.floor(i / COLS) + .5) / ROWS];
 
     const LAWS = [
-      { zh: '接近律', en: 'Proximity', d: '彼此靠近的点，会被你自动看成一组。我们并没有画出任何边框。',
+      { zh: '接近律', en: 'Proximity', d: '靠得近的，就是一伙。边框是你的大脑画上去的。',
         set(d, i) {
           const g = i % 6, k = Math.floor(i / 6), cx = [.2, .5, .8][g % 3], cy = [.3, .72][Math.floor(g / 3)];
           const side = 5, a = (k % side) - (side - 1) / 2, b = Math.floor(k / side) - 2.2;
           d.tx = cx + a * .03; d.ty = cy + b * .036; d.tr = k < 26 ? 1 : 0; d.tred = 0;
         } },
-      { zh: '相似律', en: 'Similarity', d: '同样的点排成方阵，只改颜色，你看到的就不再是“行”，而是“列”。',
+      { zh: '相似律', en: 'Similarity', d: '同一个方阵，只换了颜色：行，就变成了列。',
         set(d, i) { const [x, y] = grid(i); d.tx = .06 + x * .88; d.ty = .06 + y * .88; d.tr = 1; d.tred = (i % COLS) % 2 === 0 ? 1 : 0; } },
-      { zh: '闭合律', en: 'Closure', d: '圆周上缺了三段，你看到的依然是一个完整的圆：大脑替你补上了缺口。',
+      { zh: '闭合律', en: 'Closure', d: '圆缺了三段，你看到的仍是一个圆。缺口，大脑替你补上了。',
         set(d, i) {
           const n = 84;
           if (i < n) {
@@ -106,7 +106,7 @@
           } else { d.tx = .5; d.ty = .5; d.tr = 0; }
           d.tred = 0;
         } },
-      { zh: '连续律', en: 'Continuity', d: '两条点线相交，你看到的是两条平滑交叉的曲线，而不是两段折回的折线。',
+      { zh: '连续律', en: 'Continuity', d: '两条点线交叉而过。你认定它们各走各路，而不是在交点折返。',
         set(d, i) {
           const n = 64;
           if (i < 2 * n) {
@@ -114,7 +114,7 @@
             d.tx = .06 + f * .88; d.ty = .5 + s * .3 * Math.sin((f - .5) * Math.PI * 1.05); d.tr = .95; d.tred = i < n ? 0 : 1;
           } else { d.tx = .5; d.ty = .5; d.tr = 0; d.tred = 0; }
         } },
-      { zh: '共同命运', en: 'Common fate', d: '静止的方阵里，一起移动的点会立刻“结成一伙”。把指针移进来试试。',
+      { zh: '共同命运', en: 'Common fate', d: '一起动的，就是一伙。把指针移进来试试。',
         set(d, i) { const [x, y] = grid(i); d.tx = .06 + x * .88; d.ty = .06 + y * .88; d.tr = 1; const c = i % COLS, r = Math.floor(i / COLS); d.tred = 0; d.fate = Math.abs(c - r - 1) <= 1 ? 1 : 0; } },
     ];
     let law = -1, lastSwitch = 0, pausedUntil = 0, ptr = null;
@@ -202,7 +202,7 @@
       box.classList.toggle('is-revealed', open);
       btns.forEach((x) => x.setAttribute('aria-pressed', String(open && x === b)));
       ans.innerHTML = open
-        ? `${b.dataset.a === 'same' ? '对。' : '其实，'}两个小方块是<b>同一种颜色</b>：中间那条色带把它们连了起来。颜色的感知取决于它周围的颜色，这是阿尔伯斯在《色彩的互动》里反复演示的现象。<br><a href="course.html?id=04-02">04-02 视觉错觉与知觉建构 →</a>`
+        ? `${b.dataset.a === 'same' ? '对，' : '被骗了：'}两个小方块是<b>同一种颜色</b>，中间那条色带就是证据。你从来看不到一块“孤立”的颜色，周围的颜色总在改写它。阿尔伯斯用一整本《色彩的互动》，演示的就是这件事。<br><a href="course.html?id=04-02">04-02 视觉错觉与知觉建构 →</a>`
         : '';
     }));
   }
