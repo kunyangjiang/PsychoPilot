@@ -629,6 +629,30 @@ button.lab-cellbtn:hover { border-color: var(--text); }
 .lab-parts.lab-flow li > b { margin-left: auto; }
 .lab-nw { white-space: nowrap; }
 .lab-stroop.lab-seq { padding: 10px 14px; font-size: 26px; line-height: 1.35; letter-spacing: .04em; text-align: center; text-wrap: balance; }
+/* ---------- Stage 07 · language and thought: masked reading, a syllable stream, line drawings, nine dots ---------- */
+.lab-stroop.lab-spr { display: flex; flex-wrap: wrap; justify-content: center; align-content: center; gap: 6px .2em; padding: 14px; font: 600 24px/1.5 var(--body); letter-spacing: .02em; }
+.lab-spr .lab-mask { color: transparent; border-bottom: 2px solid var(--text-3); user-select: none; }
+.lab-stroop.lab-spr.lab-done { display: block; font: 500 17px/1.8 var(--body); text-align: center; }
+.lab-spr.lab-done b { color: var(--red); }
+.lab .lab-resp .lab-act.lab-big { padding: 10px 22px; font: 600 20px var(--mono); letter-spacing: .04em; }
+.lab-stroop.lab-show { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 6px; min-height: 200px; padding: 12px; font: 500 17px/1.5 var(--body); letter-spacing: 0; }
+.lab-show b { color: var(--red); }
+.lab-shape { fill: none; stroke: var(--text); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.lab-shape .f { fill: var(--text); stroke: none; }
+.lab-grid.lab-g3 { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 12px auto 0; }
+.lab-grid.lab-g3:empty { display: none; }
+.fx-tok { font: 600 20px var(--body); fill: var(--text); }
+.fx-wall { fill: var(--paper-2); }
+.fx-candle { fill: var(--paper); stroke: var(--text); stroke-width: 1.5; }
+.fx-flame { fill: var(--red); }
+.lab-dots { display: block; width: 100%; max-width: 340px; margin: 0 auto; touch-action: manipulation; cursor: pointer; }
+.lab-dots:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 6px; }
+.lab-lat { fill: var(--rule); }
+.lab-dot9 { fill: var(--text); } .lab-dot9.on { fill: var(--red); }
+.lab-path { fill: none; stroke: var(--red); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+.lab-end { fill: var(--red); }
+.lab-cur { fill: none; stroke: var(--blue); stroke-width: 2.5; }
+.lab-recall textarea:disabled { color: var(--text-2); }
 /* course.html: the "in preparation" stamp and note stay hidden until lesson.js finds no manuscript */
 .l-wait .stamp, .l-wait .l-note { display: none; }
 

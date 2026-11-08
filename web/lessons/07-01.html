@@ -1,0 +1,148 @@
+<!-- PsychoPilot · 07-01 · 人类如何理解语言？——词汇、句法与意义加工
+     Manuscript of the lesson body. Loaded by lesson.js into course.html.
+     Conventions: each <section> has an <h2> (numbered by the reader); [n] marks link to #ref-n;
+     <figure data-figure="…"> is drawn by figs.js, <div data-demo="…"> by lab.js, <div data-quiz> by lesson.js. -->
+
+<p class="l-open">晚饭时，坐在窗边的朋友对你说：“你能把窗户关上吗？”你起身去关窗。你不会回答“能”，然后继续坐着吃饭，虽然从字面上看，他问的确实是你有没有这个能力。</p>
+<p>这件小事里藏着好几层加工。你的耳朵收到的是一串连续的声波，词与词之间并没有停顿；你要从中切分出一个个词，认出它们，弄清楚谁对什么做了什么，得出句子的字面意思，再根据场合推断说话人真正想要什么。所有这些，通常在说话人话音刚落、甚至还没说完的时候，就已经完成了。正常语速下，人们每秒大约说出两到三个词，理解几乎跟得上说话的速度。</p>
+<p>这一讲讨论语言理解的心理过程：我们怎样识别词，怎样把词组织成结构，怎样得到意义，又怎样理解言外之意。我们会看到，理解语言不是先把每个词查完、再从头分析句子，而是一边听、一边猜，一边修正。这种“边走边猜”大多数时候又快又准，偶尔也会把我们带上岔路。</p>
+
+<section id="s1">
+  <h2>理解一句话，要经过几层加工</h2>
+  <p>心理学家常把语言理解分成几个层次来研究。这样分是为了方便讨论，并不意味着大脑真的按顺序一层一层地处理；后面会看到，各层之间是同时进行、相互影响的。图 1 用开头那句话说明这几个层次。</p>
+  <figure class="l-fig" data-figure="langlayers" data-alt="竖排的六个方框，从上到下是：声音或文字、语音与字形、认出词、句法、语义、语用，每个方框附有“你能把窗户关上吗”这句话在这一层的例子。右侧一条红色虚线箭头从下往上，标注“语境和预期：自上而下影响每一层”。">
+    <figcaption>图 1　理解一句话涉及的几个层次。箭头只表示信息大致的方向；实际加工中，各层同时进行，语境和预期会反过来影响较低的层次。</figcaption>
+  </figure>
+  <p>这四个概念最容易混淆，值得先分清楚：</p>
+  <ul>
+    <li><strong>词汇识别</strong>：认出一个词是什么，并取出它在记忆中的信息，比如读音、意义和用法。研究者把记忆中储存词的系统称为<strong>心理词典</strong>。</li>
+    <li><strong>句法</strong>：词与词之间的结构关系，也就是“谁对什么做了什么”。“狗咬了人”和“人咬了狗”用的词完全一样，结构不同，意思就不同。</li>
+    <li><strong>语义</strong>：词和句子的字面意义。一个结构完全正确的句子，意义上可能说不通。</li>
+    <li><strong>语用</strong>：在具体场合中，说话人想通过这句话表达什么。“你能把窗户关上吗？”的字面意义是问能力，语用上的意思是请求。</li>
+  </ul>
+  <p>这一讲大致按这个顺序展开。不过请记住，这只是分析的顺序，不是大脑工作的时间表。</p>
+</section>
+
+<section id="s2">
+  <h2>从声音开始：没有停顿的语流</h2>
+  <p>如果你听过一门完全陌生的语言，可能会觉得对方说得飞快，词和词连成一片。其实母语也是这样：在声波里，词与词之间通常没有停顿，停顿反而常常出现在一个词的中间。我们之所以“听到”清楚的词，是因为大脑根据对这门语言的知识，主动把语流切分开了。下一讲会看到，婴儿正是在学习这种切分。</p>
+  <p>切分之前，大脑要先把连续变化的声音归入语言中的语音类别。语言学家把一门语言中能区分意义的最小声音单位称为<strong>音位</strong>。比如普通话里，“b”和“p”是两个不同的音位，“爸”和“怕”的意义靠它们区分；声调也能区分意义，“妈”“麻”“马”“骂”的声母和韵母相同，只是声调不同。</p>
+  <p>声音在物理上是连续变化的，知觉却倾向于把它分成类别。1957 年，利伯曼等人用人工合成的方法，制作了一系列从“b”逐渐过渡到“d”再到“g”的音节，相邻两个音节在物理上的差别都一样大。结果，当两个音节落在同一个音位类别内时，听者很难分辨它们；当两个音节跨过了类别的边界时，同样大小的物理差别就容易分辨得多。[1] 这种现象被称为<strong>范畴知觉</strong>。后来的研究对它的严格程度有不少讨论，比如听者在一定条件下也能察觉类别内部的细微差别，但基本现象是可靠的：语言的类别会塑造我们对声音的知觉。</p>
+  <p>语音知觉也不只依靠耳朵。在<strong>麦格克效应</strong>中，人们听到的是“ba”的录音，看到的却是嘴唇在发“ga”的视频，许多人报告听到的是“da”，一个两种信息折中的结果。[2] 看到的嘴型改变了听到的声音。</p>
+  <p>知识还会“补上”缺失的声音。1970 年，沃伦把一个英语句子中某个单词里的一个音换成咳嗽声。听者普遍报告听到了完整的单词，咳嗽声只是背景里的一个杂音，而且说不准咳嗽出现在哪个位置。[3] 这被称为<strong>音位恢复</strong>：大脑根据词和句子的知识，补全了实际上并不存在的声音。在嘈杂的餐厅里，你仍然能听懂朋友的话，靠的正是这种补全。</p>
+  <p>这些现象说明，即使在最低的层次上，语言知觉也不是被动地记录声音。它从一开始就在使用知识和预期，这是贯穿这一讲的一个主题。</p>
+</section>
+
+<section id="s3">
+  <h2>认出一个词：在心理词典里查找</h2>
+  <p>一个受过教育的成年人，心理词典里可能有几万个词。认出一个词通常只需要几分之一秒。这是怎样做到的？</p>
+  <p>一个有影响的模型是马斯伦-威尔逊提出的<strong>群集模型</strong>。听到一个词的开头，所有以这个声音开头的词会同时被激活，组成一个“候选群”；随着声音继续进来，不符合的候选被逐一淘汰，直到只剩下一个。[4] 比如听到“diàn”，“电脑”“电话”“电影”“店铺”都可能被激活；听到“diànnǎo”，候选就只剩下“电脑”了。这个模型强调了两点：词汇识别是<strong>并行</strong>的，许多候选同时竞争；识别常常<strong>早于</strong>一个词说完。</p>
+  <p>认出一个词，也会让与它意义相关的词变得更容易识别。1971 年，迈耶和施瓦内费尔特让参与者判断两串字母是不是真实的英语单词，结果，当两个词意义相关（比如“面包”和“黄油”）时，判断比两个词无关时更快。[5] 这被称为<strong>语义启动</strong>，说明心理词典中的词不是孤立存放的，而是按意义相互联系的。</p>
+  <p>许多词有不止一个意思。汉语里的“打”就有打人、打电话、打水、打毛衣等几十种用法。听到一个多义词时，我们是只想到符合语境的意思，还是所有意思都会被想到？斯温尼在 1979 年的研究中让参与者听句子，在句子中的一个多义词出现之后，立即在屏幕上呈现一串字母让他们判断是不是词。结果发现，即使前面的语境明显偏向其中一个意思，在多义词刚出现时，它的几个意思都会带来启动效应；几个音节之后，只剩下与语境相符的那个意思还有效果。[6] 也就是说，至少在这类实验条件下，词的多个意思会被短暂地同时激活，随后由语境选出一个。后来的研究发现，这个过程也受意义的常见程度和语境强度的影响，并非在所有情况下都如此。</p>
+  <p>词还有内部结构。由更小的有意义单位组合而成的词，比如英语的“un-happi-ness”，或汉语的“火车”“电脑”，心理词典是整个储存，还是会把它们拆开处理？塔夫特和福斯特在 1975 年发现，人们拒绝一个由真实词根构成的假词（比如从 rejuvenate 中拆出的 juvenate）时，比拒绝一个普通的假词更慢，说明阅读时会尝试把词拆成词根和词缀。[7] 2004 年，拉斯特尔等人用极短暂、读者意识不到的“掩蔽启动”发现，“corner”能启动“corn”，几乎和“cleaner”启动“clean”一样强，虽然 corner 和 corn 在意义上毫无关系；而“brothel”对“broth”就没有这种效果，因为 -el 不是英语的词缀。[8] 这说明，在识别的早期，视觉系统会根据词的“形状”自动拆分，不管拆出来的部分在意义上是否真的相关。这些研究大多以拼音文字为材料；汉字的识别有它自己的特点，比如部件和整字的关系，不能直接套用英语的结论。</p>
+</section>
+
+<section id="s4">
+  <h2>句法：谁对谁做了什么</h2>
+  <p>认出了词，还要知道它们怎样组合。句法让我们能用有限的词表达无限多的意思，也让同样的词可以有不同的组织方式。图 2 是一个经典的汉语例子：“咬死了猎人的狗”。</p>
+  <figure class="l-fig" data-figure="twoparse" data-alt="两个面板，各写着“咬死了 猎人 的 狗”四个词。左面板的括号把“猎人的狗”括成名词短语，整体是“咬死了猎人的狗”这个动词短语，意思是有人咬死了猎人的狗，死的是狗。右面板的括号把“咬死了猎人”括成动词短语，再与“的狗”组成名词短语，意思是咬死了猎人的那条狗，死的是猎人。">
+    <figcaption>图 2　同一串词的两种结构。词和词序完全相同，意义却相反。</figcaption>
+  </figure>
+  <p>这个例子说明，句法不只是语文课上的语法规则，它直接决定了意义。理解句子时，读者必须一边读，一边为读到的词建立结构。问题在于，句子是一个词一个词进来的，读到一半时，往往不止一种结构是可能的。读者会怎么做？</p>
+  <p>英语中一个著名的例子是“The horse raced past the barn fell.”。大多数读者读到“fell”时会愣住：前面已经是一个完整的句子“马跑过了谷仓”，后面怎么还有一个动词？其实，“raced past the barn”是在修饰“horse”，整句的意思是“被赶着跑过谷仓的那匹马摔倒了”。这类句子被称为<strong>花园路径句</strong>：句子的开头把读者引向一条看似合理的路，走到后面才发现走错了，必须回头重新分析。</p>
+  <p>1982 年，弗雷泽和雷纳用眼动仪记录人们阅读这类句子时的眼睛运动。读者读到揭示真正结构的那个词时，注视时间明显变长，而且常常回跳到句子前面重新读。[9] 这说明读者在读的过程中已经确定了一种结构，而不是把所有可能都保留到句末再决定。</p>
+  <p>下面的演示让你体会一下汉语中的类似情况。</p>
+  <div data-demo="garden"></div>
+  <p>关于读者怎样选择最初的结构，有两类有影响的理论，至今仍有争论。</p>
+  <p>第一类是<strong>两阶段模型</strong>，弗雷泽等人的“花园路径模型”是代表。它认为，读者首先只根据句法信息，按照一些简单的原则（比如选择最简单的结构）快速建立一个结构；词的意义、语境等其他信息稍后才参与进来，用于检查和修正。</p>
+  <p>第二类是<strong>基于制约的模型</strong>。它认为，读者从一开始就同时使用所有可用的信息，包括词的意义、某种结构的常见程度、上下文和眼前的情境，各种可能的结构按照这些信息的支持程度相互竞争。支持这一观点的证据之一来自特鲁斯韦尔等人 1994 年的研究：英语句子开头是“The evidence examined…”（证据审查了……）时，由于“证据”不可能去审查别人，读者很快就把它理解为“被审查的证据”，几乎没有花园路径效应；而开头是“The defendant examined…”（被告审查了……）时，效应就很明显。[10] 词的意义在最初的结构选择中就起了作用。</p>
+  <p>更直接的证据来自坦嫩豪斯等人 1995 年的“视觉情境”研究。参与者一边听指令，一边看着桌上的物体，研究者记录他们的眼睛看向哪里。听到“Put the apple on the towel in the box”（把毛巾上的苹果放进盒子里）这样的指令时，如果桌上只有一个苹果，参与者常常会先看向一条空着的毛巾，把“on the towel”误当成要放的位置；如果桌上有两个苹果（一个在毛巾上，一个不在），“on the towel”显然是在说明是哪一个苹果，误看就少得多。[11] 眼前的视觉情境，在几百毫秒之内就影响了句法分析。</p>
+  <p>目前多数研究者同意，非句法的信息可以很早地影响结构选择；但句法在加工中是否有某种优先地位、各种信息怎样结合，仍有争论。这是一个仍在进行中的辩论，而不是已经结束的问题。</p>
+</section>
+
+<section id="s5">
+  <h2>语义：结构对了，意思不一定通</h2>
+  <p>句法和语义是两种不同的东西。语言学家乔姆斯基在 1957 年造了一个著名的英语句子“Colorless green ideas sleep furiously”，用来说明一个句子可以结构完全正确，意义却说不通。[12] 下表用汉语的例子对比了几种情况。</p>
+  <div class="l-table">
+    <table>
+      <thead><tr><th>例句</th><th>结构（句法）</th><th>意思（语义）</th></tr></thead>
+      <tbody>
+        <tr><th>小猫在沙发上睡觉。</th><td>正确</td><td>说得通</td></tr>
+        <tr><th>无色的绿色想法在愤怒地睡觉。</th><td>正确</td><td>说不通：想法没有颜色，也不会睡觉</td></tr>
+        <tr><th>睡觉 沙发 小猫 上 在。</th><td>不正确</td><td>每个词都认识，大意还能猜出来</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>大脑似乎也以不同的方式对这两类问题作出反应。研究者用头皮上的电极记录阅读时大脑的电活动，即<strong>事件相关电位</strong>。1980 年，库塔斯和希利亚德发现，当句子末尾出现一个语义上不合适的词时，比如“他在温热的面包上抹了袜子”，大约 400 毫秒后会出现一个明显的负向波，后来被称为 N400。[13] 1992 年，奥斯特豪特和霍尔科姆发现，句法上的错误则会引发大约 600 毫秒后出现的正向波，被称为 P600。[14]</p>
+  <p>这一对发现常被用来说明语义和句法由不同的过程处理。不过，后来的研究发现这种对应并不总是那么整齐：有些在语义上严重冲突、句法上完全正确的句子，也会引发 P600。[15] 这提醒我们，句法和语义作为分析的概念是可以分开的，但在大脑中，它们的加工可能紧密交织在一起。</p>
+  <p>另一个重要的发现是，人们并不总是把句子的结构完整地分析清楚。费雷拉等人提出了“<strong>足够好</strong>”的理解观点：在日常理解中，人们常常只建立一个大致合理的意义，只要它够用就行，即使它与句子实际的结构不完全相符。[16] 比如，克里斯蒂安森等人让参与者读这样的英语句子：“While Anna dressed the baby played in the crib.”（安娜穿衣服的时候，婴儿在婴儿床里玩。）读完后问：“安娜给婴儿穿衣服了吗？”许多人回答“是”，即使他们已经正确地理解了“婴儿在玩”。[17] 最初那个错误的理解，在重新分析之后仍然残留着。</p>
+  <p>“足够好”的理解并不是一种缺陷。在大多数情况下，世界知识和语境给出的意义就是正确的，完整的分析既费力又不必要。只有在句子的意思与常识相反、而细节又很重要的时候，这种策略才会出错。</p>
+</section>
+
+<section id="s6">
+  <h2>语用：说出来的和想表达的</h2>
+  <p>回到开头的问题。“你能把窗户关上吗？”在字面上是问能力，人们却把它理解为请求。语言中这种“言外之意”无处不在：“这里有点冷”可能是在请你关窗；朋友问“晚上有空吗？”，往往是邀请的前奏；你问“报告写得怎么样？”，对方回答“格式很整齐”，你大概听得出他对内容不太满意。</p>
+  <p>哲学家格莱斯提出，对话建立在一种合作的默契上：听者假定说话人提供的信息是真实的、相关的、详略恰当的，并且表达得清楚。[18] 当一句话在字面上似乎违反了这种默契，比如答非所问，听者不会认为对方在胡说，而会推断他另有所指。“格式很整齐”之所以听得出批评，正是因为它对“写得怎么样”的回答显得信息不足：如果内容也好，对方为什么不说？</p>
+  <p>语用理解需要知道很多语言之外的东西：说话人是谁，你们是什么关系，此时此地在发生什么，以及他可能知道什么、想要什么。在这个意义上，语言理解和社会认知密不可分。同样一句“你真行啊”，可以是真诚的夸奖，也可以是讽刺，区别不在词，而在场合和语气。</p>
+  <p>理解言外之意需要额外的推断，但这并不意味着人们总是先得出字面意义、再推出言外之意。对于“你能……吗”这样非常常见的请求方式，听者很可能直接就理解为请求。字面意义和语用意义在加工中的先后关系，至今仍是研究和争论的问题。</p>
+</section>
+
+<section id="s7">
+  <h2>语境和预期：理解是一边听一边猜</h2>
+  <p>前面几节反复出现同一个主题：较高层次的知识会影响较低层次的加工。词的知识补全了被咳嗽声掩盖的音，视觉情境影响了句法分析，常识影响了对句子的理解。</p>
+  <p>布兰斯福德和约翰逊在 1972 年的研究生动地说明了背景知识的作用。参与者听一段文字，内容大致是：“这个过程其实很简单。首先，你把东西分成几堆……如果没有必要的设备，就得去别的地方……”每个句子都看得懂，整段却让人不知所云。如果在听之前先告诉参与者这段话的主题是“洗衣服”，他们对文字的理解评分和回忆成绩都明显提高；如果在听完之后才告诉，帮助就小得多。[19] 知识需要在理解的过程中被调动起来，才能起作用。</p>
+  <p>近年来，许多研究者认为，大脑在理解语言时会主动<strong>预测</strong>接下来可能出现的内容。在“他早上起来，先刷了……”之后，“牙”几乎是呼之欲出的。前面提到的 N400，在一个词越难预料时就越大，这常被视为预测存在的证据。库珀伯格和耶格尔在一篇综述中总结说，大量证据支持人们在理解时会根据概率、在多个层次上进行预测；但预测在多大程度上是“押注”于某一个词，还是只是让一批可能的词变得更容易处理，仍有讨论。他们还提出，预测的程度可能取决于它在当时的用处有多大。[20]</p>
+  <p>预测能解释为什么理解这么快，也能解释花园路径句为什么让人卡住：读者按最可能的方向往前猜，猜错了就要付出重新分析的代价。在大多数情况下，这个代价值得付出，因为猜对的时候远多于猜错的时候。</p>
+</section>
+
+<section id="s8">
+  <h2>这一领域的局限</h2>
+  <p>语言理解的研究大多依赖精心构造的实验句子，常常在屏幕上一个词一个词地呈现，或者在读者头上戴着电极。真实的语言是在对话中、带着语气和表情、在具体情境里发生的，实验室里的结论推广到日常对话时需要谨慎。</p>
+  <p>另一个重要的局限是，现有研究中有很大一部分以英语等少数几种欧洲语言为材料。不同语言在词的构成、语序和书写系统上差别很大，比如汉语没有英语那样的屈折变化，书写系统也完全不同。基于英语得出的模型，不一定能直接推广到汉语和其他语言。这一讲中关于词的内部结构和花园路径的研究，大多来自英语；演示中的汉语句子是为说明原理编写的，不是正式研究的材料。</p>
+  <p>此外，读者之间存在很大的个体差异，包括阅读经验、工作记忆和词汇量。平均的结果说明的是一般规律，不能直接用来判断某一个人的理解能力。</p>
+</section>
+
+<section id="s9" class="l-sum">
+  <h2>本讲要点</h2>
+  <ul>
+    <li>语言理解涉及几个层次：语音、词汇识别、句法、语义和语用。这是分析的方便，各层在实际加工中同时进行、相互影响。</li>
+    <li>语音知觉不是被动记录：声音被归入语言的类别（范畴知觉），看到的嘴型和已有的知识都会改变听到的内容。</li>
+    <li>词汇识别是并行竞争的过程；多义词的几个意思可能被短暂同时激活，再由语境选出一个。阅读时，视觉系统会尝试按词缀拆分词。</li>
+    <li>句法决定“谁对谁做了什么”。读者边读边建立结构，选错了就会在花园路径句中卡住。非句法的信息能多早参与结构选择，两类理论仍有争论，但证据显示意义和情境可以很早起作用。</li>
+    <li>结构正确不等于意思说得通。人们常常只建立“足够好”的理解，最初的错误理解可能残留下来。</li>
+    <li>语用理解依靠对说话人意图和场合的推断；语境和预期贯穿理解的每一个层次。</li>
+    <li>许多结论来自英语和实验室句子，推广到其他语言和真实对话时需要谨慎。</li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <h2>检验一下</h2>
+  <p>下面三道题，考的是你能不能用这一讲的概念分析具体情境。选择之后会立即显示解释，你也可以修改自己的答案。</p>
+  <div data-quiz></div>
+</section>
+
+<section id="refs" class="l-refs">
+  <h2>参考文献</h2>
+  <ol>
+    <li id="ref-1">Liberman, A. M., Harris, K. S., Hoffman, H. S., &amp; Griffith, B. C. (1957). The discrimination of speech sounds within and across phoneme boundaries. <i>Journal of Experimental Psychology, 54</i>(5), 358–368. <a href="https://doi.org/10.1037/h0044417">doi:10.1037/h0044417</a></li>
+    <li id="ref-2">McGurk, H., &amp; MacDonald, J. (1976). Hearing lips and seeing voices. <i>Nature, 264</i>(5588), 746–748. <a href="https://doi.org/10.1038/264746a0">doi:10.1038/264746a0</a></li>
+    <li id="ref-3">Warren, R. M. (1970). Perceptual restoration of missing speech sounds. <i>Science, 167</i>(3917), 392–393. <a href="https://doi.org/10.1126/science.167.3917.392">doi:10.1126/science.167.3917.392</a></li>
+    <li id="ref-4">Marslen-Wilson, W. D. (1987). Functional parallelism in spoken word-recognition. <i>Cognition, 25</i>(1-2), 71–102. <a href="https://doi.org/10.1016/0010-0277(87)90005-9">doi:10.1016/0010-0277(87)90005-9</a></li>
+    <li id="ref-5">Meyer, D. E., &amp; Schvaneveldt, R. W. (1971). Facilitation in recognizing pairs of words: Evidence of a dependence between retrieval operations. <i>Journal of Experimental Psychology, 90</i>(2), 227–234. <a href="https://doi.org/10.1037/h0031564">doi:10.1037/h0031564</a></li>
+    <li id="ref-6">Swinney, D. A. (1979). Lexical access during sentence comprehension: (Re)consideration of context effects. <i>Journal of Verbal Learning and Verbal Behavior, 18</i>(6), 645–659. <a href="https://doi.org/10.1016/s0022-5371(79)90355-4">doi:10.1016/s0022-5371(79)90355-4</a></li>
+    <li id="ref-7">Taft, M., &amp; Forster, K. I. (1975). Lexical storage and retrieval of prefixed words. <i>Journal of Verbal Learning and Verbal Behavior, 14</i>(6), 638–647. <a href="https://doi.org/10.1016/s0022-5371(75)80051-x">doi:10.1016/s0022-5371(75)80051-x</a></li>
+    <li id="ref-8">Rastle, K., Davis, M. H., &amp; New, B. (2004). The broth in my brother’s brothel: Morpho-orthographic segmentation in visual word recognition. <i>Psychonomic Bulletin &amp; Review, 11</i>(6), 1090–1098. <a href="https://doi.org/10.3758/bf03196742">doi:10.3758/bf03196742</a></li>
+    <li id="ref-9">Frazier, L., &amp; Rayner, K. (1982). Making and correcting errors during sentence comprehension: Eye movements in the analysis of structurally ambiguous sentences. <i>Cognitive Psychology, 14</i>(2), 178–210. <a href="https://doi.org/10.1016/0010-0285(82)90008-1">doi:10.1016/0010-0285(82)90008-1</a></li>
+    <li id="ref-10">Trueswell, J. C., Tanenhaus, M. K., &amp; Garnsey, S. M. (1994). Semantic influences on parsing: Use of thematic role information in syntactic ambiguity resolution. <i>Journal of Memory and Language, 33</i>(3), 285–318. <a href="https://doi.org/10.1006/jmla.1994.1014">doi:10.1006/jmla.1994.1014</a></li>
+    <li id="ref-11">Tanenhaus, M. K., Spivey-Knowlton, M. J., Eberhard, K. M., &amp; Sedivy, J. C. (1995). Integration of visual and linguistic information in spoken language comprehension. <i>Science, 268</i>(5217), 1632–1634. <a href="https://doi.org/10.1126/science.7777863">doi:10.1126/science.7777863</a></li>
+    <li id="ref-12">Chomsky, N. (1957). <i>Syntactic structures</i>. Mouton.</li>
+    <li id="ref-13">Kutas, M., &amp; Hillyard, S. A. (1980). Reading senseless sentences: Brain potentials reflect semantic incongruity. <i>Science, 207</i>(4427), 203–205. <a href="https://doi.org/10.1126/science.7350657">doi:10.1126/science.7350657</a></li>
+    <li id="ref-14">Osterhout, L., &amp; Holcomb, P. J. (1992). Event-related brain potentials elicited by syntactic anomaly. <i>Journal of Memory and Language, 31</i>(6), 785–806. <a href="https://doi.org/10.1016/0749-596x(92)90039-z">doi:10.1016/0749-596x(92)90039-z</a></li>
+    <li id="ref-15">Kuperberg, G. R. (2007). Neural mechanisms of language comprehension: Challenges to syntax. <i>Brain Research, 1146</i>, 23–49. <a href="https://doi.org/10.1016/j.brainres.2006.12.063">doi:10.1016/j.brainres.2006.12.063</a></li>
+    <li id="ref-16">Ferreira, F., Bailey, K. G. D., &amp; Ferraro, V. (2002). Good-enough representations in language comprehension. <i>Current Directions in Psychological Science, 11</i>(1), 11–15. <a href="https://doi.org/10.1111/1467-8721.00158">doi:10.1111/1467-8721.00158</a></li>
+    <li id="ref-17">Christianson, K., Hollingworth, A., Halliwell, J. F., &amp; Ferreira, F. (2001). Thematic roles assigned along the garden path linger. <i>Cognitive Psychology, 42</i>(4), 368–407. <a href="https://doi.org/10.1006/cogp.2001.0752">doi:10.1006/cogp.2001.0752</a></li>
+    <li id="ref-18">Grice, H. P. (1975). Logic and conversation. In P. Cole &amp; J. L. Morgan (Eds.), <i>Syntax and semantics: Vol. 3. Speech acts</i> (pp. 41–58). Academic Press.</li>
+    <li id="ref-19">Bransford, J. D., &amp; Johnson, M. K. (1972). Contextual prerequisites for understanding: Some investigations of comprehension and recall. <i>Journal of Verbal Learning and Verbal Behavior, 11</i>(6), 717–726. <a href="https://doi.org/10.1016/s0022-5371(72)80006-9">doi:10.1016/s0022-5371(72)80006-9</a></li>
+    <li id="ref-20">Kuperberg, G. R., &amp; Jaeger, T. F. (2016). What do we mean by prediction in language comprehension? <i>Language, Cognition and Neuroscience, 31</i>(1), 32–59. <a href="https://doi.org/10.1080/23273798.2015.1102299">doi:10.1080/23273798.2015.1102299</a></li>
+  </ol>
+</section>

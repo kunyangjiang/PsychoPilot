@@ -1516,5 +1516,211 @@
     ['一周后的测验：做对的比例', [['按题型集中练习', 20, 'fx-bar b', '20%'], ['不同题型混在一起练', 63, 'fx-bar', '63%']], 100],
   ], '<p>大学生学习计算四种陌生几何体的体积。集中练习时，每讲完一种就做四道同类题；混合练习时，先讲完四种，再把十六道题打乱来做。练习时集中组明显领先，一周后的测验却是混合组领先。数据来源：罗勒与泰勒（2007），实验二。</p>');
 
+  /* ---------- Stage 07 · language and thought: process diagrams and schematic comparisons ---------- */
+  const rot = (t, x, y) => { t.setAttribute('transform', `rotate(-90 ${x} ${y})`); return t; };
+  const bracket = (p, x1, x2, y, label, cls = '') => {
+    const g = el('g', {}, p);
+    el('path', { d: `M${x1},${y - 7} V${y} H${x2} V${y - 7}`, class: 'fx-ln ' + cls }, g);
+    tx(g, (x1 + x2) / 2, y + 17, label, 'fx-s', 'middle');
+    return g;
+  };
+
+  /* ===== 07-01 · one sentence through the layers of comprehension, with context feeding back from above ===== */
+  F.langlayers = (fig) => figure(fig, (box, w) => {
+    const L = [
+      ['声音或文字', '一串连续的声波（或一行字），词与词之间并没有停顿', 'm'],
+      ['语音与字形', '把声音归入母语的语音类别，把笔画认成字', 'b'],
+      ['认出词', '在心理词典里找到“窗户”“关上”，取出它们的意义', 'b'],
+      ['句法：组织结构', '谁对什么做了什么：“你”是关窗的人，“窗户”是被关的东西', 'b'],
+      ['语义：字面意思', '问你有没有能力把窗户关上', 'b'],
+      ['语用：说话人的意图', '在这个场合，其实是请你关窗', 'r'],
+    ];
+    const side = 44, cw = Math.min(w - side, 560), x0 = 0, gap = 22, top = 34;
+    const hs = L.map(([, s]) => cardH(cw, s));
+    const H = top + hs.reduce((a, h) => a + h + gap, 0) - gap;
+    const s = svgIn(box, w, H, fig), parts = [];
+    tx(s, 0, 18, '例句：“你能把窗户关上吗？”', 'fx-h');
+    let y = top;
+    L.forEach(([t, sub, cls], i) => {
+      const g = el('g', {}, s);
+      card(g, x0, y, cw, t, sub, cls, hs[i]);
+      if (i < L.length - 1) arrow(g, x0 + cw / 2, y + hs[i] + 3, x0 + cw / 2, y + hs[i] + gap - 3, '', 6);
+      parts.push(g); y += hs[i] + gap;
+    });
+    const fb = el('g', {}, s), ax = cw + side / 2;
+    el('line', { x1: ax, y1: H - 6, x2: ax, y2: top + 10, class: 'fx-ln fx-lr fx-dash' }, fb);
+    arrow(fb, ax, top + 30, ax, top + 2, 'r', 7);
+    rot(tx(fb, ax - 9, (top + H) / 2, '语境和预期：自上而下影响每一层', 'fx-n fx-r fx-halo', 'middle'), ax - 9, (top + H) / 2);
+    parts.push(fb);
+    return (t) => parts.forEach((p, i) => show(p, stage(t, i / (parts.length + 1), 1.6 / (parts.length + 1))));
+  }, { dur: 2000, replay: true });
+
+  /* ===== 07-01 · the same four words, two structures, opposite meanings ===== */
+  F.twoparse = (fig) => figure(fig, (box, w, api) => {
+    const TOK = ['咬死了', '猎人', '的', '狗'];
+    const P = [
+      ['读法一：动词 ＋ 名词短语', [[1, 3, '名词短语：猎人的狗'], [0, 3, '动词短语：咬死了（猎人的狗）']], '（有人）咬死了猎人的狗', '死的是狗', 'b'],
+      ['读法二：一个更长的名词短语', [[0, 1, '动词短语：咬死了猎人'], [0, 3, '名词短语：（咬死了猎人的）狗']], '那条咬死了猎人的狗', '死的是猎人', 'r'],
+    ];
+    const two = w >= 560, pw = two ? (w - 40) / 2 : w, ph = 188;
+    const s = svgIn(box, w, two ? ph : ph * 2 + 24, fig), parts = [];
+    P.forEach(([title, br, mean, who, cls], i) => {
+      const ox = two && i ? pw + 40 : 0, oy = !two && i ? ph + 24 : 0, g = el('g', {}, s), b = el('g', {}, s);
+      tx(g, ox, oy + 16, title, 'fx-h');
+      const ws = TOK.map((t) => t.length * 20), gapT = 14, tw = ws.reduce((a, x) => a + x, 0) + gapT * 3;
+      let x = ox + Math.max(0, (pw - tw) / 2); const xs = [];
+      TOK.forEach((t, k) => { tx(g, x, oy + 58, t, 'fx-tok'); xs.push([x, x + ws[k]]); x += ws[k] + gapT; });
+      br.forEach(([a, z, lab], k) => bracket(b, xs[a][0] - 2, xs[z][1] + 2, oy + 72 + k * 40, lab, k ? '' : 'fx-hair'));
+      tx(b, ox, oy + 168, `意思：${mean}`, 'fx-s');
+      tx(b, ox + pw, oy + 168, who, 'fx-n ' + (cls === 'r' ? 'fx-r' : 'fx-b'), 'end');
+      parts.push([g, b]);
+    });
+    api.out.innerHTML = '<p>四个词，顺序也完全一样，只是组织方式不同，意思就相反。单看这几个词，两种读法都通；读者通常先选读法一，后面如果接上“跑进了树林”，才发现必须改成读法二。</p>';
+    return (t) => parts.forEach(([g, b], i) => { show(g, stage(t, i * 0.35, 0.3)); show(b, stage(t, i * 0.35 + 0.2, 0.3)); });
+  }, { dur: 1600, replay: true });
+
+  /* ===== 07-02 · a broad timeline of early milestones, drawn as wide age ranges ===== */
+  F.milestones = (fig) => figure(fig, (box, w, api) => {
+    const R = [
+      ['能分辨许多语言里的语音差别，包括母语里没有的', 0, 8],
+      ['对母语语音越来越敏感，对外语里的某些差别变得不敏感', 6, 12],
+      ['咿呀学语：发出 ba-ba、da-da 这样的重复音节', 5, 10],
+      ['听懂一些常用的词', 6, 12],
+      ['说出第一批词', 10, 18],
+      ['词汇快速增加', 16, 30],
+      ['把两个词组合起来', 18, 30],
+      ['句子变长，开始用上语法标记', 24, 48],
+    ];
+    const M = 48, X = (m) => (m / M) * w, top = 6, LS = R.map(([lab]) => wrapZh(lab, w, 12.5)), RH = LS.map((l) => l.length * 17 + 30);
+    const H = top + RH.reduce((a, h) => a + h, 0) + 34, s = svgIn(box, w, H, fig), bars = [];
+    [0, 6, 12, 18, 24, 36, 48].forEach((m) => { el('line', { x1: X(m), x2: X(m), y1: top, y2: H - 28, class: 'fx-hair' }, s); tx(s, Math.min(Math.max(X(m), 14), w - 8), H - 10, `${m}`, 'fx-n', m ? 'middle' : 'start'); });
+    tx(s, w, H - 10 - 16, '月龄（0 = 出生）', 'fx-n', 'end');
+    let y = top;
+    R.forEach(([, a, b], i) => {
+      lines(s, 0, y + 14, LS[i], 'fx-s fx-halo', 17);
+      const by = y + LS[i].length * 17 + 6;
+      bars.push([el('rect', { x: X(a), y: by, width: 0, height: 12, rx: 6, class: i < 2 ? 'fx-bar b' : 'fx-bar' }, s), X(b) - X(a)]);
+      y += RH[i];
+    });
+    api.out.innerHTML = '<p>横条只表示大致的年龄范围，是对多项研究的粗略概括，不是诊断用的常模。正常发展的孩子，有不少会落在这些范围之外；同一个孩子在不同方面的进度也可能不一样。前两行（蓝色）是语音知觉的变化，其余是表达和理解的里程碑。</p>';
+    return (t) => bars.forEach(([r, full], i) => r.setAttribute('width', Math.max(0, full * stage(t, i * 0.06, 0.5)).toFixed(1)));
+  }, { dur: 1600, replay: true });
+
+  /* ===== 07-02 · Baldwin (1991): a new word while the child and the adult look at the same toy, or at different toys ===== */
+  F.joint = (fig) => figure(fig, (box, w, api) => {
+    const P = [
+      ['大人看着孩子正在看的玩具', 0, '孩子学会：这个玩具叫 toma', 'b'],
+      ['大人看着另一个玩具', 1, '孩子没有把 toma 当成自己正在看的玩具的名字', 'r'],
+    ];
+    const two = w >= 520, pw = two ? (w - 32) / 2 : w, ph = 272;
+    const s = svgIn(box, w, two ? ph : ph * 2 + 20, fig), parts = [];
+    P.forEach(([title, other, res], i) => {
+      const ox = two && i ? pw + 32 : 0, oy = !two && i ? ph + 20 : 0, g = el('g', {}, s), gz = el('g', {}, s), r = el('g', {}, s);
+      lines(g, ox, oy + 16, wrapZh(title, pw, 15), 'fx-h', 20);
+      const ta = [ox + pw * 0.25, oy + 70], tb = [ox + pw * 0.75, oy + 70], kid = [ox + pw * 0.25, oy + 160], adult = [ox + pw * 0.75, oy + 160];
+      el('rect', { x: ta[0] - 16, y: ta[1] - 16, width: 32, height: 32, rx: 4, class: 'fx-pill b' }, g); tx(g, ta[0], ta[1] + 5, 'A', 'fx-h', 'middle');
+      el('path', { d: `M${tb[0]},${tb[1] - 18} L${tb[0] + 18},${tb[1] + 14} L${tb[0] - 18},${tb[1] + 14} Z`, class: 'fx-pill b' }, g); tx(g, tb[0], tb[1] + 10, 'B', 'fx-h', 'middle');
+      [[kid, '孩子'], [adult, '大人']].forEach(([[x, y], t]) => { el('circle', { cx: x, cy: y, r: 18, class: 'fx-pill m' }, g); tx(g, x, y + 40, t, 'fx-s', 'middle'); });
+      el('line', { x1: kid[0], y1: kid[1] - 20, x2: ta[0], y2: ta[1] + 20, class: 'fx-ln fx-lb fx-dash' }, gz);
+      const tg = other ? tb : ta;
+      arrow(gz, adult[0] - (other ? 0 : 6), adult[1] - 20, tg[0] + (other ? 0 : 14), tg[1] + 20, 'r', 7);
+      tx(gz, adult[0], adult[1] + 58, '说：“toma！”', 'fx-n fx-r', 'middle');
+      lines(r, ox, oy + 236, wrapZh(res, pw, 12.5), 'fx-s fx-strong', 17);
+      parts.push([g, gz, r]);
+    });
+    api.out.innerHTML = '<p>虚线：孩子正在看的地方；红色箭头：大人看着并说出新词的玩具。16 到 19 个月的孩子在第一种情况下学会了新词；在第二种情况下，他们没有把新词错误地连到自己正在看的玩具上。这说明他们会参考说话人的视线，判断一个词指的是什么。数据来源：鲍德温（1991）。</p>';
+    return (t) => parts.forEach((ps, i) => ps.forEach((p, k) => show(p, stage(t, i * 0.3 + k * 0.15, 0.3))));
+  }, { dur: 1800, replay: true });
+
+  /* ===== 07-03 · the rotation task: "make it the same again" after turning around ===== */
+  F.frames = (fig) => {
+    const S = { v: 'rel' };
+    figure(fig, (box, w, api) => {
+      const gap = 24, pw = (w - gap) / 2, tw = Math.min(pw - 16, 170), th = 64;
+      const T1 = wrapZh('桌子 1：先看一眼', pw, 15), T2 = wrapZh('桌子 2：转身后，摆成一样的', pw, 15), tH = Math.max(T1.length, T2.length) * 20 + 8;
+      const rel = S.v === 'rel', note = wrapZh(rel ? '箭头仍指向你的右手边（现在是西）' : '箭头仍指向东（现在在你的左手边）', pw, 12);
+      const y0 = tH + 36, H = y0 + 190 + note.length * 16, s = svgIn(box, w, H, fig);
+      const person = (x, y, up, lab) => {
+        el('circle', { cx: x, cy: y, r: 14, class: 'fx-pill m' }, s);
+        el('path', { d: up ? `M${x - 6},${y - 12} L${x},${y - 22} L${x + 6},${y - 12} Z` : `M${x - 6},${y + 12} L${x},${y + 22} L${x + 6},${y + 12} Z`, class: 'fx-node' }, s);
+        tx(s, x, up ? y + 34 : y - 26, lab, 'fx-n', 'middle');
+      };
+      lines(s, 0, 16, T1, 'fx-h', 20); lines(s, pw + gap, 16, T2, 'fx-h', 20);
+      // left: table 1, the reader south of it facing north; the arrow points east, to the reader's right
+      const c1 = pw / 2;
+      el('rect', { x: c1 - tw / 2, y: y0, width: tw, height: th, rx: 4, class: 'fx-pill b' }, s);
+      arrow(s, c1 - tw * 0.28, y0 + th / 2, c1 + tw * 0.28, y0 + th / 2, 'r', 10);
+      person(c1, y0 + th + 40, true, '你，面朝北');
+      // right: table 2 behind the reader; turned around, they stand north of it facing south
+      const c2 = pw + gap + pw / 2, y2 = y0 + 36;
+      person(c2, y0 - 2, false, '你，转身后面朝南');
+      el('rect', { x: c2 - tw / 2, y: y2, width: tw, height: th, rx: 4, class: 'fx-pill b' }, s);
+      const a = el('g', {}, s);
+      if (rel) arrow(a, c2 + tw * 0.28, y2 + th / 2, c2 - tw * 0.28, y2 + th / 2, 'r', 10);
+      else arrow(a, c2 - tw * 0.28, y2 + th / 2, c2 + tw * 0.28, y2 + th / 2, 'r', 10);
+      lines(a, c2, y2 + th + 24, note, 'fx-n fx-r', 16, 'middle');
+      const cx = w - 10; arrow(s, cx, H - 8, cx, H - 34, '', 6); tx(s, cx - 8, H - 22, '北', 'fx-n', 'end');
+      el('line', { x1: pw + gap / 2, x2: pw + gap / 2, y1: 6, y2: H - 40, class: 'fx-hair fx-dash' }, s);
+      api.out.innerHTML = rel
+        ? '<p><b>相对参照</b>：用“左、右、前、后”描述位置，以自己的身体为基准。说荷兰语、英语的人，在这类任务中大多会这样摆。</p>'
+        : '<p><b>绝对参照</b>：用“东、西、南、北”或“上坡、下坡”这样固定的方向描述位置，与自己朝哪边无关。说策尔塔尔语（Tzeltal，墨西哥的一种玛雅语言）等以绝对方位为主的语言的人，更常这样摆。</p>';
+      return (t) => show(a, ease(t));
+    }, { dur: 600, ctrls: { value: 'rel', items: [['rel', '按“左右”摆'], ['abs', '按“东南西北”摆']], onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 07-04 · Duncker's candle problem: the box full of tacks, the box empty, and one solution ===== */
+  F.candle = (fig) => {
+    const S = { v: 'full' };
+    figure(fig, (box, w, api) => {
+      const H = 240, s = svgIn(box, w, H, fig), cx = w / 2, ty = H - 40;
+      el('rect', { x: 0, y: 0, width: w, height: ty, class: 'fx-wall' }, s);
+      el('line', { x1: 0, x2: w, y1: ty, y2: ty, class: 'fx-ln' }, s);
+      const g = el('g', {}, s);
+      tx(s, 8, 20, '墙', 'fx-n'); tx(s, 8, ty + 22, '桌面', 'fx-n');
+      const tack = (x, y) => { el('circle', { cx: x, cy: y, r: 3.5, class: 'fx-node' }, g); el('line', { x1: x, y1: y, x2: x, y2: y + 7, class: 'fx-ln' }, g); };
+      const mx = w - 44;
+      el('rect', { x: mx, y: ty - 10, width: 34, height: 10, rx: 2, class: 'fx-pill m' }, g); tx(g, mx + 17, ty + 22, '火柴', 'fx-n', 'middle');
+      if (S.v === 'sol') {
+        const bx = cx - 40, by = 80;
+        el('rect', { x: bx, y: by, width: 80, height: 30, rx: 2, class: 'fx-pill b' }, g);
+        tack(bx + 14, by + 10); tack(bx + 66, by + 10);
+        el('rect', { x: cx - 7, y: by - 46, width: 14, height: 46, class: 'fx-candle' }, g);
+        el('path', { d: `M${cx},${by - 64} C${cx + 7},${by - 54} ${cx + 5},${by - 47} ${cx},${by - 47} C${cx - 5},${by - 47} ${cx - 7},${by - 54} ${cx},${by - 64} Z`, class: 'fx-flame' }, g);
+        lines(g, cx, by + 52, wrapZh('盒子钉在墙上，当作烛台', w - 100, 12), 'fx-n fx-r fx-halo', 16, 'middle');
+      } else {
+        const bx = Math.max(44, w * 0.12), by = ty - 30, kx = w * 0.66 - 24;
+        el('rect', { x: bx, y: by, width: 80, height: 30, rx: 2, class: 'fx-pill b' }, g);
+        if (S.v === 'full') { for (let i = 0; i < 6; i++) tack(bx + 12 + i * 11, by + 8 + (i % 2) * 6); tx(g, bx + 40, ty + 22, '一盒图钉', 'fx-n', 'middle'); }
+        else { for (let i = 0; i < 6; i++) tack(bx + 90 + i * 7, ty - 9 + (i % 2) * 2); tx(g, bx + 40, ty + 22, '空盒子', 'fx-n', 'middle'); tx(g, bx + 108, ty + 22, '图钉', 'fx-n', 'middle'); }
+        el('rect', { x: kx, y: ty - 14, width: 48, height: 14, class: 'fx-candle' }, g); tx(g, kx + 24, ty + 22, '蜡烛', 'fx-n', 'middle');
+      }
+      api.out.innerHTML = S.v === 'full'
+        ? '<p>任务：只用桌上的东西，把蜡烛固定在墙上，点燃后蜡油不能滴到桌上。盒子装着图钉时，它很容易只被看作“装图钉的容器”。</p>'
+        : S.v === 'empty' ? '<p>同样的东西，只是盒子空着、图钉放在旁边。这种呈现方式下，人们更容易想到盒子本身也能用；后来的重复研究得到了同样方向的结果。</p>'
+        : '<p>一种解法：倒出图钉，用图钉把盒子钉在墙上，蜡烛立在盒子里。难点不在知识，而在于能否把“容器”重新看作“平台”。</p>';
+      return (t) => show(g, ease(t));
+    }, { dur: 500, ctrls: { value: 'full', items: [['full', '盒子装着图钉'], ['empty', '盒子空着'], ['sol', '一种解法']], onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 07-04 · divergent thinking fans out to many possibilities; convergent thinking narrows them to one ===== */
+  F.divconv = (fig) => figure(fig, (box, w, api) => {
+    const N = 9, H = 280, top = 50, s = svgIn(box, w, H, fig), r = rng(7);
+    const x0 = 20, xm = w / 2, x1 = w - 20, ys = Array.from({ length: N }, (_, i) => top + 10 + (i * (H - top - 30)) / (N - 1));
+    const keep = 6, mid = top + (H - top - 20) / 2;
+    const nar = w < 460;
+    tx(s, 0, 18, nar ? '发散' : '发散：往许多方向想', 'fx-h'); tx(s, w, 18, nar ? '聚合' : '聚合：找出最合适的一个', 'fx-h', 'end');
+    tx(s, 0, 36, '产生想法，先不评判', 'fx-n'); tx(s, w, 36, '检验、比较、筛选', 'fx-n', 'end');
+    const fan = el('g', {}, s), con = el('g', {}, s), dots = el('g', {}, s);
+    const jx = ys.map(() => xm + (r() - 0.5) * Math.min(60, w * 0.08));
+    ys.forEach((y, i) => el('line', { x1: x0 + 10, y1: mid, x2: jx[i], y2: y, class: 'fx-hair' }, fan));
+    ys.forEach((y, i) => { if (i === keep) el('line', { x1: jx[i], y1: y, x2: x1 - 12, y2: mid, class: 'fx-ln fx-lr fx-crit' }, con); else if (i % 3 !== 1) el('line', { x1: jx[i], y1: y, x2: x1 - 12, y2: mid, class: 'fx-hair fx-dash' }, con); });
+    ys.forEach((y, i) => el('circle', { cx: jx[i], cy: y, r: 6, class: i === keep ? 'fx-node r' : 'fx-node b' }, dots));
+    el('circle', { cx: x0, cy: mid, r: 10, class: 'fx-node' }, s); tx(s, x0, mid + 28, '问题', 'fx-n', 'middle');
+    const end = el('g', {}, s);
+    el('circle', { cx: x1, cy: mid, r: 10, class: 'fx-node r' }, end); tx(end, x1, mid + 28, '方案', 'fx-n', 'middle');
+    api.out.innerHTML = '<p>左半边是“发散”：从一个问题出发，产生尽可能多、尽可能不同的想法。右半边是“聚合”：判断哪些可行、哪些更好，最后收拢到一个方案上；有些想法根本走不到最后（没有连线的点）。真实的创造过程常常在两者之间来回许多次。</p>';
+    return (t) => { show(fan, stage(t, 0, 0.35)); show(dots, stage(t, 0.15, 0.3)); show(con, stage(t, 0.5, 0.3)); show(end, stage(t, 0.7, 0.3)); };
+  }, { dur: 1800, replay: true });
+
   window.PPFig = F;
 })();

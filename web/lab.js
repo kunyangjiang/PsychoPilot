@@ -1214,5 +1214,310 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing };
+  /* =====================================================================
+     Stage 07 · language and thought. Five activities the reader does in the
+     browser. Results stay in the page; none is a validated test, and each
+     says so on screen.
+     ===================================================================== */
+  const avgMs = (a) => (a.length ? Math.round(a.reduce((s, x) => s + x, 0) / a.length) : null);
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  /* 07-01 · self-paced reading: a temporarily ambiguous opening, and the same sentence with a classifier in front */
+  const GP = [ // four segments; the last field is the classifier that removes the ambiguity
+    ['咬死了', '猎人的狗', '跑进了', '树林。', '那只'],
+    ['撞倒了', '老人的司机', '逃离了', '现场。', '那个'],
+    ['救起了', '邻居的女孩', '得到了', '表彰。', '那位'],
+    ['批评了', '经理的员工', '被公司', '调走了。', '那个'],
+  ];
+  const CRIT = 2; // the segment that shows which structure is right
+  function garden(host) {
+    const { fig, out, actions } = shell(host, '一段一段地读句子',
+      '下面有四个句子。每次只显示一段，其余部分用横线遮住；读懂这一段以后，按空格键或点“下一段”看下一段。请按平时的速度读，读懂为止，不必抢快。程序会记下你在每一段上停留的时间。四句中有两句开头没有任何提示，另外两句开头多了“那只”“那个”这样的词。',
+      [], '这是一个教学演示，不是经过验证的测量。只有四个句子，手指的快慢、走神、对句子的熟悉程度都会让结果大幅波动；这几个句子是为演示编写的，没有经过正式研究的检验。你的结果只保存在这个页面里，刷新就会清空。', TASK);
+    const box = document.createElement('div'); box.className = 'lab-stroop lab-spr'; box.setAttribute('aria-live', 'polite');
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(box, ctl, status);
+    const go = action(ctl, '开始读', () => step());
+    const res = { gp: [], ctl: [] };
+    let flip = Math.random() < 0.5, trials = [], k = 0, seg = -1, t0 = 0, phase = 'idle';
+    const render = () => {
+      const s = trials[k].s;
+      box.innerHTML = s.map((x, i) => (i === seg ? `<span>${x}</span>` : `<span class="lab-mask" aria-hidden="true">${x}</span>`)).join('');
+    };
+    const ready = () => {
+      phase = 'ready'; seg = -1; box.textContent = `第 ${k + 1} / ${trials.length} 句`;
+      go.textContent = '开始读'; status.textContent = '准备好以后，按空格键或点“开始读”。';
+    };
+    const begin = () => {
+      trials = shuffle(GP.map((it, i) => { const c = (i < 2) !== flip ? 'gp' : 'ctl'; return { c, s: c === 'ctl' ? [it[4] + it[0], ...it.slice(1, 4)] : it.slice(0, 4) }; }));
+      flip = !flip; k = 0; ctl.hidden = false; ready(); go.focus();
+    };
+    const step = () => {
+      const now = performance.now();
+      if (phase === 'ready') { phase = 'read'; seg = 0; go.textContent = '下一段 →'; status.textContent = '读懂这一段以后，按空格键或点“下一段”。'; render(); t0 = now; return; }
+      if (phase !== 'read') return;
+      if (seg === CRIT) res[trials[k].c].push(Math.min(now - t0, 6000));
+      seg++; t0 = now;
+      if (seg < 4) { render(); return; }
+      k++;
+      if (k < trials.length) { ready(); return; }
+      phase = 'done'; ctl.hidden = true;
+      box.innerHTML = trials.map((t) => `<p>${t.s.map((x, i) => (i === CRIT ? `<b>${x}</b>` : x)).join('')}</p>`).join('');
+      box.classList.add('lab-done');
+      status.textContent = '这一轮读完了。加粗的是用来比较的那一段。';
+      report();
+    };
+    const report = () => {
+      const g = avgMs(res.gp), c = avgMs(res.ctl), n = res.gp.length;
+      out.innerHTML = n ? `<ul class="lab-parts lab-flow"><li><span>开头没有提示的句子，读到“跑进了”“逃离了”这类关键段（${n} 句）</span><b>平均 ${g} 毫秒</b></li><li><span>开头有“那只”“那个”的句子，同一位置（${res.ctl.length} 句）</span><b>平均 ${c} 毫秒</b></li></ul>
+        <p>没有“那只”时，“咬死了猎人的狗”最容易被读成“（有人）咬死了猎人的狗”：狗是被咬死的。读到“跑进了”，这个理解接不下去，必须回头把“咬死了猎人的”改成描述“狗”的成分：原来是狗咬死了猎人。开头有了“那只”，读者一开始就预期后面会出现一个名词，“咬死了猎人的”自然被当作在描述它，不需要改。</p>
+        <p>如果你在没有提示的句子上，关键段停得更久，这就是研究者说的“花园路径”效应。如果没有，也不奇怪：句子太少，每句的词又不一样。${res.gp.length < 4 ? '再做一轮，两组句子会对调，比较起来更公平。' : '两组句子已经对调过，比较更公平一些，但样本仍然很小。'}</p>`
+        : '<p>读完四句以后，这里会比较两种句子在关键段上停留的时间。</p>';
+    };
+    action(actions, '开始', () => { box.classList.remove('lab-done'); begin(); });
+    action(actions, '清空结果', () => { res.gp = []; res.ctl = []; phase = 'idle'; ctl.hidden = true; box.classList.remove('lab-done'); box.textContent = ''; status.textContent = '点“开始”。'; report(); }, 'lab-clear');
+    ctl.hidden = true; status.textContent = '点“开始”。'; report();
+  }
+
+  /* 07-02 · statistical learning: a syllable stream with no pauses, then word versus part-word choices */
+  const SW = ['tupiro', 'golabu', 'bidaku', 'padoti'];
+  const sylOf = (w) => w.match(/.{2}/g);
+  function stream(host) {
+    const { fig, out, actions } = shell(host, '没有停顿的音节流里，哪些是“词”？',
+      '点“开始”后，屏幕上会一个接一个地出现无意义的音节，每秒三个左右，中间没有停顿，也没有标点，持续大约一分钟。你不需要刻意记什么，看着它们，最好在心里默念出来。看完以后，程序会给你八对音节组合，请凭感觉选出更像这种“语言”里的词的那一个。',
+      [], '这是一个教学演示，不是经过验证的测量。原始研究让 8 个月大的婴儿听两分钟录音，用他们听不同声音的时间长短来判断；这里改成成年人看文字、做选择，只借用了它的逻辑。音节流每次由程序随机生成；最后列出的转移概率，是从你这一次看到的音节流里实际数出来的。', TASK);
+    const box = document.createElement('div'); box.className = 'lab-stroop lab-word';
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(box, ctl, status);
+    let cancel = () => {}, syl = [], tests = [], t = 0, hits = 0, skipped = false, phase = 'idle', parts = [];
+    const make = () => {
+      const ws = []; while (ws.length < 60) { const w = SW[Math.floor(Math.random() * 4)]; if (w !== ws[ws.length - 1]) ws.push(w); }
+      syl = ws.flatMap(sylOf);
+      // part-words span a boundary: the last syllable of one word and the first two of the word that most often followed it
+      parts = SW.map((x) => {
+        const n = {}; ws.forEach((w, i) => { if (w === x && ws[i + 1]) n[ws[i + 1]] = (n[ws[i + 1]] || 0) + 1; });
+        const y = Object.keys(n).sort((a, b) => n[b] - n[a])[0];
+        return sylOf(x)[2] + sylOf(y).slice(0, 2).join('');
+      });
+    };
+    const tp = (a, b) => { let n = 0, m = 0; syl.forEach((s, i) => { if (s === a && i < syl.length - 1) { n++; if (syl[i + 1] === b) m++; } }); return n ? m / n : 0; };
+    const begin = () => {
+      cancel(); make(); skipped = false; phase = 'show'; ctl.innerHTML = ''; out.innerHTML = '';
+      status.textContent = '看着音节，在心里默念。大约一分钟。';
+      action(ctl, '跳过，直接选择', () => { skipped = true; cancel(); test(); }, 'lab-clear');
+      cancel = present(box, syl, 280, 30, test);
+    };
+    const test = () => {
+      phase = 'test'; t = 0; hits = 0;
+      tests = shuffle([...SW, ...SW].map((w, i) => { const p = parts[(i + 1 + (i >= 4 ? 1 : 0)) % 4]; return Math.random() < 0.5 ? [w, p, 0] : [p, w, 1]; }));
+      ask();
+    };
+    const ask = () => {
+      const [a, b, right] = tests[t];
+      box.textContent = '哪一个更像词？';
+      status.textContent = `第 ${t + 1} / ${tests.length} 对。凭感觉选，不必犹豫。`;
+      ctl.innerHTML = '';
+      [a, b].forEach((s, i) => action(ctl, s, () => { if (i === right) hits++; t++; if (t < tests.length) ask(); else done(); }, 'lab-big'));
+      ctl.querySelector('button').focus();
+    };
+    const done = () => {
+      phase = 'done'; ctl.innerHTML = ''; box.textContent = SW.join(' · ');
+      status.textContent = '上面是这种“语言”里真正的四个词。';
+      const within = SW.flatMap((w) => { const s = sylOf(w); return [tp(s[0], s[1]), tp(s[1], s[2])]; });
+      const across = SW.map((w, i) => [sylOf(w)[2], parts[i].slice(2, 4)]);
+      out.innerHTML = `<ul class="lab-parts lab-flow"><li><span>八对里，你选中真正的词的次数（随便猜，平均是 4 次）</span><b>${hits} / ${tests.length}</b></li>
+        <li><span>词的内部，一个音节后面跟着下一个音节的概率（8 处，平均）</span><b>${Math.round((within.reduce((s, x) => s + x, 0) / within.length) * 100)}%</b></li>
+        ${across.map(([a, b]) => `<li><span>跨过词的边界：${a} 后面接 ${b} 的概率</span><b>${Math.round(tp(a, b) * 100)}%</b></li>`).join('')}</ul>
+        <p>和你比较的“非词”（比如 ${parts[0]}）也在音节流里出现过，只是它跨过了两个词的边界。在一个词的内部，前一个音节决定了下一个音节；跨过边界时，后面可能接另外三个词中的任何一个，概率就低得多（平均约三分之一；上面列的是每个词后面最常接的那个词，所以略高一些）。转移概率在哪里突然下降，哪里就可能是词的边界。</p>
+        <p>${skipped ? '你跳过了音节流，这一轮的选择只能是猜测。' : hits >= 6 ? '你选中的真正的词明显多于猜测，说明你可能在不知不觉中利用了这种统计规律。' : '你的成绩与猜测差别不大。这并不奇怪：只看了一分钟文字，八次选择的偶然波动也很大。'}看文字的成年人和听声音的婴儿用的可能不是完全一样的过程，这个演示只说明“规律就在输入里”。</p>`;
+    };
+    action(actions, '开始', begin);
+    action(actions, '重来', () => { cancel(); phase = 'idle'; ctl.innerHTML = ''; box.textContent = ''; out.innerHTML = ''; status.textContent = '点“开始”。'; }, 'lab-clear');
+    status.textContent = '点“开始”。';
+  }
+
+  /* 07-03 · a name and a drawing: does the label pull the memory toward itself? Four ambiguous drawings,
+     each with two names; p < 0 leans toward the first name, p > 0 toward the second */
+  const LSHAPES = [
+    [['哑铃', '眼镜'], (g, p) => {
+      el('circle', { cx: 28, cy: 52, r: 16 }, g); el('circle', { cx: 72, cy: 52, r: 16 }, g);
+      if (p > 0) {
+        el('path', { d: `M44,52 Q50,${52 - 16 * p} 56,52` }, g);
+        el('path', { d: `M12,${50 - 2 * p} L${12 - 6 * p},${50 - 12 * p}` }, g); el('path', { d: `M88,${50 - 2 * p} L${88 + 6 * p},${50 - 12 * p}` }, g);
+      } else if (p < 0) { el('path', { d: `M44,${52 - 4 * -p} H56 M44,${52 + 4 * -p} H56` }, g); el('circle', { cx: 28, cy: 52, r: 7 * -p, class: 'f' }, g); el('circle', { cx: 72, cy: 52, r: 7 * -p, class: 'f' }, g); }
+      else el('path', { d: 'M44,52 H56' }, g);
+    }],
+    [['车轮', '太阳'], (g, p) => {
+      el('circle', { cx: 50, cy: 50, r: 20 }, g);
+      const a = p > 0 ? 0.7 + 0.5 * p : 0.7 + 0.6 * p, b = p > 0 ? 1.35 + 0.35 * p : 1.35 + 0.4 * p;
+      for (let i = 0; i < 8; i++) { const t = (i * Math.PI) / 4, c = Math.cos(t), s = Math.sin(t); el('path', { d: `M${50 + 20 * a * c},${50 + 20 * a * s} L${50 + 20 * b * c},${50 + 20 * b * s}` }, g); }
+      if (p < 0) el('circle', { cx: 50, cy: 50, r: 5 * -p, class: 'f' }, g);
+    }],
+    [['小山', '帽子'], (g, p) => {
+      const half = 22 - 6 * p, h = 30 + 8 * p, base = 70, brim = p > 0 ? 32 + 10 * p : 32 + 10 * p;
+      el('path', { d: `M${50 - half},${base} C${50 - half},${base - h * 1.3} ${50 + half},${base - h * 1.3} ${50 + half},${base}` }, g);
+      el('path', { d: `M${50 - brim},${base} H${50 + brim}` }, g);
+      if (p > 0) el('path', { d: `M${50 - half + 1},${base - 7 * p} H${50 + half - 1}` }, g);
+    }],
+    [['箭头', '松树'], (g, p) => {
+      el('path', { d: `M50,16 V${p > 0 ? 78 : 84}` }, g);
+      const tiers = p > 0 ? [[16, 13], [32, 18], [48, 23]] : p < 0 ? [[16, 16]] : [[16, 16], [34, 16]];
+      tiers.forEach(([y, w]) => el('path', { d: `M${50 - w},${y + w * 0.9} L50,${y} L${50 + w},${y + w * 0.9}` }, g));
+      if (p < 0) el('path', { d: 'M42,88 L50,80 L58,88 M42,80 L50,72 L58,80' }, g);
+      if (p > 0) el('path', { d: 'M44,78 H56 V86 H44 Z' }, g);
+    }],
+  ];
+  const labelSvg = (i, p, size) => {
+    const s = el('svg', { viewBox: '0 0 100 100', width: size, height: size, 'aria-hidden': 'true' });
+    LSHAPES[i][1](el('g', { class: 'lab-shape' }, s), p);
+    return s;
+  };
+  function label(host) {
+    const { fig, out, actions } = shell(host, '一个名字，会不会改变你记住的样子？',
+      '屏幕上会依次出现四个简单的线条图，每个停留三秒多。每个图下面都写着它“像什么”。看完以后，每个图会有三个版本让你挑：哪一个是你刚才看到的？三个版本中，一个是原图，一个更像你看到的那个名字，一个更像另一个名字。',
+      [], '这是一个教学演示，不是经过验证的测量。只有四个图形，偶然性很大；图形是为演示画的，不是经典研究里的原图。经典研究让人凭记忆画出来，这里改成从三个里挑，名字的影响可能更难显现。结果只保存在这个页面里。', TASK);
+    const box = document.createElement('div'); box.className = 'lab-stroop lab-show'; box.setAttribute('aria-live', 'polite');
+    const grid = document.createElement('div'); grid.className = 'lab-grid lab-g3';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(box, grid, status);
+    const tally = { orig: 0, toward: 0, away: 0 };
+    let side = shuffle([0, 0, 1, 1]), order = [], k = 0, timer = 0, rounds = 0;
+    const stop = () => clearTimeout(timer);
+    const study = () => {
+      if (k >= order.length) { k = 0; order = shuffle([0, 1, 2, 3]); return test(); }
+      const i = order[k];
+      box.innerHTML = ''; box.append(labelSvg(i, 0, 150));
+      const cap = document.createElement('p'); cap.innerHTML = `这个图形像<b>${LSHAPES[i][0][side[i]]}</b>`; box.append(cap);
+      status.textContent = `第 ${k + 1} / 4 个图形`;
+      timer = setTimeout(() => { box.innerHTML = ''; k++; timer = setTimeout(study, 500); }, 3300);
+    };
+    const begin = () => { stop(); grid.innerHTML = ''; order = shuffle([0, 1, 2, 3]); k = 0; study(); };
+    const test = () => {
+      if (k >= order.length) return done();
+      const i = order[k], lean = side[i] ? 1 : -1;
+      box.innerHTML = '<p>刚才看到的是哪一个？</p>';
+      status.textContent = `第 ${k + 1} / 4 个。点一下你认为是原图的那个。`;
+      grid.innerHTML = '';
+      shuffle([['orig', 0], ['toward', 0.85 * lean], ['away', -0.85 * lean]]).forEach(([kind, p], j) => {
+        const b = document.createElement('button'); b.type = 'button'; b.className = 'lab-cellbtn';
+        b.setAttribute('aria-label', `第 ${j + 1} 个版本`); b.append(labelSvg(i, p, 100));
+        b.addEventListener('click', () => { tally[kind]++; k++; test(); });
+        grid.append(b);
+      });
+      grid.querySelector('button').focus();
+    };
+    const done = () => {
+      rounds++; grid.innerHTML = ''; box.innerHTML = '<p>这一轮结束了。</p>';
+      side = side.map((x) => 1 - x); // next round: each drawing gets the other name
+      status.textContent = rounds === 1 ? '再做一轮，每个图形会配上另一个名字。' : `已经做了 ${rounds} 轮。`;
+      report();
+    };
+    const report = () => {
+      const n = tally.orig + tally.toward + tally.away;
+      out.innerHTML = n ? `<ul class="lab-parts lab-flow"><li><span>选中原图</span><b>${tally.orig} / ${n}</b></li><li><span>选错了，选的是更像“你看到的名字”的版本</span><b>${tally.toward}</b></li><li><span>选错了，选的是更像“另一个名字”的版本</span><b>${tally.away}</b></li></ul>
+        <p>如果名字会把记忆往它那边拉，错误应该更多地落在第二行，而不是第三行。只做了 ${n} 次选择，两种错误的差别很容易是偶然的；${tally.toward + tally.away === 0 ? '你全部选对了，这在“从三个里挑”的任务中很常见，原图就在眼前，比凭记忆画出来容易得多。' : '把几轮的结果加在一起看，才稍微有点意义。'}</p>
+        <p>注意，即使出现了偏向，也不能直接说名字改变了你“看到”的样子：它可能只是在你拿不准的时候，影响了你的猜测。区分这几种可能，正是演示下面那几段要讨论的问题。</p>`
+        : '<p>做完一轮以后，这里会统计你的选择。</p>';
+    };
+    action(actions, '开始', begin);
+    action(actions, '清空结果', () => { stop(); tally.orig = tally.toward = tally.away = 0; rounds = 0; grid.innerHTML = ''; box.innerHTML = ''; status.textContent = '点“开始”。'; report(); }, 'lab-clear');
+    status.textContent = '点“开始”。'; report();
+  }
+
+  /* 07-04 · the nine-dot problem: four straight lines, drawn without lifting the pen, through all nine dots */
+  function ninedot(host) {
+    const { fig, out, actions } = shell(host, '一笔画四条直线，穿过九个点',
+      '用不超过四条首尾相连的直线，穿过全部九个点，中间不能“抬笔”。依次点击网格上的点来画线：第一次点击是起点，之后每点一次，就从上一个点画一条直线到这里。用键盘时，先按 Tab 选中图形，用方向键移动蓝色的圈，按 Enter 或空格确定，按 Backspace 撤销。',
+      [], '这是一个经典的思维题，不是能力测验。做不出来很正常，它不能说明你的智力或创造力。结果只保存在这个页面里。', TASK);
+    const S = 320, P = (c) => 40 + (c + 1) * 60, svg = el('svg', { viewBox: `0 0 ${S} ${S}`, class: 'lab-dots', tabindex: 0, role: 'application', 'aria-label': '九点问题的画板：五乘五的网格，中间三乘三是九个要穿过的点。' }, fig);
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(status);
+    const DOTS = []; for (let y = 0; y < 3; y++) for (let x = 0; x < 3; x++) DOTS.push([x, y]);
+    const SOL = [[0, 0], [3, 0], [0, 3], [0, 0], [2, 2]];
+    let pts = [], cur = [1, 1], shown = false;
+    const on = (d, a, b) => { const cr = (b[0] - a[0]) * (d[1] - a[1]) - (b[1] - a[1]) * (d[0] - a[0]); if (cr) return false; return d[0] >= Math.min(a[0], b[0]) && d[0] <= Math.max(a[0], b[0]) && d[1] >= Math.min(a[1], b[1]) && d[1] <= Math.max(a[1], b[1]); };
+    const covered = () => DOTS.map((d) => pts.some((p, i) => i && on(d, pts[i - 1], p)));
+    const draw = () => {
+      svg.innerHTML = '';
+      for (let y = -1; y <= 3; y++) for (let x = -1; x <= 3; x++) el('circle', { cx: P(x), cy: P(y), r: 3, class: 'lab-lat' }, svg);
+      if (pts.length > 1) el('path', { d: 'M' + pts.map(([x, y]) => `${P(x)},${P(y)}`).join(' L'), class: 'lab-path' }, svg);
+      const cov = covered();
+      DOTS.forEach(([x, y], i) => el('circle', { cx: P(x), cy: P(y), r: 9, class: 'lab-dot9' + (cov[i] ? ' on' : '') }, svg));
+      if (pts.length) { const [x, y] = pts[pts.length - 1]; el('circle', { cx: P(x), cy: P(y), r: 5, class: 'lab-end' }, svg); }
+      if (document.activeElement === svg) el('circle', { cx: P(cur[0]), cy: P(cur[1]), r: 16, class: 'lab-cur' }, svg);
+      const lines = Math.max(0, pts.length - 1), n = cov.filter(Boolean).length;
+      status.textContent = shown ? '这是一种解法：线要延伸到九个点围成的方框之外。'
+        : n === 9 && lines <= 4 ? `成功了！你用 ${lines} 条线穿过了全部九个点。`
+        : lines >= 4 ? `四条线用完了，穿过了 ${n} / 9 个点。点“撤销一步”或“重来”。`
+        : pts.length ? `已画 ${lines} 条线，穿过了 ${n} / 9 个点。` : '点击网格上的任意一点作为起点。';
+    };
+    const add = (p) => {
+      if (shown) { shown = false; pts = []; }
+      const last = pts[pts.length - 1];
+      if (pts.length >= 5 || (last && last[0] === p[0] && last[1] === p[1])) return;
+      if (covered().every(Boolean) && pts.length > 1) return;
+      pts.push(p); draw();
+    };
+    svg.addEventListener('click', (e) => {
+      const r = svg.getBoundingClientRect(), k = S / r.width;
+      const x = Math.round(((e.clientX - r.left) * k - 40) / 60) - 1, y = Math.round(((e.clientY - r.top) * k - 40) / 60) - 1;
+      if (x < -1 || x > 3 || y < -1 || y > 3) return;
+      cur = [x, y]; add([x, y]);
+    });
+    svg.addEventListener('keydown', (e) => {
+      const mv = { arrowleft: [-1, 0], arrowright: [1, 0], arrowup: [0, -1], arrowdown: [0, 1] }[e.key.toLowerCase()];
+      if (mv) { cur = [Math.max(-1, Math.min(3, cur[0] + mv[0])), Math.max(-1, Math.min(3, cur[1] + mv[1]))]; draw(); }
+      else if (e.key === 'Enter' || e.key === ' ') add([...cur]);
+      else if (e.key === 'Backspace') { pts.pop(); draw(); }
+      else return;
+      e.preventDefault();
+    });
+    svg.addEventListener('focus', draw); svg.addEventListener('blur', draw);
+    action(actions, '撤销一步', () => { if (shown) return; pts.pop(); draw(); }, 'lab-clear');
+    action(actions, '重来', () => { pts = []; shown = false; out.innerHTML = ''; draw(); }, 'lab-clear');
+    action(actions, '提示', () => { out.innerHTML = '<p>提示：线可以画到九个点围成的方框外面去。不过研究发现，即使明确告诉人们这一点，能很快做出来的人仍然不多（见这一讲第五节）。</p>'; }, 'lab-clear');
+    action(actions, '看一种解法', () => { pts = SOL.map((p) => [...p]); shown = true; draw(); out.innerHTML = '<p>四条线：沿上边一直画到方框外，斜着穿回左下方之外，再沿左边向上，最后沿对角线斜下。关键的两步都要“出界”。</p>'; }, 'lab-clear');
+    draw();
+  }
+
+  /* 07-04 · alternative uses for a brick: how many ideas, and which are not on a short list of common ones */
+  const COMMON = [/盖|建|砌|墙|房|垒|铺|筑/, /垫/, /压|镇纸/, /门/, /砸|敲|锤|捶|核桃|钉/, /武器|防身|打人|自卫|扔/, /灶|烧烤|烤|锅|生火/, /花坛|花池|围/, /台阶|垫脚|踩|踏/, /健身|举|锻炼|哑铃/];
+  const USE_S = 120;
+  function uses(host) {
+    const { fig, out, actions } = shell(host, '一块砖头，能用来做什么？',
+      `在 ${USE_S / 60} 分钟内，尽可能多地写出一块普通砖头的用途，越不寻常越好。每行写一个，也可以用逗号、顿号隔开。可以提前点“写完了”。`,
+      [], '这是一个教学活动，不是创造力测验。程序只会按一张很短的“常见用途”示意清单做标记，这张清单是为演示编写的，不是研究中的常模；“不在清单里”不等于“有创意”。你写的内容不会被发送到任何地方，刷新就会清空。', TASK);
+    const rec = recallArea('砖头的用途', '例如：盖房子\n压住被风吹的纸');
+    const area = rec.querySelector('textarea'); area.rows = 6;
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(rec, ctl, status);
+    let clock = 0, left = 0;
+    const stop = () => clearInterval(clock);
+    const begin = () => {
+      stop(); area.value = ''; area.disabled = false; rec.hidden = false; out.innerHTML = ''; left = USE_S;
+      ctl.innerHTML = ''; action(ctl, '写完了', finish);
+      status.textContent = `还剩 ${left} 秒。`; area.focus();
+      clock = setInterval(() => { left--; if (left <= 0) finish(); else status.textContent = `还剩 ${left} 秒。`; }, 1000);
+    };
+    const finish = () => {
+      stop(); ctl.innerHTML = ''; area.disabled = true;
+      const ideas = [...new Set(area.value.split(/[\n,，、;；。]+/).map((s) => s.trim()).filter(Boolean))];
+      const rare = ideas.map((s) => !COMMON.some((re) => re.test(s)));
+      const h = Math.ceil(ideas.length / 2), share = (a) => (a.length ? Math.round((a.filter(Boolean).length / a.length) * 100) + '%' : '—');
+      status.textContent = `时间到了，或者你已经写完。你一共写了 ${ideas.length} 条。`;
+      out.innerHTML = ideas.length ? `<ul class="lab-parts lab-flow">${ideas.map((s, i) => `<li><span>${i + 1}. ${esc(s)}</span><b>${rare[i] ? '不在示意清单里' : '常见'}</b></li>`).join('')}</ul>
+        <ul class="lab-parts lab-flow"><li><span>想法的数量（研究中叫“流畅性”）</span><b>${ideas.length}</b></li>${ideas.length >= 4 ? `<li><span>前一半想法中，不在清单里的比例</span><b>${share(rare.slice(0, h))}</b></li><li><span>后一半想法中，不在清单里的比例</span><b>${share(rare.slice(h))}</b></li>` : ''}</ul>
+        <p>很多人的前几个答案都是“盖房子”“垫东西”这类最先想到的用途，更不寻常的想法往往出现在后面。研究者正式计分时，会看一个想法在一大群人的答案里有多罕见，或者请几位评分者独立判断它有多新颖、多巧妙；这里的“清单”只是一个粗糙的替代。</p>
+        <p>更重要的是这个任务<strong>没有</strong>测到的东西：想法是否真的可行，你能否从中挑出最好的一个并把它做出来，以及在你熟悉的领域里能否做出有价值的成果。这些都是创造力的一部分。</p>`
+        : '<p>你还没有写下任何用途。点“开始”再试一次。</p>';
+    };
+    action(actions, '开始', begin);
+    action(actions, '清空', () => { stop(); area.value = ''; area.disabled = false; rec.hidden = true; ctl.innerHTML = ''; out.innerHTML = ''; status.textContent = '点“开始”，计时开始。'; }, 'lab-clear');
+    rec.hidden = true; status.textContent = '点“开始”，计时开始。';
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses };
 })();
