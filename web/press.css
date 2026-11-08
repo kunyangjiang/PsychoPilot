@@ -439,6 +439,9 @@ button { font: inherit; color: inherit; }
 .l-table .l-tag { margin: 0 0 4px; white-space: nowrap; }
 
 /* simulation demos (lab.js, Stage 02) */
+/* the demo box shares the class name .lab with the small mono labels; undo that inheritance inside it */
+.l-demo.lab { font: inherit; letter-spacing: normal; text-transform: none; color: var(--text); }
+.l-demo.lab .l-demo-head p:not(.lab):not(.lab-sim) { margin-top: 10px; font-size: 15.5px; line-height: 1.75; color: var(--text-2); }
 .lab-sim { font-size: 13.5px !important; color: var(--red) !important; }
 .lab-ctrls { margin-top: 16px; display: grid; gap: 10px; }
 .lab-row { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 8px 12px; align-items: center; }
@@ -550,3 +553,41 @@ button { font: inherit; color: inherit; }
 .fx-myelin { fill: var(--paper); stroke: var(--text-3); stroke-width: 1.2; }
 .fx-rec { fill: var(--text-3); } .fx-rec.on { fill: var(--red); }
 .fx-c.m1 { fill: rgba(34, 48, 90, .45); } .fx-c.m2 { fill: rgba(34, 48, 90, .25); } .fx-c.m3 { fill: rgba(34, 48, 90, .11); }
+
+/* ---------- Stage 04 · perception figures and the hands-on demos ---------- */
+.fx-fa { fill: rgba(34, 48, 90, .55); }
+.k.fa { background: rgba(34, 48, 90, .55); } .k.dash { background: none; border-top: 2px dashed var(--blue); border-radius: 0; height: 0; width: 16px; vertical-align: 3px; }
+.fx-crit { stroke-width: 2.5; }
+.fx-faint { stroke: var(--rule); }
+.fx-thick { stroke-width: 3.5; stroke-linecap: round; }
+.fx-figure { fill: var(--blue); } .fx-ground { fill: var(--paper); }
+.fx-glyph { font-family: var(--head); font-weight: 700; fill: var(--text); }
+.fx-glyph-ln { fill: none; stroke: var(--text); stroke-linecap: butt; }
+.fx-word { font-family: var(--head); font-weight: 800; }
+.fx-screen { fill: var(--paper-2); }
+.fx-hyp { stroke-width: 2; }
+.lab-stim svg { max-width: 420px; margin: 0 auto; }
+.lab-cell { fill: var(--blue); }
+.lab-resp { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.lab-resp[hidden] { display: none; }
+.lab-resp .lab-act { min-width: 3.2em; }
+.lab-status { min-height: 1.6em; margin-top: 10px; text-align: center; font-size: 15px; color: var(--text-2); }
+.lab-ml { stroke: var(--text); stroke-width: 3; stroke-linecap: round; }
+.lab-range { display: grid; gap: 6px; max-width: 420px; margin: 10px auto 0; }
+.lab-range input { width: 100%; min-height: 32px; margin: 0; accent-color: var(--red); cursor: pointer; } /* a taller hit area for fingers; the track itself is unchanged */
+.lab-stroop { display: grid; place-items: center; min-height: 120px; border: 1.5px solid var(--rule); border-radius: 6px; font: 700 42px/1 var(--mono); letter-spacing: .08em; color: var(--text); }
+.lab-bar { fill: var(--blue); } .lab-bar.b { fill: var(--red); }
+.lab-tally { margin-top: 6px; }
+.lab-tally td b { font-family: var(--mono); }
+.lab-cd { display: flex; justify-content: center; }
+.lab-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: min(100%, 340px); }
+.lab-cellbtn { display: block; aspect-ratio: 1; padding: 6%; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--paper); }
+button.lab-cellbtn { cursor: pointer; }
+button.lab-cellbtn:hover { border-color: var(--text); }
+.lab-cellbtn svg { display: block; width: 100%; height: 100%; }
+.lab-cellbtn.is-mark { border: 3px solid var(--red); }
+.lab-sh { fill: var(--blue); } .lab-sh.r { fill: var(--red); }
+.lab-sh.ring { fill: none; stroke: var(--blue); stroke-width: 5; } .lab-sh.r.ring { fill: none; stroke: var(--red); }
+.lab-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; }
+.lab-pair .lab-grid { width: 100%; gap: 4px; }
+.lab-pair .lab-k { margin-bottom: 4px; }

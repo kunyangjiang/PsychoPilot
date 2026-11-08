@@ -34,14 +34,14 @@
   const text = (parent, x, y, s, cls, anchor = 'start') => { const t = el('text', { x, y, class: cls, 'text-anchor': anchor }, parent); t.textContent = s; return t; };
 
   // shell shared by all demos: heading, "simulated data" notice, control rows, figure, readout
-  const shell = (host, title, intro, controls) => {
+  const shell = (host, title, intro, controls, sim = '图中的数据都由程序在你的浏览器里随机生成，只用来说明原理，不是任何真实研究的结果。', tag = 'Simulation · 模拟演示') => {
     host.className = 'l-demo lab';
     host.innerHTML = `
       <div class="l-demo-head">
-        <p class="lab">Simulation · 模拟演示</p>
+        <p class="lab">${tag}</p>
         <h3>${title}</h3>
         <p>${intro}</p>
-        <p class="lab-sim">图中的数据都由程序在你的浏览器里随机生成，只用来说明原理，不是任何真实研究的结果。</p>
+        <p class="lab-sim">${sim}</p>
       </div>
       <div class="lab-ctrls">${controls.map(([key, label, opts]) => `
         <div class="lab-row" role="group" aria-label="${label}">
@@ -268,5 +268,320 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies };
+  /* =====================================================================
+     Stage 04 · demonstrations the reader takes part in. Their own answers are
+     never sent anywhere and are not a measurement of anything; each demo says so.
+     ===================================================================== */
+  const TASK = 'Try it · 动手试试';
+  const shuffle = (a) => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const pct = (a, b) => (b ? Math.round((a / b) * 100) + '%' : '—');
+  const median = (a) => { if (!a.length) return NaN; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
+  const keyIn = (host, fn) => host.addEventListener('keydown', (e) => { if (e.altKey || e.ctrlKey || e.metaKey) return; if (fn(e.key.toLowerCase())) e.preventDefault(); });
+
+  /* ----- 04-01 · signal detection: a faint bar in visual noise, under three payoff rules ----- */
+  const SDT_RULES = {
+    neutral: ['两种错误一样糟', { hit: 1, cr: 1, miss: -1, fa: -1 }],
+    screen: ['漏掉的代价很大', { hit: 1, cr: 1, miss: -4, fa: -1 }],
+    strict: ['误报的代价很大', { hit: 1, cr: 1, miss: -1, fa: -4 }],
+  };
+  const SDT_NOISE = { low: ['噪声少', 0.12, 1.4], high: ['噪声多', 0.2, 0.8] }; // label, SD of cell shading, sensitivity of the simulated observer
+  const OUTCOME = { hit: '击中', miss: '漏报', fa: '误报', cr: '正确否定' };
+  function sdt(host) {
+    const o = { noise: 'low', rule: 'neutral' };
+    const { fig, out, actions } = shell(host, '在噪声中找一条淡淡的竖线',
+      '每一次，下面的方格里都布满了深浅随机的小格。其中一半的画面，正中间那一列（上下有红色小刻度标出）会稍微深一点，形成一条很淡的竖线；另一半没有。请判断：这一次有没有竖线？可以点按钮，也可以按键盘：F 表示“有”，J 表示“没有”。一组 20 次，每次回答后都会告诉你对不对。',
+      [['noise', '噪声', Object.entries(SDT_NOISE).map(([k, [t]]) => [k, t])],
+       ['rule', '计分规则', Object.entries(SDT_RULES).map(([k, [t]]) => [k, t])]],
+      '这是一个教学演示，不是经过验证的测量。屏幕亮度、对比度、观看距离和疲劳都会改变结果，所以它不能说明你的视力或任何能力。你的回答只保存在这个页面里，刷新就会清空。“模拟观察者”的结果由程序随机生成。', TASK);
+    const COLS = 15, ROWS = 9, MID = 7, SIG = 0.17;
+    let trials = [], i = 0, tally = null, field = null, fb = '', running = false;
+    const history = [];
+    const stim = document.createElement('div'); stim.className = 'lab-stim';
+    const resp = document.createElement('div'); resp.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(stim, resp, status);
+    const bYes = action(resp, '有竖线（F）', () => answer(true));
+    action(resp, '没有（J）', () => answer(false));
+    const makeField = (signal) => {
+      const sd = SDT_NOISE[o.noise][1];
+      return Array.from({ length: ROWS * COLS }, (_, k) => {
+        const c = k % COLS, r = Math.floor(k / COLS);
+        const v = 0.36 + sd * rnorm() + (signal && c === MID && r > 0 && r < ROWS - 1 ? SIG : 0);
+        return Math.min(0.95, Math.max(0.03, v));
+      });
+    };
+    const drawStim = () => {
+      const W = Math.min(widthOf(fig), 420), cs = Math.floor((W - 20) / COLS), H = cs * ROWS + 24, x0 = (W - cs * COLS) / 2, xm = x0 + MID * cs + (cs - 1) / 2;
+      stim.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': running ? `第 ${i + 1} 次的画面：随机深浅的方格。` : '随机深浅的方格，尚未开始。' }, stim);
+      const cells = field || Array(ROWS * COLS).fill(0.12);
+      cells.forEach((v, k) => el('rect', { x: x0 + (k % COLS) * cs, y: 12 + Math.floor(k / COLS) * cs, width: cs - 1, height: cs - 1, class: 'lab-cell', 'fill-opacity': v.toFixed(3) }, svg));
+      el('path', { d: `M${xm - 5},1 L${xm},9 L${xm + 5},1 Z`, class: 'lab-red' }, svg);
+      el('path', { d: `M${xm - 5},${H - 1} L${xm},${H - 9} L${xm + 5},${H - 1} Z`, class: 'lab-red' }, svg);
+    };
+    const setStatus = () => {
+      resp.hidden = !running;
+      status.innerHTML = running ? `第 <b>${i + 1}</b> / ${trials.length} 次${fb ? '　·　' + fb : ''}` : fb;
+    };
+    const start = () => {
+      trials = shuffle([...Array(10).fill(true), ...Array(10).fill(false)]);
+      i = 0; tally = { hit: 0, miss: 0, fa: 0, cr: 0, pts: 0 }; running = true; fb = '';
+      field = makeField(trials[0]); drawStim(); setStatus(); bYes.focus();
+    };
+    const answer = (yes) => {
+      if (!running) return;
+      const sig = trials[i], k = sig ? (yes ? 'hit' : 'miss') : (yes ? 'fa' : 'cr');
+      tally[k]++; tally.pts += SDT_RULES[o.rule][1][k];
+      fb = `上一次${sig ? '有' : '没有'}竖线，你答“${yes ? '有' : '没有'}”：${OUTCOME[k]}`;
+      i++;
+      if (i >= trials.length) {
+        running = false; field = null;
+        history.unshift({ who: '你', o: { ...o }, ...tally });
+        fb = '这一组做完了。可以换一种计分规则再做一组，比较两组的击中率和误报率。';
+        drawStim(); draw(); setStatus(); actions.querySelector('.lab-act')?.focus();
+        return;
+      }
+      field = makeField(trials[i]); drawStim(); setStatus();
+    };
+    const simulate = () => { // fixed sensitivity; the criterion is the one that earns the most points under the rule
+      const d = SDT_NOISE[o.noise][2], v = SDT_RULES[o.rule][1];
+      const beta = (v.cr - v.fa) / (v.hit - v.miss), c = d / 2 + Math.log(beta) / d;
+      const t = { hit: 0, miss: 0, fa: 0, cr: 0, pts: 0 };
+      for (let n = 0; n < 200; n++) { const sig = n % 2 === 0, x = (sig ? d : 0) + rnorm(), yes = x > c, k = sig ? (yes ? 'hit' : 'miss') : (yes ? 'fa' : 'cr'); t[k]++; t.pts += v[k]; }
+      history.unshift({ who: '模拟观察者', o: { ...o }, ...t });
+      draw();
+    };
+    const sdtNote = () => {
+      const r = history.find((h) => h.o.rule !== 'neutral'), n = history.find((h) => h.o.rule === 'neutral');
+      if (!r || !n) return '提示：保持噪声不变，分别在“两种错误一样糟”和“漏掉的代价很大”两种规则下各做一组，再比较。';
+      return '比较不同计分规则下的结果：通常，漏掉的代价变大时，击中率和误报率会<b>一起</b>上升；误报的代价变大时，两者会一起下降。画面本身没有变，变的是“多像才算有”的标准。人只做 20 次，偶然波动很大，结果不一定这么整齐。';
+    };
+    const draw = () => {
+      if (history.length > 8) history.length = 8;
+      const last = history[0];
+      const table = last ? `<p>最近一组（${last.who}，${SDT_NOISE[last.o.noise][0]}，${SDT_RULES[last.o.rule][0]}）：</p>
+        <div class="l-table lab-tally" role="region" tabindex="0" aria-label="最近一组的四种结果"><table>
+          <thead><tr><th></th><th>回答“有”</th><th>回答“没有”</th></tr></thead>
+          <tbody><tr><th>有竖线</th><td>击中 <b>${last.hit}</b></td><td>漏报 <b>${last.miss}</b></td></tr>
+          <tr><th>没有竖线</th><td>误报 <b>${last.fa}</b></td><td>正确否定 <b>${last.cr}</b></td></tr></tbody></table></div>` : '';
+      const rows = history.map((h) => `<li><span>${h.who} · ${SDT_NOISE[h.o.noise][0]} · ${SDT_RULES[h.o.rule][0]}</span><b>击中率 ${pct(h.hit, h.hit + h.miss)} · 误报率 ${pct(h.fa, h.fa + h.cr)}</b></li>`).join('');
+      out.innerHTML = history.length ? `${table}<p>已完成的各组（最新的在最上面）：</p><ul class="lab-parts">${rows}</ul><p>${sdtNote()}</p>` : '<p>还没有结果。点“开始一组”自己做，或者先看看“模拟观察者”在 200 次判断中的表现。</p>';
+    };
+    keyIn(host, (k) => { if (!running) return false; if (k === 'f') { answer(true); return true; } if (k === 'j') { answer(false); return true; } return false; });
+    bindControls(host, o, () => { if (running) { running = false; field = null; fb = '设置改变了，这一组已作废，请重新开始。'; } drawStim(); setStatus(); });
+    action(actions, '开始一组（20 次）', start);
+    action(actions, '模拟观察者做 200 次', simulate, 'lab-clear');
+    action(actions, '清空结果', () => { history.length = 0; running = false; field = null; fb = ''; drawStim(); setStatus(); draw(); }, 'lab-clear');
+    drawStim(); setStatus(); draw();
+    onResize(drawStim);
+  }
+
+  /* ----- 04-02 · Müller-Lyer: set the lower line until it looks as long as the upper one ----- */
+  function muller(host) {
+    const o = { fins: 'on' };
+    const { fig, out, actions } = shell(host, '把两条线调成一样长',
+      '上面那条线两端是向外张开的“尾巴”，下面那条两端是“箭头”。拖动滑块（或者选中滑块后按左右方向键），让下面那条线<b>看起来</b>和上面一样长，然后点“我觉得一样长了”。',
+      [['fins', '线段两端', [['on', '显示箭头'], ['off', '去掉箭头']]]],
+      '这是一个教学演示，不是测量。错觉的强弱因人、屏幕大小和观看条件而不同；有些人几乎感觉不到它，这也很正常。', TASK);
+    const sw = document.createElement('div');
+    const lab = document.createElement('label'); lab.className = 'lab-range';
+    lab.innerHTML = '<span class="lab-k">下面那条线的长度</span><input type="range" min="60" max="150" step="1">';
+    const range = lab.querySelector('input');
+    fig.append(sw, lab);
+    let r = 100, done = false; // r: the lower line as a percentage of the upper one
+    const reset = () => { r = Math.random() < 0.5 ? 72 + Math.round(Math.random() * 8) : 130 + Math.round(Math.random() * 8); range.value = r; done = false; draw(); };
+    range.addEventListener('input', () => { r = Number(range.value); done = false; draw(); });
+    const fins = (svg, x1, x2, y, outward, len) => {
+      if (o.fins === 'off') return;
+      const a = 0.62, dx = len * Math.cos(a), dy = len * Math.sin(a);
+      [[x1, outward ? -1 : 1], [x2, outward ? 1 : -1]].forEach(([x, s]) => [-1, 1].forEach((v) => el('line', { x1: x, y1: y, x2: x + s * dx, y2: y + v * dy, class: 'lab-ml' }, svg)));
+    };
+    const draw = () => {
+      const W = widthOf(fig), H = 196, L = Math.round(W * 0.42), cx = W / 2, f = Math.round(L * 0.16), Lb = Math.round((L * r) / 100);
+      sw.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `上面一条线长 ${L} 像素，两端${o.fins === 'on' ? '是向外张开的尾巴' : '没有箭头'}；下面一条线长 ${Lb} 像素${o.fins === 'on' ? '，两端是箭头' : ''}。` }, sw);
+      el('line', { x1: cx - L / 2, x2: cx + L / 2, y1: 52, y2: 52, class: 'lab-ml' }, svg); fins(svg, cx - L / 2, cx + L / 2, 52, true, f);
+      el('line', { x1: cx - Lb / 2, x2: cx + Lb / 2, y1: 138, y2: 138, class: 'lab-ml' }, svg); fins(svg, cx - Lb / 2, cx + Lb / 2, 138, false, f);
+      if (done) {
+        [cx - L / 2, cx + L / 2].forEach((x) => el('line', { x1: x, x2: x, y1: 30, y2: 160, class: 'lab-true' }, svg));
+        text(svg, cx, 186, '红色虚线标出上面那条线的真实两端', 'lab-s b', 'middle');
+      }
+      range.setAttribute('aria-valuetext', `上面那条线的 ${r}%`);
+      const d = r - 100;
+      out.innerHTML = done
+        ? `<p>你把下面的线调成了上面的 <b>${r}%</b>，${d === 0 ? '也就是<b>完全一样长</b>' : `也就是比上面${d > 0 ? '长' : '短'}了 <b>${Math.abs(d)}%</b>`}。${o.fins === 'off' ? '去掉箭头之后，判断通常会准确得多。' : d > 2 ? '这正是错觉通常的方向：带箭头的线看起来更短，所以你把它调长了，才觉得两条一样。' : '你的设定几乎没有受到错觉影响，或者偏向了另一边。错觉的强弱本来就因人而异。'}</p><p>${o.fins === 'on' ? '再点“去掉箭头”，看看两条线现在的真实长度。' : '点“重新开始”可以再试一次。'}</p>`
+        : '<p>调好之后，点“我觉得一样长了”。</p>';
+    };
+    bindControls(host, o, draw);
+    action(actions, '我觉得一样长了', () => { done = true; draw(); });
+    action(actions, '重新开始', () => { o.fins = 'on'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === 'on'))); reset(); }, 'lab-clear');
+    reset();
+    onResize(draw);
+  }
+
+  /* ----- 04-03 · counting Stroop: how many symbols are there, whatever they are ----- */
+  const STROOP_K = { neutral: '圆点', same: '一致', diff: '不一致' };
+  function stroop(host) {
+    const { fig, out, actions } = shell(host, '数一数：一共有几个？',
+      '屏幕中间会出现一排符号，有时是圆点，有时是数字。请尽快回答<b>一共有几个</b>，不用管它们是什么。按键盘上的 1、2、3、4，或者点下面的按钮。一组 24 次，大约一分钟。',
+      [], '这是一个教学演示，不是测验。浏览器和设备记录的时间并不精确，可能相差几十毫秒；键盘、触屏、屏幕刷新和你当时的状态都会影响结果。结果不能用来判断你的注意力好坏。', TASK);
+    host.querySelector('.lab-ctrls').remove();
+    const box = document.createElement('div'); box.className = 'lab-stroop';
+    const resp = document.createElement('div'); resp.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(box, resp, status);
+    const btn = [1, 2, 3, 4].map((n) => action(resp, String(n), () => answer(n)));
+    let trials = [], i = 0, t0 = 0, live = false, timer = 0, data = [];
+    const sym = (t) => Array(t.n).fill(t.kind === 'neutral' ? '●' : String(t.digit)).join(' ');
+    const make = () => {
+      const list = [];
+      ['neutral', 'same', 'diff'].forEach((kind) => [1, 2, 3, 4, 1, 2, 3, 4].forEach((n) => {
+        let digit = n;
+        if (kind === 'diff') { const alt = [1, 2, 3, 4].filter((x) => x !== n); digit = alt[Math.floor(Math.random() * alt.length)]; }
+        list.push({ kind, n, digit });
+      }));
+      return shuffle(list);
+    };
+    const running = () => trials.length > 0 && i < trials.length;
+    const setStatus = (msg) => { resp.hidden = !running(); status.textContent = msg ?? (running() ? `第 ${i + 1} / ${trials.length} 次` : ''); };
+    const showTrial = () => { const t = trials[i]; box.textContent = sym(t); box.setAttribute('aria-label', `第 ${i + 1} 次：${sym(t)}`); t0 = performance.now(); live = true; };
+    const showFix = () => { live = false; box.textContent = '+'; box.setAttribute('aria-label', '准备'); timer = setTimeout(showTrial, 600); };
+    const start = () => { clearTimeout(timer); trials = make(); i = 0; data = []; setStatus(); draw(); btn[0].focus(); showFix(); };
+    const answer = (n) => {
+      if (!live) return;
+      live = false;
+      const t = trials[i];
+      data.push({ kind: t.kind, ok: n === t.n, rt: performance.now() - t0 });
+      i++;
+      if (i >= trials.length) { box.textContent = '完成'; box.removeAttribute('aria-label'); setStatus('这一组做完了。'); draw(); actions.querySelector('.lab-act')?.focus(); return; }
+      setStatus(n === t.n ? null : `第 ${i + 1} / ${trials.length} 次　·　上一次答错了：一共有 ${t.n} 个`);
+      showFix();
+    };
+    const draw = () => {
+      if (!data.length || running()) { out.innerHTML = running() ? '' : '<p>点“开始”。做完一组后，这里会显示三种情况下你的反应时间。</p>'; return; }
+      const res = Object.keys(STROOP_K).map((k) => {
+        const d = data.filter((x) => x.kind === k), ok = d.filter((x) => x.ok && x.rt > 150 && x.rt < 4000);
+        return { k, med: median(ok.map((x) => x.rt)), err: d.filter((x) => !x.ok).length };
+      });
+      const W = widthOf(out), H = 156, L = 76, max = Math.max(900, ...res.map((x) => x.med || 0)) * 1.12;
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': res.map((x) => `${STROOP_K[x.k]}：中位反应时间 ${Number.isFinite(x.med) ? Math.round(x.med) + ' 毫秒' : '无'}，答错 ${x.err} 次`).join('；') });
+      res.forEach((x, j) => {
+        const y = 16 + j * 40, bw = Number.isFinite(x.med) ? (x.med / max) * (W - L - 84) : 0;
+        text(svg, L - 10, y + 16, STROOP_K[x.k], 'lab-s', 'end');
+        el('rect', { x: L, y, width: Math.max(0, bw), height: 22, class: x.k === 'diff' ? 'lab-bar b' : 'lab-bar' }, svg);
+        text(svg, L + bw + 6, y + 16, Number.isFinite(x.med) ? `${Math.round(x.med)} 毫秒` : '—', 'lab-s');
+      });
+      text(svg, L, H - 6, '中位反应时间，只算答对的', 'lab-tick');
+      const gap = res[2].med - res[1].med;
+      out.innerHTML = `<p>${Number.isFinite(gap) ? `“不一致”比“一致”${gap >= 0 ? '慢' : '快'}了大约 <b>${Math.abs(Math.round(gap))} 毫秒</b>。` : ''}答错：圆点 ${res[0].err} 次，一致 ${res[1].err} 次，不一致 ${res[2].err} 次。</p>
+        <p>${gap > 30 ? '这是一种斯特鲁普式的干扰：任务只要求数个数，可是认出数字是一个更自动的过程。两者冲突时，需要额外的时间压住那个不该给的答案。' : '这一次差异不明显。每种情况只有 8 次，偶然波动很大；设备的计时误差也可能掩盖几十毫秒的差别。研究中通常每人要做许多次，再比较一群人的平均结果。'}</p>`;
+      out.prepend(svg);
+    };
+    keyIn(host, (k) => { if (!running() || !/^[1-4]$/.test(k)) return false; answer(Number(k)); return true; });
+    action(actions, '开始（24 次）', start);
+    action(actions, '重置', () => { clearTimeout(timer); trials = []; i = 0; data = []; live = false; box.textContent = ''; box.removeAttribute('aria-label'); setStatus(); draw(); }, 'lab-clear');
+    setStatus(); draw();
+    onResize(() => { if (!running()) draw(); });
+  }
+
+  /* ----- 04-03 · change detection: one switch per click, with or without a blank in between ----- */
+  const SHAPES = { circle: '圆形', square: '方形', tri: '三角形', ring: '圆环', cross: '十字' };
+  const shapeSvg = (s, ink) => {
+    const c = ink === 'r' ? 'lab-sh r' : 'lab-sh';
+    switch (s) {
+      case 'circle': return `<circle cx="20" cy="20" r="12" class="${c}"/>`;
+      case 'square': return `<rect x="9" y="9" width="22" height="22" class="${c}"/>`;
+      case 'tri': return `<path d="M20 7 L33 31 H7 Z" class="${c}"/>`;
+      case 'ring': return `<circle cx="20" cy="20" r="10" class="${c} ring"/>`;
+      case 'cross': return `<path d="M16 7h8v9h9v8h-9v9h-8v-9H7v-8h9z" class="${c}"/>`;
+      default: return '';
+    }
+  };
+  function change(host) {
+    const o = { gap: 'blank' };
+    const { fig, out, actions } = shell(host, '哪里变了？',
+      '先看清第一张图，准备好以后点“切换”。图会换成第二张，其中<b>有一个</b>图形变了样子，或者不见了。找到它就点那个位置；看不出来就点“看不出来”。每次切换只在你点按钮时发生一次，画面不会闪烁。',
+      [['gap', '切换时', [['blank', '中间有短暂空白'], ['none', '直接切换']]]],
+      '这是一个教学演示，不是测验。图形由程序随机生成；屏幕大小和观看距离都会影响难度。你的结果只保存在这个页面里。', TASK);
+    const stage = document.createElement('div'); stage.className = 'lab-cd';
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(stage, ctl, status);
+    const tally = { blank: [0, 0], none: [0, 0] };
+    let A = null, B = null, ch = -1, phase = 'idle', timer = 0;
+    const where = (k) => `第 ${Math.floor(k / 4) + 1} 行第 ${(k % 4) + 1} 个`;
+    const name = (x) => (x.s ? (x.ink === 'r' ? '红色' : '蓝色') + SHAPES[x.s] : '空');
+    const build = () => {
+      const ks = Object.keys(SHAPES);
+      A = Array.from({ length: 12 }, () => ({ s: ks[Math.floor(Math.random() * ks.length)], ink: Math.random() < 0.5 ? 'b' : 'r' }));
+      ch = Math.floor(Math.random() * 12);
+      B = A.map((x) => ({ ...x }));
+      if (Math.random() < 0.35) B[ch] = { s: '', ink: '' };
+      else { const alt = ks.filter((k) => k !== A[ch].s); B[ch] = { s: alt[Math.floor(Math.random() * alt.length)], ink: A[ch].ink }; }
+    };
+    const gridOf = (scene, { click = false, mark = -1, label = '' } = {}) => {
+      const g = document.createElement('div'); g.className = 'lab-grid';
+      g.setAttribute('role', 'group'); g.setAttribute('aria-label', label);
+      scene.forEach((x, k) => {
+        const c = document.createElement(click ? 'button' : 'div');
+        c.className = 'lab-cellbtn' + (k === mark ? ' is-mark' : '');
+        if (click) { c.type = 'button'; c.setAttribute('aria-label', `${where(k)}：${name(x)}`); c.addEventListener('click', () => pick(k)); }
+        else { c.setAttribute('role', 'img'); c.setAttribute('aria-label', `${where(k)}：${name(x)}`); }
+        c.innerHTML = `<svg viewBox="0 0 40 40" aria-hidden="true">${shapeSvg(x.s, x.ink)}</svg>`;
+        g.appendChild(c);
+      });
+      return g;
+    };
+    const blankGrid = () => gridOf(Array(12).fill({ s: '' }), { label: '空白' }); // empty frames: no shapes, nothing flashes
+    const buttons = (list) => { ctl.innerHTML = ''; list.forEach(([t, fn, cls]) => action(ctl, t, fn, cls)); };
+    const begin = () => {
+      clearTimeout(timer); build(); phase = 'A';
+      stage.innerHTML = ''; stage.appendChild(gridOf(A, { label: '第一张图' }));
+      status.textContent = '第一张图。看清楚以后，点“切换”。';
+      buttons([['切换', swap]]); ctl.querySelector('button').focus();
+    };
+    const swap = () => {
+      if (phase !== 'A') return;
+      phase = 'gap';
+      const toB = () => {
+        phase = 'B'; stage.innerHTML = ''; stage.appendChild(gridOf(B, { click: true, label: '第二张图：点你认为变了的位置' }));
+        status.textContent = '第二张图。哪个位置变了？';
+        buttons([['看不出来', () => pick(-1), 'lab-clear']]);
+        stage.querySelector('button').focus();
+      };
+      if (o.gap === 'blank') { stage.innerHTML = ''; stage.appendChild(blankGrid()); ctl.innerHTML = ''; status.textContent = ''; timer = setTimeout(toB, 300); }
+      else toB();
+    };
+    const pick = (k) => {
+      if (phase !== 'B') return;
+      phase = 'done';
+      const t = tally[o.gap]; t[1]++; if (k === ch) t[0]++;
+      const what = B[ch].s ? `${name(A[ch])}变成了${name(B[ch])}` : `${name(A[ch])}不见了`;
+      status.innerHTML = (k === ch ? '找到了。' : k < 0 ? '没关系，这正是要演示的现象。' : `不是这里（你点的是${where(k)}）。`) + `变化在<b>${where(ch)}</b>：${what}。下面并排显示两张图，变化的位置用红框标出。`;
+      stage.innerHTML = '';
+      const pair = document.createElement('div'); pair.className = 'lab-pair';
+      [['第一张', A], ['第二张', B]].forEach(([lab, sc]) => {
+        const w = document.createElement('div');
+        w.innerHTML = `<p class="lab-k">${lab}</p>`;
+        w.appendChild(gridOf(sc, { mark: ch, label: lab + '图' }));
+        pair.appendChild(w);
+      });
+      stage.appendChild(pair);
+      buttons([['再来一轮', begin]]); ctl.querySelector('button').focus();
+      draw();
+    };
+    const draw = () => {
+      const [bh, bn] = tally.blank, [nh, nn] = tally.none;
+      out.innerHTML = bn + nn ? `<ul class="lab-parts"><li><span>中间有短暂空白</span><b>找到 ${bh} / ${bn} 次</b></li><li><span>直接切换</span><b>找到 ${nh} / ${nn} 次</b></li></ul>
+        <p>${bn && nn ? '研究中的典型结果是：直接切换时，变化的位置会产生一个局部的“跳动”，自动把注意力拉过去，所以变化很容易被发现；插入空白以后，整个画面都在变，这个线索被淹没，人们往往要反复对比才找得到。你的几轮结果不一定完全符合这个规律。' : '提示：在“中间有短暂空白”和“直接切换”两种条件下各做几轮，再比较。'}</p>` : '<p>点“开始”。</p>';
+    };
+    bindControls(host, o, () => { if (phase === 'B' || phase === 'gap' || phase === 'A') begin(); });
+    action(actions, '开始', begin);
+    action(actions, '清空结果', () => { tally.blank = [0, 0]; tally.none = [0, 0]; draw(); }, 'lab-clear');
+    stage.appendChild(blankGrid());
+    status.textContent = '点“开始”，看第一张图。';
+    draw();
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change };
 })();

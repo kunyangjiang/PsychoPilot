@@ -930,5 +930,269 @@
     }, { dur: 1400, ctrls: { value: 'stress', items: Object.entries(EX).map(([k, [lab]]) => [k, lab]), onChange: (v) => { S.ex = v; } } });
   };
 
+  /* ===================== Stage 04 · sensation, perception, attention, consciousness ===================== */
+  const erf = (x) => { // Abramowitz–Stegun 7.1.26
+    const s = Math.sign(x), a = Math.abs(x), t = 1 / (1 + 0.3275911 * a);
+    return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-a * a));
+  };
+  const Phi = (x) => 0.5 * (1 + erf(x / Math.SQRT2));
+  const pathOf = (pts) => pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ');
+  const drawOn = (path) => { const len = (path.getTotalLength && path.getTotalLength()) || 2000; path.style.strokeDasharray = len; return (p) => { path.style.strokeDashoffset = len * (1 - p); }; };
+
+  /* ===== 04-01 · signal detection: two overlapping distributions and a movable criterion (illustrative) ===== */
+  F.sdt = (fig) => {
+    const D = 1.5, C = { strict: 1.6, mid: 0.75, lax: -0.1 };
+    const S = { prev: 'mid', cur: 'mid' };
+    figure(fig, (box, w, api) => {
+      const h = 250, L = 8, R = 8, T = 46, B = 54, s = svgIn(box, w, h, fig);
+      const X = (v) => L + ((v + 3.4) / 8.3) * (w - L - R), Y = (p) => h - B - (p / 0.42) * (h - T - B);
+      const pdf = (v, m) => Math.exp(-((v - m) ** 2) / 2) / Math.sqrt(2 * Math.PI);
+      const curve = (m) => { const pts = []; for (let v = -3.4; v <= 4.9; v += 0.05) pts.push([X(v), Y(pdf(v, m))]); return pts; };
+      const area = (m, from) => { const pts = curve(m).filter(([x]) => x >= X(from)); return pts.length ? `M${X(from)},${Y(0)} L${X(from)},${Y(pdf(from, m))} ${pathOf(pts).replace(/^M/, 'L')} L${pts[pts.length - 1][0]},${Y(0)} Z` : ''; };
+      const hit = el('path', { class: 'fx-tail' }, s), fa = el('path', { class: 'fx-fa' }, s); // false alarms drawn over hits, so both stay visible
+      el('path', { d: pathOf(curve(0)), class: 'fig-dist a', 'fill-opacity': 0 }, s);
+      el('path', { d: pathOf(curve(D)), class: 'fig-dist b', 'fill-opacity': 0 }, s);
+      el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+      const narrow = w < 470;
+      tx(s, X(0) - (narrow ? 4 : 10), Y(0.42) - 14, narrow ? '只有噪声' : '只有噪声（没有信号）', 'fx-s fx-b fx-halo', 'end');
+      tx(s, X(D) + (narrow ? 4 : 10), Y(0.42) - 14, narrow ? '噪声 + 信号' : '噪声 + 信号（有信号）', 'fx-s fx-r fx-halo');
+      tx(s, L, h - B + 20, '← 内部证据较弱', 'fx-n');
+      tx(s, w - R, h - B + 20, '内部证据较强 →', 'fx-n', 'end');
+      const cl = el('line', { y1: T - 26, y2: Y(0), class: 'fx-ln fx-crit' }, s);
+      const ct = tx(s, 0, T - 32, '标准', 'fx-s fx-strong fx-halo', 'middle');
+      const t1 = tx(s, 0, h - 10, '', 'fx-s fx-halo', 'middle');
+      const c0 = C[S.prev], c1 = C[S.cur];
+      const lab = { strict: '严格', mid: '中等', lax: '宽松' }[S.cur];
+      api.out.innerHTML = `<p class="fx-keys"><span><i class="k hi"></i>击中：有信号，并且回答“有”</span><span><i class="k fa"></i>误报：没有信号，却回答“有”</span></p><p>标准${lab}时：击中率约 <b>${Math.round(Phi(D - c1) * 100)}%</b>，误报率约 <b>${Math.round((1 - Phi(c1)) * 100)}%</b>。两条曲线的距离（敏感性）始终没有变。图中的数字是为了说明原理设定的。</p>`;
+      return (t) => {
+        const c = lerp(c0, c1, ease(t)), xc = X(c);
+        cl.setAttribute('x1', xc); cl.setAttribute('x2', xc);
+        ct.setAttribute('x', clamp(xc, L + 20, w - R - 20)); ct.textContent = '标准：超过它就回答“有”';
+        const half = (ct.textContent.length * 12.5) / 2; ct.setAttribute('x', clamp(xc, L + half, w - R - half));
+        hit.setAttribute('d', area(D, c)); fa.setAttribute('d', area(0, c));
+        t1.setAttribute('x', clamp(xc, L + 60, w - R - 60)); t1.textContent = '线的右边：回答“有”';
+      };
+    }, { dur: 900, ctrls: { value: 'mid', items: [['strict', '严格的标准'], ['mid', '中等'], ['lax', '宽松的标准']], onChange: (v) => { S.prev = S.cur; S.cur = v; } } });
+  };
+
+  /* ===== 04-01 · Weber's law: the same absolute difference is easy to see on a short line, hard on a long one ===== */
+  F.weber = (fig) => {
+    const S = { prev: 'abs', cur: 'abs' };
+    figure(fig, (box, w, api) => {
+      const h = 180, L = 10, s = svgIn(box, w, h, fig);
+      const unit = (w - L * 2) / 100, b1 = 16, b2 = 74, d = 4;
+      const long2 = (m) => (m === 'abs' ? b2 + d : b2 * (1 + d / b1));
+      const scale = Math.min(1, 98 / long2('ratio'));
+      const bar = (y, len, cls) => el('rect', { x: L, y, height: 12, width: len * unit * scale, class: cls }, s);
+      tx(s, L, 18, '短的一对', 'fx-h');
+      bar(30, b1, 'fx-seg b'); bar(48, b1 + d, 'fx-seg b');
+      tx(s, L, 108, '长的一对', 'fx-h');
+      bar(118, b2, 'fx-seg b'); const lb = bar(136, b2 + d, 'fx-seg b');
+      const n1 = tx(s, L, 78, `下面一根比上面长 ${d} 个单位，也就是长 ${Math.round((d / b1) * 100)}%`, 'fx-s');
+      const n2 = tx(s, L, 166, '', 'fx-s');
+      const a0 = long2(S.prev), a1 = long2(S.cur);
+      api.out.innerHTML = S.cur === 'abs'
+        ? '<p>两对线条相差的长度<b>完全一样</b>，但在长的一对中，差别很难看出来。</p>'
+        : `<p>把长的一对的差别也放大到 <b>${Math.round((d / b1) * 100)}%</b>：两对线条现在都比较容易分辨。决定能否察觉差别的，主要是差别占原来大小的比例。</p>`;
+      void n1;
+      return (t) => {
+        const len = lerp(a0, a1, ease(t));
+        lb.setAttribute('width', len * unit * scale);
+        n2.textContent = `下面一根比上面长 ${Math.round(len - b2)} 个单位，也就是长 ${Math.round(((len - b2) / b2) * 100)}%`;
+      };
+    }, { dur: 900, ctrls: { value: 'abs', items: [['abs', '相差同样的长度'], ['ratio', '相差同样的比例']], onChange: (v) => { S.prev = S.cur; S.cur = v; } } });
+  };
+
+  /* ===== 04-02 · four Gestalt grouping principles ===== */
+  F.gestalt = (fig) => figure(fig, (box, w) => {
+    const cols = w >= 600 ? 4 : 2, gap = 14, pw = (w - gap * (cols - 1)) / cols;
+    const panels = [
+      ['接近', '靠得近的点，被看成一组：四列'],
+      ['相似', '形状相同的，被看成一组：四行'],
+      ['闭合', '有缺口的线，仍被看成一个圆'],
+      ['连续', '看成一条直线和一条曲线交叉'],
+    ];
+    const nl = Math.max(...panels.map(([, n]) => wrap(n, pw - 8, 12.5).length)), ph = Math.min(130, pw - 10) + 12 + 32 + nl * 16 + 10;
+    const h = ph * Math.ceil(4 / cols), s = svgIn(box, w, h, fig);
+    const gs = panels.map(([k, note], i) => {
+      const g = el('g', { transform: `translate(${(i % cols) * (pw + gap)},${Math.floor(i / cols) * ph})` }, s);
+      const sz = Math.min(130, pw - 10), ox = (pw - sz) / 2, oy = 6;
+      el('rect', { x: 0.5, y: 0.5, width: pw - 1, height: sz + 12, class: 'fx-box fx-faint' }, g);
+      if (i === 0) for (let c = 0; c < 8; c++) for (let r = 0; r < 4; r++) el('circle', { cx: ox + sz * (0.12 + Math.floor(c / 2) * 0.24 + (c % 2) * 0.09), cy: oy + sz * (0.2 + r * 0.2), r: sz * 0.035, class: 'fx-node b' }, g);
+      if (i === 1) for (let c = 0; c < 5; c++) for (let r = 0; r < 4; r++) {
+        const cx = ox + sz * (0.14 + c * 0.18), cy = oy + sz * (0.2 + r * 0.2), q = sz * 0.04;
+        if (r % 2) el('rect', { x: cx - q, y: cy - q, width: q * 2, height: q * 2, class: 'fx-node b' }, g); else el('circle', { cx, cy, r: q, class: 'fx-node b' }, g);
+      }
+      if (i === 2) { const cx = ox + sz / 2, cy = oy + sz / 2 + 6, r = sz * 0.34; for (let a = 0; a < 6; a++) { const a0 = (a / 6) * 2 * Math.PI + 0.22, a1 = a0 + 0.6; el('path', { d: `M${cx + r * Math.cos(a0)},${cy + r * Math.sin(a0)} A${r},${r} 0 0 1 ${cx + r * Math.cos(a1)},${cy + r * Math.sin(a1)}`, class: 'fx-ln fx-thick' }, g); } }
+      if (i === 3) {
+        const pts = []; for (let k = 0; k <= 40; k++) { const u = k / 40; pts.push([ox + u * sz, oy + sz * (0.55 - 0.3 * Math.sin(u * Math.PI * 2))]); }
+        el('path', { d: pathOf(pts), class: 'fx-ln fx-thick' }, g);
+        el('line', { x1: ox, y1: oy + sz * 0.2, x2: ox + sz, y2: oy + sz * 0.9, class: 'fx-ln fx-lr fx-thick' }, g);
+      }
+      tx(g, 4, sz + 34, k, 'fx-h');
+      lines(g, 4, sz + 52, wrap(note, pw - 8, 12.5), 'fx-s', 16);
+      return g;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.35)));
+  }, { dur: 1200 });
+
+  /* ===== 04-02 · figure and ground: Rubin's vase, drawn from one profile curve ===== */
+  F.rubin = (fig) => {
+    const S = { mode: 'vase' };
+    figure(fig, (box, w, api) => {
+      const H = Math.min(320, w * 0.8), Wd = H * 0.86, h = H + 12, s = svgIn(box, w, h, fig), x0 = (w - Wd) / 2, cx = w / 2;
+      // One face in profile, looking right: how far it reaches in from the frame's left edge (0 = edge, 1 = centre line),
+      // from the top of the forehead down to the neck. The vase is whatever lies between the two mirrored faces.
+      const FACE = [[0, 0.28], [0.08, 0.36], [0.17, 0.46], [0.22, 0.49], [0.27, 0.45], [0.31, 0.47], [0.40, 0.74], [0.44, 0.6],
+        [0.48, 0.56], [0.515, 0.66], [0.55, 0.57], [0.585, 0.64], [0.63, 0.52], [0.68, 0.56], [0.72, 0.6], [0.76, 0.5],
+        [0.8, 0.34], [0.86, 0.26], [1, 0.24]];
+      const reach = (y) => { // Catmull–Rom through FACE
+        let i = 0; while (i < FACE.length - 2 && FACE[i + 1][0] < y) i++;
+        const P = (k) => FACE[Math.max(0, Math.min(FACE.length - 1, k))];
+        const [y0, p0] = P(i - 1), [y1, p1] = P(i), [y2, p2] = P(i + 1), [y3, p3] = P(i + 2);
+        const u = (y - y1) / (y2 - y1 || 1), m1 = ((p2 - p0) / (y2 - y0 || 1)) * (y2 - y1), m2 = ((p3 - p1) / (y3 - y1 || 1)) * (y2 - y1);
+        return (2 * u ** 3 - 3 * u * u + 1) * p1 + (u ** 3 - 2 * u * u + u) * m1 + (-2 * u ** 3 + 3 * u * u) * p2 + (u ** 3 - u * u) * m2;
+      };
+      const hw = (y) => 0.5 * (1 - reach(y)); // half width of the vase, as a share of the frame width
+      const right = [], left = [];
+      for (let k = 0; k <= 200; k++) { const y = k / 200; right.push([cx + hw(y) * Wd, 6 + y * H]); left.unshift([cx - hw(y) * Wd, 6 + y * H]); }
+      const vase = `${pathOf(right)} ${pathOf(left).replace(/^M/, 'L')} Z`;
+      const inkVase = S.mode === 'vase';
+      el('rect', { x: x0, y: 6, width: Wd, height: H, class: inkVase ? 'fx-ground' : 'fx-figure' }, s);
+      el('path', { d: vase, class: inkVase ? 'fx-figure' : 'fx-ground' }, s);
+      el('rect', { x: x0, y: 6, width: Wd, height: H, class: 'fx-box' }, s);
+      api.out.innerHTML = inkVase
+        ? '<p>深色的部分大多被看成<b>花瓶</b>（图形），浅色部分是背景。</p>'
+        : '<p>把深浅颠倒以后，深色的两侧更容易被看成两张<b>相对的侧脸</b>（图形），中间成了背景。</p><p>线条本身一点没变。看不出脸也没关系：额头、鼻子、嘴唇和下巴都在中间花瓶的边缘上。</p>';
+      return () => {};
+    }, { dur: 600, ctrls: { value: 'vase', items: [['vase', '中间涂深'], ['faces', '两侧涂深']], onChange: (v) => { S.mode = v; } } });
+  };
+
+  /* ===== 04-02 · size contrast (Ebbinghaus): the same circle among large or small neighbours ===== */
+  F.ebbinghaus = (fig) => {
+    const S = { prev: 'with', cur: 'with' };
+    figure(fig, (box, w, api) => {
+      const rc = Math.max(14, Math.min(26, w * 0.04)), h = rc * 9.4, s = svgIn(box, w, h, fig), cy = h / 2 - 8;
+      const lx = w * 0.27, rx = w * 0.75, big = rc * 1.55, small = rc * 0.42;
+      const ring = (x, n, r, dist) => Array.from({ length: n }, (_, k) => el('circle', { cx: x + dist * Math.cos((k / n) * 2 * Math.PI), cy: cy + dist * Math.sin((k / n) * 2 * Math.PI), r, class: 'fx-node b' }, s));
+      const ctx = [...ring(lx, 6, big, rc + big + rc * 0.45), ...ring(rx, 8, small, rc + small + rc * 0.3)];
+      [lx, rx].forEach((x) => el('circle', { cx: x, cy, r: rc, class: 'fx-node r' }, s));
+      tx(s, lx, h - 4, '左边的红圆', 'fx-s', 'middle'); tx(s, rx, h - 4, '右边的红圆', 'fx-s', 'middle');
+      const a0 = S.prev === 'with' ? 1 : 0, a1 = S.cur === 'with' ? 1 : 0;
+      api.out.innerHTML = S.cur === 'with'
+        ? `<p>许多人觉得右边的红圆更大一些。两个红圆的直径其实完全相同，都是 <b>${Math.round(rc * 2)} 像素</b>。</p>`
+        : '<p>去掉周围的圆之后，两个红圆看起来一样大。</p>';
+      return (t) => { const v = lerp(a0, a1, ease(t)); ctx.forEach((c) => show(c, v)); };
+    }, { dur: 700, ctrls: { value: 'with', items: [['with', '有周围的圆'], ['without', '去掉周围的圆']], onChange: (v) => { S.prev = S.cur; S.cur = v; } } });
+  };
+
+  /* ===== 04-02 · context decides what an ambiguous shape is: B or 13 ===== */
+  F.context = (fig) => {
+    const S = { mode: 'row' };
+    figure(fig, (box, w, api) => {
+      const fs = Math.min(54, w * 0.12), gapX = fs * 1.35, gapY = fs * 1.3, h = gapY * 2 + fs + 30, s = svgIn(box, w, h, fig), cx = w / 2, cy = h / 2 - 4;
+      const row = el('g', {}, s), col = el('g', {}, s);
+      s.style.setProperty('font-size', fs + 'px');
+      tx(row, cx - gapX, cy + fs * 0.36, 'A', 'fx-glyph', 'middle'); tx(row, cx + gapX, cy + fs * 0.36, 'C', 'fx-glyph', 'middle');
+      tx(col, cx, cy - gapY + fs * 0.36, '12', 'fx-glyph', 'middle'); tx(col, cx, cy + gapY + fs * 0.36, '14', 'fx-glyph', 'middle');
+      const g = fs * 0.72, x = cx - g * 0.32, y = cy - g / 2;
+      el('path', { d: `M${x},${y} V${y + g} M${x + g * 0.16},${y} H${x + g * 0.38} A${g * 0.24},${g * 0.24} 0 0 1 ${x + g * 0.38},${y + g * 0.48} H${x + g * 0.2} M${x + g * 0.38},${y + g * 0.48} A${g * 0.26},${g * 0.26} 0 0 1 ${x + g * 0.38},${y + g} H${x + g * 0.16}`, class: 'fx-glyph-ln', 'stroke-width': (fs * 0.13).toFixed(1) }, s);
+      const on = S.mode === 'row';
+      row.style.opacity = on ? 1 : 0.18; col.style.opacity = on ? 0.18 : 1;
+      api.out.innerHTML = on
+        ? '<p>横着读“A ? C”，中间那个图形很像字母 <b>B</b>。</p>'
+        : '<p>竖着读“12 ? 14”，同一个图形更像数字 <b>13</b>。</p><p>中间的图形一笔也没有改变，改变的只是它周围的东西。</p>';
+      return () => {};
+    }, { dur: 600, ctrls: { value: 'row', items: [['row', '横着读'], ['col', '竖着读']], onChange: (v) => { S.mode = v; } } });
+  };
+
+  /* ===== 04-03 · the classic colour-word Stroop task, in the two inks of this site ===== */
+  F.stroop = (fig) => figure(fig, (box, w) => {
+    const fs = w < 420 ? 24 : 30, h = fs * 6.4 + 10, s = svgIn(box, w, h, fig), lab = w < 420 ? 64 : 90, step = Math.min(fs * 2.1, (w - lab) / 5);
+    const rows = [
+      ['中性', ['■■', 'b'], ['■■', 'r'], ['■■', 'r'], ['■■', 'b'], ['■■', 'b']],
+      ['一致', ['蓝', 'b'], ['红', 'r'], ['红', 'r'], ['蓝', 'b'], ['红', 'r']],
+      ['不一致', ['红', 'b'], ['蓝', 'r'], ['红', 'b'], ['红', 'b'], ['蓝', 'r']],
+    ];
+    const gs = rows.map(([k, ...ws], i) => {
+      const g = el('g', {}, s), y = fs * 1.3 + i * fs * 2.1;
+      tx(g, 0, y - fs * 0.32, k, 'fx-s fx-strong');
+      ws.forEach(([t, ink], j) => tx(g, lab + j * step + step / 2, y, step < fs * 2.3 ? t.slice(0, 1) : t, 'fx-word ' + (ink === 'r' ? 'fx-r' : 'fx-b'), 'middle').style.fontSize = fs + 'px');
+      return g;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1100 });
+
+  /* ===== 04-04 · masked priming: a brief number hidden between two masks, then the target ===== */
+  F.masking = (fig) => figure(fig, (box, w) => {
+    const n = 4, gap = w < 420 ? 8 : 18, fw = Math.min(118, (w - gap * (n - 1)) / n), fh = fw * 0.72, h = fh + 120, s = svgIn(box, w, h, fig);
+    const x0 = (w - (fw * n + gap * (n - 1))) / 2, small = fw < 90;
+    const steps = [['#&@%', '遮蔽', '短暂', ''], ['6', '启动数字', '极短', 'r'], ['%@#&', '遮蔽', '短暂', ''], ['9', '目标数字', '直到作答', 'b']];
+    const gs = steps.map(([inner, k, dur, ink], i) => {
+      const g = el('g', {}, s), x = x0 + i * (fw + gap);
+      el('rect', { x, y: 10, width: fw, height: fh, rx: 4, class: 'fx-box fx-screen' }, g);
+      const it = tx(g, x + fw / 2, 10 + fh / 2 + (small ? 6 : 9), inner, 'fx-num' + (ink === 'r' ? ' fx-r' : ink === 'b' ? ' fx-b' : ''), 'middle');
+      if (small) it.style.fontSize = '15px';
+      tx(g, x + fw / 2, fh + 34, k, 'fx-s fx-strong', 'middle');
+      tx(g, x + fw / 2, fh + 52, dur, 'fx-n', 'middle');
+      return g;
+    });
+    arrow(s, x0, fh + 72, x0 + fw * n + gap * (n - 1), fh + 72, '', 7);
+    tx(s, x0, fh + 92, '时间', 'fx-n');
+    const note = tx(s, w / 2, fh + 112, '多数人报告：只看见了遮蔽和目标，没看见中间那个数字', 'fx-s fx-halo', 'middle');
+    if (w < 470) { note.textContent = '多数人报告：没看见中间那个数字'; }
+    return (t) => { gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.25))); show(note, stage(t, 0.8, 0.2)); };
+  }, { dur: 1400 });
+
+  /* ===== 04-04 · a schematic night of sleep (hypnogram) ===== */
+  const NIGHT = [[0, 'W'], [10, 'N1'], [15, 'N2'], [30, 'N3'], [70, 'N2'], [80, 'R'], [92, 'N2'], [112, 'N3'], [140, 'N2'], [165, 'R'], [185, 'N2'], [215, 'N3'], [232, 'N2'], [256, 'R'], [282, 'N2'], [330, 'W'], [334, 'N2'], [346, 'R'], [376, 'N1'], [381, 'N2'], [428, 'R'], [470, 'W'], [480, 'W']];
+  F.hypnogram = (fig) => figure(fig, (box, w) => {
+    const h = 262, L = w < 420 ? 44 : 56, R = 10, T = 18, B = 56, s = svgIn(box, w, h, fig);
+    const lv = { W: 0, R: 1, N1: 2, N2: 3, N3: 4 }, names = { W: '清醒', R: 'REM', N1: 'N1', N2: 'N2', N3: 'N3' };
+    const X = (m) => L + (m / 480) * (w - L - R), Y = (k) => T + lv[k] * ((h - T - B) / 4);
+    Object.keys(lv).forEach((k) => { el('line', { x1: L, x2: w - R, y1: Y(k), y2: Y(k), class: 'fx-hair' }, s); tx(s, L - 8, Y(k) + 4, names[k], k === 'R' ? 'fx-s fx-r fx-strong' : 'fx-s', 'end'); });
+    [[0, '23:00'], [120, '1:00'], [240, '3:00'], [360, '5:00'], [480, '7:00']].forEach(([m, t]) => tx(s, X(m), h - B + 20, t, 'fx-n', m === 0 ? 'start' : m === 480 ? 'end' : 'middle'));
+    let d = '';
+    NIGHT.forEach(([m, k], i) => { d += i ? ` H${X(m).toFixed(1)} V${Y(k)}` : `M${X(m)},${Y(k)}`; });
+    const p = el('path', { d, class: 'fx-ln fx-hyp' }, s), on = drawOn(p);
+    const bars = [];
+    NIGHT.forEach(([m, k], i) => { if ((k === 'R' || k === 'N3') && NIGHT[i + 1]) bars.push([el('rect', { x: X(m), y: Y(k) - 4, width: X(NIGHT[i + 1][0]) - X(m), height: 8, class: k === 'R' ? 'fx-seg r' : 'fx-seg b' }, s), m]); });
+    const n1 = tx(s, L, h - 6, w < 420 ? '前半夜深睡多' : '前半夜：深睡眠（N3）较多', 'fx-s fx-b');
+    const n2 = tx(s, w - R, h - 6, w < 420 ? '后半夜 REM 长' : '后半夜：REM 睡眠更长', 'fx-s fx-r', 'end');
+    return (t) => { on(ease(t)); bars.forEach(([b, m]) => show(b, ease(clamp((t * 480 - m) / 30)))); show(n1, stage(t, 0.3, 0.2)); show(n2, stage(t, 0.85, 0.15)); };
+  }, { dur: 2200 });
+
+  /* ===== 04-04 · two-process model: sleep pressure (S) and the circadian wake signal (C), schematic ===== */
+  F.twoprocess = (fig) => {
+    const S = { mode: 'normal' };
+    figure(fig, (box, w, api) => {
+      const h = 250, L = 10, R = 10, T = 30, B = 48, s = svgIn(box, w, h, fig);
+      const X = (hr) => L + (hr / 48) * (w - L - R), Y = (v) => h - B - v * (h - T - B);
+      const sleep = S.mode === 'normal' ? [[16, 24], [40, 48]] : [[40, 48]];
+      sleep.forEach(([a, b]) => { el('rect', { x: X(a), y: T - 8, width: X(b) - X(a), height: h - B - T + 8, class: 'fx-band2' }, s); tx(s, (X(a) + X(b)) / 2, T + 8, '睡眠', 'fx-n', 'middle'); });
+      const asleep = (t) => sleep.some(([a, b]) => t >= a && t < b);
+      const sp = [], cp = [];
+      let v = 0.12;
+      for (let t = 0; t <= 48.001; t += 0.25) {
+        sp.push([X(t), Y(v)]);
+        const clock = (7 + t) % 24;
+        cp.push([X(t), Y(0.45 + 0.28 * Math.cos(((clock - 18) / 24) * 2 * Math.PI))]);
+        v = asleep(t) ? v - v * (0.25 / 4.2) : v + (1 - v) * (0.25 / 18);
+      }
+      el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+      [[0, '7:00'], [12, '19:00'], [24, '7:00'], [36, '19:00'], [48, '7:00']].forEach(([t, lab]) => tx(s, X(t), h - B + 18, lab, 'fx-n', t === 0 ? 'start' : t === 48 ? 'end' : 'middle'));
+      tx(s, X(12), h - 8, '第一天', 'fx-n', 'middle'); tx(s, X(36), h - 8, '第二天', 'fx-n', 'middle');
+      const pc = el('path', { d: pathOf(cp), class: 'fx-ln fx-lb fx-dash fx-curve' }, s);
+      const ps = el('path', { d: pathOf(sp), class: 'fx-ln fx-lr fx-curve' }, s);
+      const a = drawOn(ps), b = drawOn(pc);
+      api.out.innerHTML = `<p class="fx-keys"><span><i class="k hi"></i>睡眠压力（过程 S）</span><span><i class="k dash"></i>昼夜节律的清醒信号（过程 C）</span></p>`
+        + (S.mode === 'normal'
+          ? '<p>醒着的时候，睡眠压力逐渐累积；睡着以后，它逐渐释放。昼夜节律则按大约 24 小时的周期起伏，与是否睡觉无关。</p>'
+          : '<p>熬一夜，睡眠压力会一直升高。可是到了第二天上午，昼夜节律的清醒信号重新升高，有些人会觉得“没那么困了”。这并不说明睡眠压力消失了。</p>')
+        + '<p>这是一张示意图，曲线的形状和高度都是简化的。</p>';
+      return (t) => { a(ease(t)); b(ease(t)); };
+    }, { dur: 1800, ctrls: { value: 'normal', items: [['normal', '正常作息'], ['allnight', '熬一夜']], onChange: (v) => { S.mode = v; } } });
+  };
+
   window.PPFig = F;
 })();
