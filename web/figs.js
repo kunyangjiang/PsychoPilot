@@ -1,4 +1,4 @@
-/* PsychoPilot — explanatory figures for the method lessons (Stage 02).
+/* PsychoPilot — explanatory figures for the lessons (Stages 02–03).
    window.PPFig[name](figure) fills a <figure class="l-fig" data-figure="name" data-alt="…"> placed in a
    lesson manuscript: the drawing goes in before the <figcaption>. Figures are drawn at the figure's real
    width (1 unit = 1 px) so labels keep their CSS size on phones, redrawn on resize, and animated once
@@ -541,6 +541,393 @@
         const m = lerp(m0, m1, p); mean.setAttribute('x1', X(m)); mean.setAttribute('x2', X(m));
       };
     }, { dur: 1100, ctrls: { value: 'all', items: [['all', '全部做过的研究'], ['pub', '只看发表了的研究']], onChange: (v) => { S.prev = S.cur; S.cur = v; } } });
+  };
+
+  /* ======================= Stage 03 · biological psychology =======================
+     All Stage 03 figures are schematics: shapes, timings and numbers are chosen to show a mechanism
+     or a logical point, and the captions say so. None of them redraws a study's raw data. */
+
+  // numbered legend under a drawing: rows of [label, text]; returns the height used
+  const legend = (p, y, w, rows, fs = 13.5, lh = 20) => {
+    rows.forEach(([n, s]) => {
+      const ls = wrap(s, w - 30, fs);
+      el('circle', { cx: 9, cy: y - 4.5, r: 9, class: 'fx-step' }, p); tx(p, 9, y, n, 'fx-n fx-inv', 'middle');
+      lines(p, 26, y, ls, 'fx-t', lh); y += ls.length * lh + 6;
+    });
+    return y;
+  };
+  const legendH = (w, rows, fs = 13.5, lh = 20) => rows.reduce((s, [, t]) => s + wrap(t, w - 30, fs).length * lh + 6, 0);
+
+  /* ===== 03-01 · one neuron to the next: electrical inside, chemical across the gap ===== */
+  F.signal = (fig) => figure(fig, (box, w) => {
+    const rows = [
+      ['1', '树突接收来自其他神经元的信号。'],
+      ['2', '胞体把这些信号汇总起来；只有超过阈值，才会触发动作电位。'],
+      ['3', '动作电位沿轴突传导，这是一个电信号，传到末端时大小不变。'],
+      ['4', '轴突末梢释放神经递质，化学信号跨过突触间隙。'],
+      ['5', '递质与下一个神经元上的受体结合，使它更容易或更难发放。'],
+    ];
+    const y = 74, top = 168, h = top + legendH(w, rows), s = svgIn(box, w, h, fig);
+    const X = (f) => Math.round(f * w), sx = X(0.19), r = Math.max(13, Math.min(21, w * 0.032));
+    const ax0 = sx + r, ax1 = X(0.66), tb = ax1 + 9, gap = Math.max(20, Math.round(w * 0.045)), nx = tb + 10 + gap;
+    const tips = [[sx - X(0.15), y - 44], [sx - X(0.17), y + 2], [sx - X(0.14), y + 46], [sx - X(0.05), y - 56], [sx - X(0.06), y + 56]];
+    tips.forEach(([x, yy]) => el('line', { x1: x, y1: yy, x2: sx, y2: y, class: 'fx-ln' }, s));
+    el('line', { x1: ax0, y1: y, x2: ax1, y2: y, class: 'fx-ln' }, s);
+    const segs = Math.max(3, Math.min(6, Math.round((ax1 - ax0) / 60))), sl = (ax1 - ax0 - 16) / segs;
+    for (let i = 0; i < segs; i++) el('rect', { x: ax0 + 10 + i * sl, y: y - 6, width: sl - 7, height: 12, rx: 6, class: 'fx-myelin' }, s);
+    const soma = el('circle', { cx: sx, cy: y, r, class: 'fx-cell' }, s);
+    el('circle', { cx: tb, cy: y, r: 10, class: 'fx-cell' }, s);
+    const ves = [[-3, -4], [3, 2], [-2, 5]].map(([dx, dy]) => el('circle', { cx: tb + dx, cy: y + dy, r: 2.4, class: 'fx-node b' }, s));
+    el('rect', { x: nx, y: y - 30, width: 9, height: 60, rx: 4, class: 'fx-cell' }, s);
+    el('line', { x1: nx + 9, y1: y, x2: w - 2, y2: y, class: 'fx-ln' }, s);
+    const recs = [-18, -6, 6, 18].map((d) => el('rect', { x: nx - 4, y: y + d - 3.5, width: 4, height: 7, class: 'fx-rec' }, s));
+    const tr = rng(31), dots = Array.from({ length: 7 }, () => ({ x: tb + 12 + tr() * (gap - 8), y: y - 18 + tr() * 36 }));
+    const nts = dots.map(() => el('circle', { r: 2.4, class: 'fx-node b' }, s));
+    const ins = tips.map(() => el('circle', { r: 4, class: 'fx-node r' }, s));
+    const pulse = el('rect', { y: y - 8, width: 18, height: 16, rx: 8, class: 'fx-bar' }, s);
+    const marks = [[sx - X(0.1), 148], [sx, 148], [(ax0 + ax1) / 2, 148], [tb + gap / 2 + 5, 148], [Math.min(w - 12, nx + 30), 148]];
+    marks.forEach(([x, yy], i) => { el('circle', { cx: x, cy: yy - 4.5, r: 9, class: 'fx-step' }, s); tx(s, x, yy, String(i + 1), 'fx-n fx-inv', 'middle'); });
+    tx(s, (ax0 + ax1) / 2, y - 16, '电信号', 'fx-s', 'middle');
+    tx(s, tb + gap / 2 + 5, y - 40, '化学信号', 'fx-s', 'middle');
+    legend(s, top, w, rows);
+    return (t) => {
+      const a = stage(t, 0, 0.24);
+      ins.forEach((c, i) => { c.setAttribute('cx', lerp(tips[i][0], sx, a)); c.setAttribute('cy', lerp(tips[i][1], y, a)); show(c, t < 0.26 ? 1 : 0); });
+      soma.setAttribute('class', t > 0.22 && t < 0.4 ? 'fx-cell on' : 'fx-cell');
+      const p = stage(t, 0.36, 0.32); pulse.setAttribute('x', lerp(ax0, ax1 - 18, p)); show(pulse, t > 0.34 && t < 0.7 ? 1 : 0);
+      const q = stage(t, 0.68, 0.16);
+      nts.forEach((c, i) => { c.setAttribute('cx', lerp(tb, dots[i].x, q)); c.setAttribute('cy', lerp(y, dots[i].y, q)); show(c, t > 0.68 ? 1 : 0); });
+      ves.forEach((c) => show(c, t > 0.68 ? 0.35 : 1));
+      recs.forEach((c) => c.setAttribute('class', t >= 0.86 ? 'fx-rec on' : 'fx-rec'));
+    };
+  }, { dur: 2600, replay: true });
+
+  /* ===== 03-01 · summation at the cell body: excitatory and inhibitory inputs against a threshold ===== */
+  F.summation = (fig) => {
+    const S = { mode: 'exc' };
+    const EX = [0.26, 0.3, 0.34, 0.38], IN = [0.315, 0.355], T0 = 0.12, T1 = 0.72;
+    const k = (x) => (x <= 0 ? 0 : (Math.exp(-x / 0.07) - Math.exp(-x / 0.012)) / 0.78);
+    const volt = (mode) => {
+      const pts = []; let tc = null;
+      for (let i = 0; i <= 400; i++) {
+        const t = T0 + (T1 - T0) * i / 400;
+        if (tc !== null) {
+          const x = t - tc;
+          const v = x < 0.012 ? lerp(-55, 30, x / 0.012) : x < 0.032 ? lerp(30, -78, (x - 0.012) / 0.02) : -78 + 8 * (1 - Math.exp(-(x - 0.032) / 0.06));
+          pts.push([t, v]); continue;
+        }
+        let v = -70 + EX.reduce((s, e) => s + 9 * k(t - e), 0);
+        if (mode === 'mix') v -= IN.reduce((s, e) => s + 9 * k(t - e), 0);
+        if (v >= -55) { tc = t; v = -55; }
+        pts.push([t, v]);
+      }
+      return { pts, fired: tc !== null };
+    };
+    figure(fig, (box, w, api) => {
+      const h = 250, L = 52, R = 8, T = 14, B = 52, s = svgIn(box, w, h, fig);
+      const X = (t) => L + (t - T0) / (T1 - T0) * (w - L - R), Y = (v) => T + (40 - v) / 125 * (h - T - B);
+      el('line', { x1: L, x2: L, y1: T, y2: h - B, class: 'fx-ln' }, s);
+      [30, 0, -55, -70].forEach((v) => tx(s, L - 6, Y(v) + 4, (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v), 'fx-n', 'end'));
+      tx(s, 0, T + 2, 'mV', 'fx-n');
+      el('line', { x1: L, x2: w - R, y1: Y(-55), y2: Y(-55), class: 'fx-ln fx-lr fx-dash' }, s);
+      tx(s, w - R, Y(-55) - 6, '阈值', 'fx-s fx-r fx-halo', 'end');
+      el('line', { x1: L, x2: w - R, y1: Y(-70), y2: Y(-70), class: 'fx-hair' }, s);
+      tx(s, w - R, Y(-70) + 16, '静息电位', 'fx-s fx-halo', 'end');
+      const ty = h - B + 16;
+      EX.forEach((e) => { arrow(s, X(e), ty + 14, X(e), ty, '', 6); });
+      if (S.mode === 'mix') IN.forEach((e) => { arrow(s, X(e), ty, X(e), ty + 14, 'r', 6); });
+      tx(s, L, h - 4, '↑ 兴奋性输入', 'fx-n');
+      if (S.mode === 'mix') tx(s, Math.min(w - R, L + 120), h - 4, '↓ 抑制性输入', 'fx-n fx-r');
+      const { pts, fired } = volt(S.mode);
+      const path = el('path', { class: 'fx-ln fx-curve' }, s);
+      const ap = fired ? tx(s, X(0.42), Y(30) + 4, '动作电位', 'fx-h fx-r') : tx(s, X(0.46), Y(-46), '没有达到阈值', 'fx-h');
+      api.out.textContent = S.mode === 'exc'
+        ? '四个兴奋性输入在很短时间内相继到达，单个输入都不足以达到阈值，但它们叠加在一起，膜电位越过了阈值，于是触发了一个动作电位。'
+        : '还是那四个兴奋性输入，但中间夹着两个抑制性输入。抑制性输入把膜电位往下拉，总和始终没有达到阈值，所以这一次没有动作电位。';
+      return (t) => {
+        const n = Math.max(1, Math.round(t * (pts.length - 1)));
+        path.setAttribute('d', pts.slice(0, n + 1).map(([a, v], i) => `${i ? 'L' : 'M'}${X(a).toFixed(1)},${Y(v).toFixed(1)}`).join(' '));
+        show(ap, stage(t, 0.75, 0.2));
+      };
+    }, { dur: 1800, replay: true, ctrls: { value: 'exc', items: [['exc', '只有兴奋性输入'], ['mix', '再加入抑制性输入']], onChange: (v) => { S.mode = v; } } });
+  };
+
+  /* ===== 03-02 · what each method can see, and whether it can test a cause ===== */
+  F.methods = (fig) => figure(fig, (box, w) => {
+    const rows = [
+      ['脑损伤研究', '某个区域受损以后，哪些能力丧失、哪些保留下来', '因果', '但损伤的位置和范围不由研究者控制'],
+      ['脑电图（EEG）', '头皮上记录到的大量神经元同步的电活动；时间精确到毫秒，位置很粗略', '相关', ''],
+      ['功能磁共振（fMRI）', '局部血液含氧量的变化，间接反映神经活动；位置精确到几毫米，时间上要慢几秒', '相关', ''],
+      ['经颅磁刺激（TMS）', '短暂干扰头皮下方的一小块皮层，看任务表现是否变差', '因果', '影响短暂、可逆，只能到达大脑表层'],
+      ['单细胞记录、光遗传学', '记录单个神经元的放电；用光打开或关闭特定类型的神经元（主要用于动物）', '两者', '记录是相关，操纵是因果'],
+    ];
+    const wide = w >= 560, c2 = wide ? Math.round(w * 0.3) : 0, c3 = wide ? Math.round(w * 0.78) : 0;
+    const cw = wide ? c3 - c2 - 18 : w - 4, cw3 = wide ? w - c3 : w - 60;
+    let y = wide ? 40 : 10;
+    const laid = rows.map(([a, b, c, d]) => {
+      const lb = wrap(b, cw, 13.5), ld = d ? wrap(d, cw3, 12.5) : [], y0 = y;
+      y += wide ? Math.max(lb.length * 20, 26 + ld.length * 17) + 22 : 24 + lb.length * 20 + (ld.length ? 6 + ld.length * 17 : 0) + 24;
+      return { a, lb, c, ld, y0 };
+    });
+    const h = y - 8, s = svgIn(box, w, h, fig);
+    if (wide) { tx(s, 0, 16, '方法', 'fx-n'); tx(s, c2, 16, '它能看到什么', 'fx-n'); tx(s, c3, 16, '能否直接检验因果', 'fx-n'); }
+    const gs = laid.map(({ a, lb, c, ld, y0 }, i) => {
+      const g = el('g', {}, s);
+      if (i) el('line', { x1: 0, x2: w, y1: y0 - 12, y2: y0 - 12, class: 'fx-hair' }, g);
+      tx(g, 0, y0 + 4, a, 'fx-h');
+      const bx = wide ? c2 : 0, by = wide ? y0 + 4 : y0 + 28;
+      lines(g, bx, by, lb, 'fx-t', 20);
+      const tx3 = wide ? c3 : w - 52, ty3 = wide ? y0 + 4 : y0 + 4;
+      const lab = c === '因果' ? '能' : c === '相关' ? '不能' : '部分';
+      const pw = lab.length * 14 + 20;
+      el('rect', { x: tx3, y: ty3 - 15, width: pw, height: 22, rx: 11, class: c === '相关' ? 'fx-pill b' : 'fx-pill r' }, g);
+      tx(g, tx3 + pw / 2, ty3 + 1, lab, c === '相关' ? 'fx-s fx-b' : 'fx-s fx-r', 'middle');
+      if (ld.length) lines(g, wide ? c3 : 0, wide ? y0 + 28 : by + lb.length * 20 + 4, ld, 'fx-s', 17);
+      return g;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.25)));
+  }, { dur: 1600 });
+
+  /* ===== 03-02 · forward vs reverse inference (illustrative numbers) ===== */
+  F.reverse = (fig) => {
+    const S = { mode: 'fwd' };
+    // reverse: 100 scans in which the amygdala was active, by the kind of task (illustrative proportions)
+    const kinds = [['诱发恐惧', 20, 'tp'], ['其他负面情绪', 22, 'fp'], ['新奇或意外的刺激', 20, 'm1'], ['面孔', 20, 'm2'], ['奖励等正面刺激', 18, 'm3']];
+    figure(fig, (box, w, api) => {
+      const cols = 20, gapC = 3, side = Math.min(26, Math.floor((w - (cols - 1) * gapC) / cols)), h = 5 * (side + gapC) + 34;
+      const s = svgIn(box, w, h, fig), x0 = Math.round((w - (cols * side + (cols - 1) * gapC)) / 2);
+      tx(s, w / 2, 14, S.mode === 'fwd' ? '100 次诱发恐惧的扫描' : '100 次杏仁核明显激活的扫描', 'fx-h', 'middle');
+      const cls = [];
+      if (S.mode === 'fwd') for (let i = 0; i < 100; i++) cls.push(i < 80 ? 'fx-c tp' : 'fx-c');
+      else kinds.forEach(([, n, c]) => { for (let i = 0; i < n; i++) cls.push(c === 'tp' ? 'fx-c tp' : 'fx-c ' + c); });
+      const cells = cls.map((c, i) => el('rect', { x: x0 + (i % cols) * (side + gapC), y: 28 + Math.floor(i / cols) * (side + gapC), width: side, height: side, rx: 2, class: c }, s));
+      api.out.innerHTML = S.mode === 'fwd'
+        ? '<p class="fx-keys"><span><i class="k tp"></i>杏仁核明显激活</span><span><i class="k" style="background:rgba(34,48,90,.11)"></i>没有明显激活</span></p><p>正向推理：<b>在诱发恐惧的时候，杏仁核是否激活？</b>答案通常是“经常激活”，图中假设为 80%。</p>'
+        : '<p class="fx-keys"><span><i class="k tp"></i>诱发恐惧</span><span><i class="k" style="background:var(--blue)"></i>其他负面情绪</span><span><i class="k" style="background:rgba(34,48,90,.45)"></i>新奇或意外</span><span><i class="k" style="background:rgba(34,48,90,.25)"></i>面孔</span><span><i class="k" style="background:rgba(34,48,90,.11)"></i>奖励等正面刺激</span></p><p>反向推理：<b>看到杏仁核激活，能不能说明这个人在害怕？</b>在这组假设的数字里，激活的扫描中只有 20% 来自恐惧任务。</p>';
+      return (t) => cells.forEach((c, i) => show(c, stage(t, (i / 100) * 0.7, 0.3)));
+    }, { dur: 1400, ctrls: { value: 'fwd', items: [['fwd', '恐惧时，杏仁核激活吗？'], ['rev', '杏仁核激活时，是恐惧吗？']], onChange: (v) => { S.mode = v; } } });
+  };
+
+  /* ===== 03-03 · reward prediction error: three conditions (schematic after Schultz et al., 1997) ===== */
+  F.rpe = (fig) => {
+    const S = { mode: 'before' };
+    const CS = 0.28, RW = 0.68, NB = 200, TR = 8;
+    const sim = (mode) => {
+      const r = rng({ before: 11, after: 12, omit: 13 }[mode]), trials = [];
+      for (let k = 0; k < TR; k++) {
+        const sp = [];
+        for (let b = 0; b < NB; b++) {
+          const x = b / NB; let p = 0.035;
+          const burstAt = mode === 'before' ? [RW] : [CS];
+          if (burstAt.some((e) => x >= e + 0.01 && x < e + 0.05)) p = 0.55;
+          if (mode === 'omit' && x >= RW + 0.01 && x < RW + 0.1) p = 0;
+          if (r() < p) sp.push(x);
+        }
+        trials.push(sp);
+      }
+      const cnt = new Array(NB).fill(0); trials.forEach((sp) => sp.forEach((x) => cnt[Math.min(NB - 1, Math.floor(x * NB))]++));
+      const rate = cnt.map((_, i) => { let a = 0, ws = 0; for (let j = -5; j <= 5; j++) { const v = cnt[i + j]; if (v === undefined) continue; const wt = Math.exp(-(j * j) / 8); a += v * wt; ws += wt; } return a / ws / TR; });
+      return { trials, rate };
+    };
+    const TXT = {
+      before: ['学习之前：奖励来得出乎意料', '奖励出现时，多巴胺神经元短暂地密集放电。实际得到的比预期的好，预测误差为正。'],
+      after: ['学会之后：线索预示着奖励', '反应提前到了线索出现的时候；奖励本身已经在预料之中，到来时几乎没有额外反应，预测误差约为零。'],
+      omit: ['学会之后，预期的奖励却没有来', '线索出现时照样放电；到了本该给奖励的时刻什么也没有发生，放电反而短暂停顿，低于平时的水平。预测误差为负。'],
+    };
+    figure(fig, (box, w, api) => {
+      const L = 8, R = 8, T = 30, rh = 64, rowH = 10, h = T + rh + 16 + TR * rowH + 58, s = svgIn(box, w, h, fig);
+      const X = (x) => L + x * (w - L - R), { trials, rate } = sim(S.mode);
+      const ry0 = T + rh + 16, base = T + rh;
+      tx(s, 0, 14, TXT[S.mode][0], 'fx-h');
+      el('line', { x1: L, x2: w - R, y1: base, y2: base, class: 'fx-hair' }, s);
+      const path = el('path', { class: 'fx-ln fx-curve' }, s);
+      const ticks = [];
+      trials.forEach((sp, k) => sp.forEach((x) => ticks.push([x, el('line', { x1: X(x), x2: X(x), y1: ry0 + k * rowH, y2: ry0 + k * rowH + rowH - 3, class: 'fx-ln' }, s)])));
+      const ay = ry0 + TR * rowH + 8;
+      el('line', { x1: L, x2: w - R, y1: ay, y2: ay, class: 'fx-ln' }, s);
+      const ev = (x, lab, dashed) => {
+        el('line', { x1: X(x), x2: X(x), y1: T - 6, y2: ay, class: dashed ? 'fx-hair fx-dash' : 'fx-hair' }, s);
+        el('circle', { cx: X(x), cy: ay, r: 4, class: dashed ? 'fx-node m' : 'fx-node' }, s);
+        tx(s, X(x), ay + 20, lab, 'fx-s', 'middle');
+      };
+      ev(CS, '线索', false); ev(RW, S.mode === 'omit' ? '奖励（没有出现）' : '奖励', S.mode === 'omit');
+      tx(s, L, ay + 42, '时间 →　每一行是一次试验，每一道竖线是一次放电', 'fx-n');
+      const dl = { before: [[RW, '＋']], after: [[CS, '＋'], [RW, '0']], omit: [[CS, '＋'], [RW, '−']] }[S.mode];
+      const dlab = dl.map(([x, v]) => tx(s, X(x) - 6, T + 8, '预测误差 ' + v, v === '−' ? 'fx-s fx-b fx-halo' : v === '0' ? 'fx-s fx-halo' : 'fx-s fx-r fx-halo', 'end')); // left of the event line, where the curve is flat
+      const mx = 0.5, Yr = (v) => base - Math.min(1, v / mx) * (rh - 6);
+      api.out.textContent = TXT[S.mode][1];
+      return (t) => {
+        const n = Math.max(1, Math.round(t * (NB - 1)));
+        path.setAttribute('d', rate.slice(0, n + 1).map((v, i) => `${i ? 'L' : 'M'}${X(i / NB).toFixed(1)},${Yr(v).toFixed(1)}`).join(' '));
+        ticks.forEach(([x, l]) => show(l, x <= t ? 1 : 0));
+        dlab.forEach((g, i) => show(g, t >= dl[i][0] + 0.05 ? 1 : 0));
+      };
+    }, { dur: 2000, replay: true, ctrls: { value: 'before', items: [['before', '意外的奖励'], ['after', '预料之中的奖励'], ['omit', '预期落空']], onChange: (v) => { S.mode = v; } } });
+  };
+
+  /* ===== 03-03 · a sensitive period (schematic after Hubel & Wiesel, 1970) ===== */
+  F.window = (fig) => figure(fig, (box, w) => {
+    const h = 230, L = 10, R = 10, T = 34, B = 50, s = svgIn(box, w, h, fig);
+    // x in weeks on a compressed axis: 0–16 weeks linear over 75 % of the width, then "adult"
+    const X = (wk) => L + (wk <= 16 ? wk / 16 * 0.75 : 0.75 + Math.min(1, (wk - 16) / 40) * 0.25) * (w - L - R);
+    const Y = (v) => h - B - v * (h - T - B);
+    const f = (wk) => (wk < 3 ? 0.03 * wk : wk < 4.5 ? lerp(0.09, 1, (wk - 3) / 1.5) : wk < 6.5 ? 1 : wk < 14 ? lerp(1, 0.08, ease((wk - 6.5) / 7.5)) : Math.max(0.02, 0.08 - (wk - 14) * 0.004));
+    el('path', { d: `M${L},${T - 10} V${h - B} H${w - R}`, class: 'fx-ln' }, s);
+    tx(s, L + 4, T - 16, '↑ 遮住一只眼几天造成的影响', 'fx-n');
+    [[0, '出生'], [4, '4 周'], [13, '约 3 个月'], [56, '成年']].forEach(([wk, lab]) => { el('line', { x1: X(wk), x2: X(wk), y1: h - B, y2: h - B + 5, class: 'fx-ln' }, s); tx(s, X(wk), h - B + 20, lab, 'fx-n', wk === 0 ? 'start' : wk === 56 ? 'end' : 'middle'); });
+    el('rect', { x: X(4), y: T - 6, width: X(13) - X(4), height: h - B - T + 6, class: 'fx-band2' }, s);
+    tx(s, (X(4) + X(13)) / 2, h - B + 40, '敏感期', 'fx-s fx-b', 'middle');
+    const pts = []; for (let wk = 0; wk <= 56; wk += 0.25) pts.push([X(wk), Y(f(wk))]);
+    const path = el('path', { d: pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' '), class: 'fx-ln fx-lr fx-curve' }, s);
+    const len = (path.getTotalLength && path.getTotalLength()) || 2000;
+    path.style.strokeDasharray = len;
+    const note = tx(s, X(40), Y(0.2), '同样处理，几乎没有影响', 'fx-s fx-halo', 'middle');
+    return (t) => { path.style.strokeDashoffset = len * (1 - ease(t)); show(note, stage(t, 0.85, 0.15)); };
+  }, { dur: 1600 });
+
+  /* ===== 03-04 · heritability depends on how much the environment varies (illustrative) ===== */
+  F.herit = (fig) => {
+    const N = 60, [g, e] = orthoVectors(2, N, rng(17));
+    const SD = { same: 0.25, mid: 1, big: 2 };
+    const S = { prev: 'mid', cur: 'mid' };
+    figure(fig, (box, w, api) => {
+      const h = 200, L = 6, R = 6, s = svgIn(box, w, h, fig);
+      const X = (v) => L + (clamp(v, -6.5, 6.5) + 6.5) / 13 * (w - L - R);
+      const r = rng(5), jy = Array.from({ length: N }, () => 52 + r() * 60);
+      el('line', { x1: L, x2: w - R, y1: 124, y2: 124, class: 'fx-hair' }, s);
+      tx(s, w / 2, 142, '← 测量到的特质得分 →', 'fx-n', 'middle');
+      tx(s, 0, 16, '同一群人：基因上的差异不变，只改变环境差异的大小', 'fx-s');
+      const dots = g.map(() => el('circle', { r: 4.5, class: 'fx-sc' }, s));
+      const bw = w - L - R, by = 160, gb = el('rect', { x: L, y: by, height: 18, class: 'fx-seg b' }, s), eb = el('rect', { y: by, height: 18, class: 'fx-seg r' }, s);
+      const gl = tx(s, L + 6, by + 13.5, '', 'fx-s fx-inv'), el2 = tx(s, w - R - 6, by + 13.5, '', 'fx-s fx-inv', 'end');
+      const h2 = (k) => 1 / (1 + SD[k] ** 2), a0 = SD[S.prev], a1 = SD[S.cur];
+      api.out.innerHTML = `<p class="fx-keys"><span><i class="k lo"></i>来自基因差异的部分</span><span><i class="k hi"></i>来自环境差异的部分</span></p><p>在这一群人中，遗传力约为 <b>${Math.round(h2(S.cur) * 100)}%</b>。图中的数字是为了说明原理设定的。</p>`;
+      return (t) => {
+        const sd = lerp(a0, a1, ease(t)), hh = 1 / (1 + sd * sd);
+        dots.forEach((d, i) => { d.setAttribute('cx', X(g[i] + sd * e[i])); d.setAttribute('cy', jy[i]); });
+        gb.setAttribute('width', bw * hh); eb.setAttribute('x', L + bw * hh); eb.setAttribute('width', bw * (1 - hh));
+        gl.textContent = hh > 0.18 ? `基因 ${Math.round(hh * 100)}%` : ''; el2.textContent = 1 - hh > 0.18 ? `环境 ${Math.round((1 - hh) * 100)}%` : '';
+      };
+    }, { dur: 1000, ctrls: { value: 'mid', items: [['same', '环境几乎相同'], ['mid', '环境差异中等'], ['big', '环境差异很大']], onChange: (v) => { S.prev = S.cur; S.cur = v; } } });
+  };
+
+  /* ===== 03-04 · Lewontin's two pots: within-group heritability says nothing about the gap between groups ===== */
+  F.seeds = (fig) => figure(fig, (box, w) => {
+    const n = 9, r = rng(23), gv = Array.from({ length: n }, () => 0.55 + r() * 0.45);
+    const h = 270, s = svgIn(box, w, h, fig), ground = 196, pw = (w - 24) / 2, maxH = 150;
+    const pots = [[0, 1, '肥沃的土壤'], [pw + 24, 0.55, '贫瘠的土壤']];
+    const stems = [];
+    pots.forEach(([x0, soil, lab], k) => {
+      el('path', { d: `M${x0 + 6},${ground} L${x0 + 18},${ground + 34} L${x0 + pw - 18},${ground + 34} L${x0 + pw - 6},${ground} Z`, class: 'fx-box' }, s);
+      tx(s, x0 + pw / 2, ground + 23, lab, 'fx-s', 'middle');
+      gv.forEach((v, i) => {
+        const x = x0 + 24 + i * (pw - 48) / (n - 1), full = v * soil * maxH;
+        const st = el('line', { x1: x, x2: x, y1: ground, y2: ground, class: k ? 'fx-ln fx-lr' : 'fx-ln fx-lb' }, s);
+        const tip = el('circle', { cx: x, r: 3.5, class: k ? 'fx-node r' : 'fx-node b' }, s);
+        stems.push({ st, tip, full });
+      });
+    });
+    const m0 = gv.reduce((a, b) => a + b, 0) / n, yA = ground - m0 * maxH, yB = ground - m0 * 0.55 * maxH;
+    const g = el('g', {}, s);
+    el('line', { x1: 0, x2: w, y1: yA, y2: yA, class: 'fx-hair fx-dash' }, g);
+    el('line', { x1: pw + 24, x2: w, y1: yB, y2: yB, class: 'fx-hair fx-dash' }, g);
+    const bx = pw + 12; arrow(g, bx, yB, bx, yA + 2, 'r', 6); arrow(g, bx, yA, bx, yB - 2, 'r', 6);
+    tx(g, 0, 16, '两盆撒的是同一包混合种子', 'fx-h');
+    if (w >= 520) { tx(g, 0, h - 4, '盆内高矮不齐：来自种子的差异', 'fx-s fx-b'); tx(g, w, h - 4, '两盆之间的差距：来自土壤', 'fx-s fx-r', 'end'); }
+    else { tx(g, 0, h - 22, '盆内高矮不齐：来自种子的差异', 'fx-s fx-b'); tx(g, 0, h - 4, '两盆之间的差距：来自土壤', 'fx-s fx-r'); }
+    return (t) => { const p = stage(t, 0, 0.75); stems.forEach(({ st, tip, full }) => { const y = ground - full * p; st.setAttribute('y2', y); tip.setAttribute('cy', y); }); show(g, stage(t, 0.75, 0.25)); };
+  }, { dur: 1800 });
+
+  /* ===== 03-05 · the HPA axis and its negative feedback ===== */
+  F.hpa = (fig) => figure(fig, (box, w) => {
+    const wide = w >= 520, bw = Math.min(230, Math.round(w * (wide ? 0.42 : 0.66))), cx = wide ? Math.round(w * 0.36) : Math.round(bw / 2 + 4);
+    const nodes = [['大脑判断：这是威胁或挑战', ''], ['下丘脑', 'CRH'], ['垂体', 'ACTH'], ['肾上腺皮质', '皮质醇'], ['皮质醇随血液作用于全身', '']];
+    const gapY = 64, top = 8, bh = 34, fast = wide ? 0 : 92, h = top + (nodes.length - 1) * gapY + bh + 8 + fast, s = svgIn(box, w, h, fig);
+    const ny = (i) => top + i * gapY;
+    const gs = nodes.map(([lab, hor], i) => {
+      const g = el('g', {}, s);
+      el('rect', { x: cx - bw / 2, y: ny(i), width: bw, height: bh, rx: i === 0 || i === 4 ? 17 : 3, class: i === 0 || i === 4 ? 'fx-pill b' : 'fx-box' }, g);
+      tx(g, cx, ny(i) + 22, lab, i === 0 || i === 4 ? 'fx-s' : 'fx-h', 'middle');
+      if (i < nodes.length - 1) {
+        arrow(g, cx, ny(i) + bh, cx, ny(i + 1) - 1);
+        if (hor) tx(g, cx - 10, ny(i) + bh + 20, hor, 'fx-n fx-halo', 'end');
+      }
+      return g;
+    });
+    const fx = cx + bw / 2 + 24, fb = el('g', {}, s);
+    el('path', { d: `M${cx + bw / 2},${ny(4) + bh / 2} H${fx} V${ny(1) + bh / 2}`, class: 'fx-ln fx-lr fx-dash' }, fb);
+    arrow(fb, fx, ny(1) + bh / 2, cx + bw / 2 + 2, ny(1) + bh / 2, 'r', 7);
+    arrow(fb, fx, ny(2) + bh / 2, cx + bw / 2 + 2, ny(2) + bh / 2, 'r', 7);
+    lines(fb, fx + 8, ny(2) + 46, wrap('负反馈：皮质醇升高后，抑制下丘脑和垂体', Math.max(70, w - fx - 12), 12.5), 'fx-s fx-r', 17);
+    const fg = el('g', {}, s), fy = ny(4) + bh + 30; // the faster route: beside the chain when wide, below it when narrow
+    lines(fg, wide ? cx + bw / 2 + 24 : 0, wide ? ny(0) + 22 : fy, wrap('另一条更快的通路：交感神经 → 肾上腺髓质 → 肾上腺素，几秒内起作用', wide ? w - cx - bw / 2 - 30 : w - 4, 12.5), 'fx-s', 17);
+    return (t) => { gs.forEach((g, i) => show(g, stage(t, i * 0.13, 0.18))); show(fb, stage(t, 0.72, 0.2)); show(fg, stage(t, 0.85, 0.15)); };
+  }, { dur: 2200, replay: true });
+
+  /* ===== 03-05 · cortisol over a day and after a short stressor (schematic) ===== */
+  F.cortisol = (fig) => {
+    const S = { mode: 'acute' };
+    figure(fig, (box, w, api) => {
+      const h = 230, L = 10, R = 10, T = 30, B = 46, s = svgIn(box, w, h, fig);
+      const day = S.mode === 'day';
+      const [x0, x1] = day ? [6, 24] : [-15, 90];
+      const X = (v) => L + (v - x0) / (x1 - x0) * (w - L - R), Y = (v) => h - B - v * (h - T - B);
+      const f = day
+        ? (x) => (x < 7 ? 0.32 : x < 7.6 ? lerp(0.32, 0.95, ease((x - 7) / 0.6)) : 0.89 * Math.exp(-(x - 7.6) / 5.2) + 0.06 * (1 - (x - 7.6) / 16.4))
+        : (x) => 0.25 + (x < 0 ? 0 : 0.6 * (x / 30) ** 2 * Math.exp(2 * (1 - x / 30)));
+      el('path', { d: `M${L},${T - 10} V${h - B} H${w - R}`, class: 'fx-ln' }, s);
+      tx(s, L + 4, T - 16, '↑ 皮质醇水平（示意）', 'fx-n');
+      const ticks = day ? [[7, '起床'], [12, '中午'], [18, '傍晚'], [24, '午夜']] : [[0, '压力开始'], [30, '30 分钟'], [60, '60 分钟'], [90, '90 分钟']];
+      ticks.forEach(([v, lab]) => { el('line', { x1: X(v), x2: X(v), y1: h - B, y2: h - B + 5, class: 'fx-ln' }, s); tx(s, X(v), h - B + 20, lab, 'fx-n', v === x1 ? 'end' : 'middle'); });
+      if (!day) { el('rect', { x: X(0), y: T - 6, width: X(15) - X(0), height: h - B - T + 6, class: 'fx-band2' }, s); tx(s, X(7.5), h - B + 38, '压力任务', 'fx-s fx-b', 'middle'); }
+      else { tx(s, X(7.6) + 6, Y(0.95) + 4, '起床后约半小时达到高峰', 'fx-s fx-halo'); }
+      const pts = []; for (let v = x0; v <= x1; v += (x1 - x0) / 300) pts.push([X(v), Y(f(v))]);
+      const path = el('path', { class: 'fx-ln fx-lr fx-curve' }, s);
+      api.out.textContent = day
+        ? '在没有特别压力的日子里，皮质醇也有自己的节律：醒来后的半小时左右明显升高，然后在一天中逐渐下降，到夜里降到最低。'
+        : '一次短暂的压力（比如在评委面前做演讲）之后，皮质醇不是立刻升高，而是在压力开始后二三十分钟左右才达到高峰，随后在负反馈的作用下逐渐回落。';
+      return (t) => { const n = Math.max(1, Math.round(t * (pts.length - 1))); path.setAttribute('d', pts.slice(0, n + 1).map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' ')); };
+    }, { dur: 1500, ctrls: { value: 'acute', items: [['acute', '一次短暂的压力'], ['day', '普通的一天']], onChange: (v) => { S.mode = v; } } });
+  };
+
+  /* ===== 03-05 · Tinbergen's four questions, applied to one behaviour ===== */
+  F.levels = (fig) => {
+    const EX = {
+      stress: ['急性压力反应', [
+        ['机制', '大脑判断出威胁，HPA 轴和交感神经启动，皮质醇和肾上腺素升高。'],
+        ['发育', '早年的经历和环境，可能调整这套系统的敏感程度（动物研究中证据较多）。'],
+        ['功能', '在短时间内调动能量和注意力，帮助应对眼前的挑战。'],
+        ['演化史', '许多脊椎动物都有以皮质醇或类似激素为核心的压力反应，说明它起源很早。'],
+      ]],
+      song: ['雄鸟在春天鸣唱', [
+        ['机制', '白天变长，引起激素变化，鸣唱相关脑区随之改变。'],
+        ['发育', '幼鸟要在早期听到同类成年鸟的鸣唱，之后才能学会唱得完整。'],
+        ['功能', '吸引配偶，宣示和保卫领地。'],
+        ['演化史', '鸣唱学习只在少数几个鸟类类群中出现，可以通过比较亲缘关系推断它的起源。'],
+      ]],
+    };
+    const S = { ex: 'stress' };
+    figure(fig, (box, w) => {
+      const [, cells] = EX[S.ex], wide = w >= 520, head = wide ? 40 : 0, cw = wide ? (w - 96) / 2 : w;
+      const ls = cells.map(([, t]) => wrap(t, cw - 24, 13.5));
+      const rowH = (i) => wide ? Math.max(ls[i].length, ls[i + 1].length) * 20 + 44 : 0;
+      const pos = []; let y = head;
+      if (wide) { [0, 2].forEach((i) => { const hh = rowH(i); pos[i] = [96, y, cw, hh]; pos[i + 1] = [96 + cw, y, cw, hh]; y += hh; }); }
+      else cells.forEach((_, i) => { const hh = ls[i].length * 20 + 44; pos[i] = [0, y, w, hh]; y += hh; });
+      const h = y + 2, s = svgIn(box, w, h, fig);
+      if (wide) {
+        tx(s, 96 + cw / 2, 16, '眼前这一刻', 'fx-n', 'middle'); tx(s, 96 + cw * 1.5, 16, '随时间展开', 'fx-n', 'middle');
+        lines(s, 0, head + rowH(0) / 2 - 4, ['它是怎样', '运作的？'], 'fx-n', 16); lines(s, 0, head + rowH(0) + rowH(2) / 2 - 4, ['它为什么', '会存在？'], 'fx-n', 16);
+      }
+      const gs = cells.map(([k, t], i) => {
+        const [x, yy, ww, hh] = pos[i], g = el('g', {}, s), ult = i >= 2;
+        el('rect', { x: x + 1, y: yy + 1, width: ww - 2, height: hh - 2, class: 'fx-box' }, g);
+        tx(g, x + 12, yy + 24, (wide ? '' : (ult ? '为什么 · ' : '怎样 · ')) + k, ult ? 'fx-h fx-r' : 'fx-h fx-b');
+        lines(g, x + 12, yy + 46, ls[i], 'fx-t', 20);
+        return g;
+      });
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.3)));
+    }, { dur: 1400, ctrls: { value: 'stress', items: Object.entries(EX).map(([k, [lab]]) => [k, lab]), onChange: (v) => { S.ex = v; } } });
   };
 
   window.PPFig = F;
