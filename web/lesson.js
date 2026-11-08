@@ -57,6 +57,7 @@
     const quiz = $('[data-quiz]', body);
     if (quiz) checks(quiz);
     if (location.hash) document.getElementById(location.hash.slice(1))?.scrollIntoView();
+    document.dispatchEvent(new Event('pp:lesson-ready')); // nav.js can now return the reader to their place
   }).catch(() => {
     const note = $('.l-note');
     if (note) note.insertAdjacentHTML('beforeend', '<p>正文暂时没有加载成功，请刷新页面再试。</p>');

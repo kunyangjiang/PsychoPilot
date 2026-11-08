@@ -1,42 +1,98 @@
-/* PsychoPilot — going back, shared by every page.
-   1. Each page remembers how far down the reader was (per tab, in sessionStorage). The back
-      button returns to that spot: when the page it leads to is the one the reader came from,
-      it steps back in history; otherwise it opens the page and scrolls to the remembered place.
-   2. Once the top bar has scrolled away, a floating back button stays in the bottom-left corner,
-      opposite the back-to-top button. It does not move. */
+/* PsychoPilot — going back and picking up where you left off, shared by every page.
+   1. Each page remembers how far down the reader was (per tab, in sessionStorage). Going back, by the
+      page's own back button or the browser's, returns to that spot; so does a reload.
+   2. Each lesson also remembers the paragraph the reader had reached (in localStorage, across visits).
+      Opening the lesson again returns there, with a short note offering to start from the top.
+   3. Once the top bar has scrolled away, a floating back button stays in the bottom-left corner,
+      opposite the back-to-top button. It does not move.
+   Page addresses are normalised because the host serves course.html as /course and index.html as /. */
 (() => {
   'use strict';
-  const KEY = 'pp.scroll', FLAG = 'pp.restore';
-  const keyOf = (u) => { const url = new URL(u, location.href); let p = url.pathname; if (p.endsWith('/')) p += 'index.html'; return p + url.search; };
+  const KEY = 'pp.scroll', FLAG = 'pp.restore', READ = 'pp.read';
+  const keyOf = (u) => {
+    const url = new URL(u, location.href);
+    let p = url.pathname.replace(/\.html$/, '');
+    if (p.endsWith('/index')) p = p.slice(0, -5);
+    return p + url.search;
+  };
   const here = keyOf(location.href);
-  const read = () => { try { return JSON.parse(sessionStorage.getItem(KEY)) || {}; } catch { return {}; } };
-  const save = () => { try { const m = read(); m[here] = Math.round(scrollY); sessionStorage.setItem(KEY, JSON.stringify(m)); } catch {} };
+  const json = (store, k) => { try { return JSON.parse(store.getItem(k)) || {}; } catch { return {}; } };
+  const put = (store, k, v) => { try { store.setItem(k, JSON.stringify(v)); } catch {} };
+
+  /* ---------- lesson pages: the paragraph the reader had reached ---------- */
+  const lessonId = /\/course$/.test(location.pathname.replace(/\.html$/, '')) ? new URLSearchParams(location.search).get('id') : null;
+  const blocks = () => [...document.querySelectorAll('.l-text > :not(section), .l-text section > *')]; // paragraphs, figures, headings
+  let ready = !lessonId; // lesson text loaded (other pages are ready at once)
+  let settled = false; // the arrival jump is over, so scrolling now is the reader's own
+  const mark = () => { // first block whose bottom is below the top of the window, and how far into it we are
+    const bs = blocks();
+    const i = bs.findIndex((b) => b.getBoundingClientRect().bottom > 80);
+    if (i < 0) return null;
+    return { i, dy: Math.round(80 - bs[i].getBoundingClientRect().top), y: Math.round(scrollY), t: Date.now() };
+  };
+  const yOfMark = (m) => { const b = blocks()[m.i]; return b ? b.getBoundingClientRect().top + scrollY - 80 + m.dy : m.y; };
+  const saveRead = () => {
+    if (!lessonId || !ready || !settled) return;
+    const all = json(localStorage, READ);
+    if (scrollY < 200) delete all[lessonId]; else { const m = mark(); if (m) all[lessonId] = m; }
+    put(localStorage, READ, all);
+  };
+
+  // per tab: the scroll position, plus (on a lesson) the paragraph, so a different window width still lands right
+  const save = () => { const m = json(sessionStorage, KEY); const mk = lessonId && ready ? mark() : null; m[here] = mk ? { y: Math.round(scrollY), m: mk } : Math.round(scrollY); put(sessionStorage, KEY, m); saveRead(); };
   addEventListener('pagehide', save);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
   document.addEventListener('click', (e) => { if (e.target.closest?.('a[href]')) save(); }, true); // pagehide can come late on phones
+  let st = 0;
+  addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(saveRead, 400); }, { passive: true });
 
-  /* ---------- arriving through a back button: scroll to the remembered spot ---------- */
-  let want = null;
-  try { if (sessionStorage.getItem(FLAG) === here) { want = read()[here] ?? null; sessionStorage.removeItem(FLAG); } } catch {}
-  if (want !== null) {
-    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
-    let touched = false;
-    ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => { touched = true; }, { once: true, passive: true }));
-    // fonts, covers and lesson text can still change the page height, so the jump is repeated until the reader takes over
-    const go = () => { if (!touched) scrollTo({ top: want, behavior: 'instant' }); };
-    go(); requestAnimationFrame(go); addEventListener('load', go); document.fonts?.ready.then(go); setTimeout(go, 400); setTimeout(go, 1200);
+  /* ---------- arriving: decide where to put the reader ---------- */
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  const navType = performance.getEntriesByType?.('navigation')[0]?.type || 'navigate';
+  let flagged = false;
+  try { flagged = sessionStorage.getItem(FLAG) === here; if (flagged) sessionStorage.removeItem(FLAG); } catch {}
+  const sessionY = json(sessionStorage, KEY)[here]; // a number, or { y, m } on a lesson
+  const wantBack = (flagged || navType === 'back_forward' || navType === 'reload') && sessionY != null; // beats a #hash in the address
+  const record = lessonId && !wantBack && !location.hash ? json(localStorage, READ)[lessonId] : null;
+
+  let touched = false;
+  ['wheel', 'touchstart', 'keydown', 'pointerdown'].forEach((t) => addEventListener(t, () => { touched = true; settled = true; }, { once: true, passive: true }));
+  const target = () => (wantBack ? (typeof sessionY === 'object' ? yOfMark(sessionY.m) : sessionY) : record ? yOfMark(record) : null);
+  const go = () => { const y = target(); if (y != null && !touched) scrollTo({ top: Math.max(0, y), behavior: 'instant' }); };
+  // fonts, figures and the lesson text itself can still change the page height, so the jump is repeated until it is stable
+  const finish = () => { go(); setTimeout(() => { go(); settled = true; if (record && !touched && scrollY > 200) note(); }, 500); };
+  if (target() != null || lessonId) {
+    go(); requestAnimationFrame(go); document.fonts?.ready.then(go);
+    if (ready) addEventListener('load', finish, { once: true });
+  } else settled = true;
+  if (!lessonId && document.readyState === 'complete') finish();
+  document.addEventListener('pp:lesson-ready', () => { ready = true; if (document.readyState === 'complete') finish(); else addEventListener('load', finish, { once: true }); });
+  if (lessonId) setTimeout(() => { settled = true; }, 6000); // lessons without a manuscript never send the event
+  addEventListener('pageshow', (e) => { if (e.persisted) { try { if (sessionStorage.getItem(FLAG) === here) sessionStorage.removeItem(FLAG); } catch {} } });
+
+  // a short note after jumping into the middle of a lesson, with a way back to the start
+  function note() {
+    const n = document.createElement('div');
+    n.className = 'resume-note'; n.setAttribute('role', 'status');
+    n.innerHTML = '<span>已回到上次读到的位置</span><button type="button">从头读</button>';
+    document.body.appendChild(n);
+    void n.offsetWidth; n.classList.add('is-on'); // reflow first, so it fades in
+    const close = () => { n.classList.remove('is-on'); setTimeout(() => n.remove(), 400); };
+    n.querySelector('button').addEventListener('click', () => { scrollTo({ top: 0, behavior: 'instant' }); close(); });
+    setTimeout(close, 7000);
   }
-  addEventListener('pageshow', (e) => { if (e.persisted) try { if (sessionStorage.getItem(FLAG) === here) sessionStorage.removeItem(FLAG); } catch {} });
 
+  /* ---------- the back button ---------- */
   const back = document.querySelector('.mast .back');
   if (!back) return;
   const goBack = (e) => {
     if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // let new-tab clicks through
-    const target = keyOf(back.href);
+    const t = keyOf(back.href);
     save();
     let from = '';
     try { if (document.referrer && new URL(document.referrer).origin === location.origin) from = keyOf(document.referrer); } catch {}
-    try { sessionStorage.setItem(FLAG, target); } catch {}
-    if (from === target && history.length > 1) { e.preventDefault(); history.back(); }
+    try { sessionStorage.setItem(FLAG, t); } catch {}
+    if (from === t && history.length > 1) { e.preventDefault(); history.back(); }
   };
   back.addEventListener('click', goBack);
 

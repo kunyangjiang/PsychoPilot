@@ -398,6 +398,18 @@ button { font: inherit; color: inherit; }
 .to-back:hover svg { transform: translateX(-3px); }
 @media (hover: hover) { .to-back:hover .t, .to-back:focus-visible .t { max-width: 18em; opacity: 1; margin-left: 8px; } }
 .to-back:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+/* "back where you left off" note, shown briefly after reopening a lesson mid-way (nav.js) */
+.resume-note {
+  position: fixed; left: 50%; bottom: 28px; z-index: 61; transform: translate(-50%, 12px);
+  display: inline-flex; align-items: center; gap: 14px; padding: 8px 8px 8px 16px; border-radius: 22px;
+  background: var(--text); color: var(--paper); font-size: 14px; white-space: nowrap;
+  box-shadow: 0 6px 18px rgba(29, 36, 64, .22); opacity: 0; transition: opacity .35s var(--ease), transform .45s var(--ease);
+}
+.resume-note.is-on { opacity: 1; transform: translate(-50%, 0); }
+.resume-note button { padding: 4px 12px; border: 0; border-radius: 14px; background: var(--paper); color: var(--text); font: inherit; font-weight: 600; cursor: pointer; }
+.resume-note button:hover, .resume-note button:focus-visible { background: var(--red); color: var(--paper); }
+@media (prefers-reduced-motion: reduce) { .resume-note { transition: none; } }
+@media print { .resume-note { display: none; } }
 @media print { .to-back, .to-top { display: none; } }
 @keyframes top-wiggle {
   0%, 100% { transform: none; }
