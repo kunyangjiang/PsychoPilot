@@ -12,14 +12,16 @@
 </head>
 <body>
   <!-- Lesson page (course.html?id=XX-YY). Lessons with a manuscript in lessons/ are loaded by
-       lesson.js into #lesson; the others show the "in preparation" note. -->
+       lesson.js into #lesson; the others show the "in preparation" note. The note and stamp stay
+       hidden (article.l-wait) until lesson.js knows there is no manuscript, so finished lessons
+       never flash the placeholder. -->
   <div class="wrap">
     <header class="mast">
       <a class="back" id="back" href="index.html#volumes"><span class="num" aria-hidden="true">←</span><span id="back-t">PsychoPilot</span></a>
       <a class="logo" href="index.html"><i aria-hidden="true"></i>PsychoPilot</a>
     </header>
 
-    <article>
+    <article class="l-wait">
       <div class="l-hero">
         <div>
           <div class="crumb lab" id="crumb"></div>

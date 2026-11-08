@@ -1317,5 +1317,204 @@
     ['训练很多', [['奖励没有被“贬值”', 0.82, 'fx-bar b'], ['奖励被“贬值”（吃完会不舒服）', 0.74, 'fx-bar']]],
   ], '<p>条形的长度表示测试时（不再给奖励）大鼠按压杠杆的多少。训练较少时，奖励一旦变得不受欢迎，按压就明显减少：行为受目标控制。训练很多以后，即使奖励已经不受欢迎，大鼠仍然照常按压：行为变成了习惯。图中的长短是定性示意，不是原始数据。</p>');
 
+  /* ---------- Stage 06 · memory: models drawn as diagrams, and a few published results ---------- */
+  // a box with a bold title and wrapped smaller lines under it; returns its group and height
+  const card = (p, x, y, w, title, sub, cls, minH = 0) => {
+    const g = el('g', {}, p), ls = sub ? wrapZh(sub, w - 20, 12.5) : [], h = Math.max(minH, 34 + ls.length * 17 + (ls.length ? 6 : 0));
+    el('rect', { x, y, width: w, height: h, rx: 6, class: 'fx-pill ' + cls }, g);
+    tx(g, x + w / 2, y + 22, title, 'fx-h', 'middle');
+    lines(g, x + w / 2, y + 41, ls, 'fx-s', 17, 'middle');
+    return { g, h };
+  };
+  const cardH = (w, sub, minH = 0) => Math.max(minH, 34 + (sub ? wrapZh(sub, w - 20, 12.5).length : 0) * 17 + (sub ? 6 : 0));
+  // bars with their values printed; rows: [label, value, cls, shown text]
+  const dbars = (p, x, y, w, title, rows, max) => {
+    const bars = [], tl = wrapZh(title, w - 18, 15), bw = w - 92;
+    lines(p, x, y + 15, tl, 'fx-h', 21); y += tl.length * 21 + 9;
+    rows.forEach(([lab, v, cls, s]) => {
+      tx(p, x, y + 13, lab, 'fx-s'); y += 20;
+      el('rect', { x, y, width: bw, height: 14, class: 'fx-c' }, p);
+      const b = el('rect', { x, y, width: 0, height: 14, class: cls }, p), t = tx(p, x + bw + 8, y + 12, s, 'fx-n');
+      bars.push([b, (v / max) * bw, t]); y += 26;
+    });
+    return { h: y, set: (k) => bars.forEach(([b, full, t]) => { b.setAttribute('width', (full * k).toFixed(1)); show(t, k > 0.95 ? 1 : 0); }) };
+  };
+  const dpanels = (fig, specs, note) => figure(fig, (box, w, api) => {
+    const two = w >= 520, pw = two ? (w - 32) / 2 : w;
+    const probe = el('svg', {}, box), hs = specs.map(([t, r, m]) => dbars(probe, 0, 0, pw, t, r, m).h);
+    box.innerHTML = '';
+    const h = two ? Math.max(...hs) : hs[0] + hs[1] + 10, s = svgIn(box, w, h, fig);
+    const sets = specs.map(([t, r, m], i) => dbars(s, two && i ? pw + 32 : 0, !two && i ? hs[0] + 10 : 0, pw, t, r, m).set);
+    api.out.innerHTML = note;
+    return (t) => sets.forEach((f) => f(ease(t)));
+  }, { dur: 1000, replay: true });
+
+  /* ===== 06-01 · the modal model: three stores, the processes between them, and where things are lost ===== */
+  F.memflow = (fig) => figure(fig, (box, w) => {
+    const ST = [
+      ['感觉记忆', '容量大，保持时间极短（视觉不到一秒）', '没被注意的很快消失'],
+      ['短时记忆', '容量有限；不复述，十几秒内就大量丢失', '被新信息挤掉或衰退'],
+      ['长时记忆', '容量和保持时间都没有明确的上限', '存着，却暂时提取不出'],
+    ];
+    const wide = w >= 600, parts = [];
+    if (wide) {
+      const gap = 64, bw = (w - gap * 2) / 3, top = 54, bh = Math.max(...ST.map(([, s]) => cardH(bw, s)));
+      const s = svgIn(box, w, top + bh + 52, fig);
+      tx(s, 0, 14, '外界信息', 'fx-n'); const a0 = arrow(s, 30, 24, 30, top - 4);
+      const cards = [], losses = el('g', {}, s);
+      ST.forEach(([t, sub, loss], i) => {
+        const x = i * (bw + gap);
+        cards.push(card(s, x, top, bw, t, sub, i === 1 ? 'r' : 'b', bh).g);
+        el('line', { x1: x + bw / 2, x2: x + bw / 2, y1: top + bh + 4, y2: top + bh + 22, class: 'fx-hair fx-dash' }, losses);
+        tx(losses, x + bw / 2, top + bh + 40, loss, 'fx-s', 'middle');
+      });
+      const y1 = top + bh * 0.36, y2 = top + bh * 0.7;
+      const g1 = el('g', {}, s); arrow(g1, bw + 6, y1, bw + gap - 6, y1); tx(g1, bw + gap / 2, y1 - 8, '注意', 'fx-n', 'middle');
+      const g2 = el('g', {}, s); arrow(g2, 2 * bw + gap + 6, y1, 2 * bw + 2 * gap - 6, y1, 'r'); tx(g2, 2 * bw + 1.5 * gap, y1 - 8, '编码', 'fx-n fx-r', 'middle');
+      arrow(g2, 2 * bw + 2 * gap - 6, y2, 2 * bw + gap + 6, y2, 'r'); tx(g2, 2 * bw + 1.5 * gap, y2 + 17, '提取', 'fx-n fx-r', 'middle');
+      const g3 = el('g', {}, s), cx = bw + gap + bw / 2;
+      el('path', { d: `M${cx - 30},${top - 2} C${cx - 30},${top - 34} ${cx + 30},${top - 34} ${cx + 30},${top - 6}`, class: 'fx-ln' }, g3);
+      arrow(g3, cx + 30, top - 14, cx + 30, top - 2, '', 6); tx(g3, cx + 40, top - 22, '复述', 'fx-n');
+      parts.push([cards[0], a0], [g1], [cards[1]], [g3], [g2], [cards[2]], [losses]);
+    } else {
+      const bw = w - 62, x = 54, gap = 46;
+      let y = 30; const hs = ST.map(([, s, l]) => cardH(bw, s + '。丢失：' + l));
+      const s = svgIn(box, w, 30 + hs.reduce((a, b) => a + b, 0) + gap * 2 + 4, fig);
+      tx(s, x, 14, '外界信息 ↓', 'fx-n');
+      const ys = [];
+      ST.forEach(([t, sub, loss], i) => {
+        const c = card(s, x, y, bw, t, sub + '。丢失：' + loss, i === 1 ? 'r' : 'b');
+        ys.push([y, c.h]); parts.push([c.g]);
+        if (i < 2) {
+          const g = el('g', {}, s); arrow(g, x + 40, y + c.h + 4, x + 40, y + c.h + gap - 4, i === 1 ? 'r' : '');
+          tx(g, x + 52, y + c.h + gap / 2 + 5, i === 0 ? '注意' : '编码', i === 1 ? 'fx-n fx-r' : 'fx-n');
+          parts.push([g]);
+          if (i === 0) { // rehearsal loop on top of the short-term box, in the gap above it
+            const r = el('g', {}, s), y1 = y + c.h + gap, xa = x + bw - 64, xb = x + bw - 24;
+            el('path', { d: `M${xa},${y1 - 2} C${xa},${y1 - 34} ${xb},${y1 - 34} ${xb},${y1 - 8}`, class: 'fx-ln' }, r);
+            arrow(r, xb, y1 - 14, xb, y1 - 2, '', 6); tx(r, xa - 8, y1 - 18, '复述', 'fx-n', 'end');
+            parts.push([r]);
+          }
+        }
+        y += c.h + gap;
+      });
+      const g = el('g', {}, s), yA = ys[2][0] + 20, yB = ys[1][0] + 20;
+      el('line', { x1: x - 8, x2: 22, y1: yA, y2: yA, class: 'fx-ln fx-lr' }, g); el('line', { x1: 22, x2: 22, y1: yA, y2: yB, class: 'fx-ln fx-lr' }, g);
+      arrow(g, 22, yB, x - 4, yB, 'r'); tx(g, 16, (yA + yB) / 2, '提取', 'fx-n fx-r', 'middle').setAttribute('transform', `rotate(-90 16 ${(yA + yB) / 2})`);
+      parts.push([g]);
+    }
+    return (t) => parts.forEach((ps, i) => ps.forEach((p) => p && show(p, stage(t, i / (parts.length + 1), 1.6 / (parts.length + 1)))));
+  }, { dur: 2200, replay: true });
+
+  /* ===== 06-01 · kinds of long-term memory ===== */
+  F.memsys = (fig) => figure(fig, (box, w) => {
+    const BR = [
+      ['外显记忆（陈述性）', '能有意识地回想，并说出来', 'b', [['情景记忆', '亲身经历过的事：上周六和谁吃了晚饭'], ['语义记忆', '一般知识：巴黎是法国的首都']]],
+      ['内隐记忆（非陈述性）', '体现在表现里，不一定意识得到', 'r', [['程序性记忆', '技能：骑自行车、打字'], ['启动效应', '见过的东西，下次更快被认出'], ['经典条件作用', '学会的情绪反应：闻到消毒水就紧张']]],
+    ];
+    const parts = [];
+    if (w >= 600) {
+      const gap = 12, lw = (w - gap * 4) / 5, lh = Math.max(...BR.flatMap((b) => b[3].map(([, s]) => cardH(lw, s)))), bwid = [2 * lw + gap, 3 * lw + 2 * gap];
+      const bcw = bwid.map((b) => Math.min(b, 260)), bh = Math.max(...BR.map(([, sub], i) => cardH(bcw[i], sub, 60))), ly = 70 + bh + 34;
+      const s = svgIn(box, w, ly + lh, fig), rw = 150;
+      parts.push([card(s, (w - rw) / 2, 0, rw, '长时记忆', '', 'b', 34).g]);
+      let x = 0;
+      BR.forEach(([t, sub, cls, leaves], i) => {
+        const bx = x, bw = bwid[i], g = el('g', {}, s), lg = el('g', {}, s);
+        el('path', { d: `M${w / 2},34 V52 H${bx + bw / 2} V70`, class: 'fx-ln' }, g);
+        card(g, bx + (bw - bcw[i]) / 2, 70, bcw[i], t, sub, cls, bh);
+        leaves.forEach(([lt, ls], k) => {
+          const lx = bx + k * (lw + gap);
+          el('path', { d: `M${bx + bw / 2},${70 + bh} V${ly - 17} H${lx + lw / 2} V${ly}`, class: 'fx-hair' }, lg);
+          card(lg, lx, ly, lw, lt, ls, cls, lh);
+        });
+        parts.push([g], [lg]); x += bw + gap;
+      });
+    } else {
+      const ind = 22, bw = w - ind, lw = w - ind * 2;
+      let y = 0; const rows = [];
+      BR.forEach(([t, sub, cls, leaves]) => { rows.push(['b', t, sub, cls]); leaves.forEach(([lt, ls]) => rows.push(['l', lt, ls, cls])); });
+      const H = 44 + rows.reduce((a, [k, , sub]) => a + cardH(k === 'b' ? bw : lw, sub) + 10, 0);
+      const s = svgIn(box, w, H, fig);
+      parts.push([card(s, 0, 0, Math.min(150, w), '长时记忆', '', 'b', 34).g]); y = 44;
+      let g = null, by = 0;
+      rows.forEach(([k, t, sub, cls]) => {
+        if (k === 'b') { g = el('g', {}, s); parts.push([g]); el('path', { d: `M10,34 V${y + 18} H${ind}`, class: 'fx-hair' }, g); const c = card(g, ind, y, bw, t, sub, cls); by = y + c.h; y += c.h + 10; return; }
+        el('path', { d: `M${ind + 10},${by} V${y + 18} H${ind * 2}`, class: 'fx-hair' }, g);
+        const c = card(g, ind * 2, y, lw, t, sub, cls); y += c.h + 10;
+      });
+    }
+    return (t) => parts.forEach((ps, i) => ps.forEach((p) => show(p, stage(t, i / (parts.length + 1), 1.5 / (parts.length + 1)))));
+  }, { dur: 1800, replay: true });
+
+  /* ===== 06-02 · Baddeley's working-memory model, 1974 and with the episodic buffer added in 2000 ===== */
+  F.wm = (fig) => {
+    const S = { v: '2000', prev: '2000' };
+    figure(fig, (box, w, api) => {
+      const gap = w < 460 ? 8 : 16, bw = (w - gap * 2) / 3;
+      const SL = [['语音环路', '保存声音和言语；默念可以刷新它'], ['情景缓冲器', '把不同来源的信息整合成一个情景'], ['视空间画板', '保存视觉形象和空间位置']];
+      const sh = Math.max(...SL.map(([, d]) => cardH(bw, d))), ew = Math.min(w, 300), eh = cardH(ew, '分配注意，协调和控制其他成分');
+      const y1 = eh + 40, y2 = y1 + sh + 40, lh = cardH(w, '语言知识、视觉知识，以及过去的情景');
+      const s = svgIn(box, w, y2 + lh, fig);
+      card(s, (w - ew) / 2, 0, ew, '中央执行系统', '分配注意，协调和控制其他成分', 'r');
+      const buf = el('g', {}, s);
+      SL.forEach(([t, d], i) => {
+        const x = i * (bw + gap), g = i === 1 ? buf : s;
+        el('line', { x1: x + bw / 2, x2: x + bw / 2, y1: eh + 4, y2: y1 - 4, class: 'fx-ln' }, g);
+        card(g, x, y1, bw, t, d, 'b', sh);
+        arrow(g, x + bw / 2 - 8, y1 + sh + 4, x + bw / 2 - 8, y2 - 4, '', 6); arrow(g, x + bw / 2 + 8, y2 - 4, x + bw / 2 + 8, y1 + sh + 4, '', 6);
+      });
+      card(s, 0, y2, w, '长时记忆', '语言知识、视觉知识，以及过去的情景', 'm', lh);
+      const a0 = S.prev === '2000' ? 1 : 0, a1 = S.v === '2000' ? 1 : 0;
+      api.out.innerHTML = S.v === '2000'
+        ? '<p>2000 年，巴德利加入了第四个成分：<b>情景缓冲器</b>。它解释了一些原模型难以说明的现象，比如人能在短时间内记住一整句有意义的话，远多于记住同样数量的无关词。</p>'
+        : '<p>1974 年的模型有三个成分：一个负责控制的中央执行系统，和两个分别保存言语信息与视觉空间信息的“子系统”。</p>';
+      return (t) => show(buf, lerp(a0, a1, ease(t)));
+    }, { dur: 700, ctrls: { value: '2000', items: [['1974', '1974 年：三个成分'], ['2000', '2000 年：加入情景缓冲器']], onChange: (v) => { S.prev = S.v; S.v = v; } } });
+  };
+
+  /* ===== 06-03 · proactive and retroactive interference on one timeline ===== */
+  F.interfere = (fig) => figure(fig, (box, w) => {
+    const R = [
+      ['前摄干扰：旧的妨碍新的', [['先学', '旧密码 A'], ['后学', '新密码 B'], ['回忆 B', '旧密码先冒出来']], 0, 2, '旧的学习向前干扰'],
+      ['倒摄干扰：新的妨碍旧的', [['先学', '旧密码 A'], ['后学', '新密码 B'], ['回忆 A', '被新密码挡住']], 1, 0, '新的学习向后干扰'],
+    ];
+    const gap = w < 460 ? 16 : 34, bw = (w - gap * 2) / 3, bh = Math.max(...R.flatMap(([, c]) => c.map(([, s]) => cardH(bw, s, 58))));
+    const rowH = 30 + 44 + bh + 22, s = svgIn(box, w, rowH * 2 - 10, fig), parts = [];
+    R.forEach(([title, cells, from, to, lab], r) => {
+      const y0 = r * rowH, g = el('g', {}, s), y = y0 + 30 + 44;
+      tx(g, 0, y0 + 16, title, 'fx-h');
+      cells.forEach(([t, d], i) => {
+        const x = i * (bw + gap);
+        card(g, x, y, bw, t, d, i === 2 ? 'r' : 'b', bh);
+        if (i < 2) arrow(g, x + bw + 4, y + bh / 2, x + bw + gap - 4, y + bh / 2);
+      });
+      const a = el('g', {}, s), xf = from * (bw + gap) + bw / 2, xt = to * (bw + gap) + bw / 2, top = y0 + 46;
+      el('path', { d: `M${xf},${y - 2} C${xf},${top} ${xt},${top} ${xt},${y - 10}`, class: 'fx-ln fx-lr' }, a);
+      arrow(a, xt, y - 14, xt, y - 2, 'r', 7);
+      tx(a, (xf + xt) / 2, top + 4, lab, 'fx-n fx-r fx-halo', 'middle');
+      parts.push([g], [a]);
+    });
+    return (t) => parts.forEach((ps, i) => ps.forEach((p) => show(p, stage(t, i * 0.22, 0.3))));
+  }, { dur: 1600, replay: true });
+
+  /* ===== 06-04 · Loftus & Palmer (1974): the verb in the question, the speed estimate, and the broken glass ===== */
+  F.loftus = (fig) => dpanels(fig, [
+    ['实验一：问题里用的动词与估计的车速（英里/小时，平均）', [['smashed（猛撞）', 41, 'fx-bar', '约 41'], ['collided（相撞）', 39, 'fx-bar b', '约 39'], ['bumped（碰撞）', 38, 'fx-bar b', '约 38'], ['hit（撞上）', 34, 'fx-bar b', '约 34'], ['contacted（接触）', 32, 'fx-bar b', '约 32']], 45],
+    ['实验二：一周后，回答“看到了碎玻璃”的人数（每组 50 人）', [['当时问的是 smashed', 16, 'fx-bar', '16 人'], ['当时问的是 hit', 7, 'fx-bar b', '7 人'], ['当时没有问车速', 6, 'fx-bar b', '6 人']], 50],
+  ], '<p>两次实验看的都是车祸录像，录像里并没有碎玻璃。左图的数值取整到整数；括号里的中文只是大意，原始实验用的是英语。数据来源：洛夫特斯与帕尔默（1974）。</p>');
+
+  /* ===== 06-05 · Roediger & Karpicke (2006), Experiment 2: four reading periods versus reading once and testing three times ===== */
+  F.rk = (fig) => dpanels(fig, [
+    ['5 分钟后的测验：回忆出的比例', [['读四遍（SSSS）', 83, 'fx-bar b', '83%'], ['读三遍，测一次（SSST）', 78, 'fx-bar b', '78%'], ['读一遍，测三次（STTT）', 71, 'fx-bar', '71%']], 100],
+    ['1 周后的测验：回忆出的比例', [['读四遍（SSSS）', 40, 'fx-bar b', '40%'], ['读三遍，测一次（SSST）', 56, 'fx-bar b', '56%'], ['读一遍，测三次（STTT）', 61, 'fx-bar', '61%']], 100],
+  ], '<p>S 表示一段阅读，T 表示一次不给反馈的回忆测验。五分钟后，读得越多成绩越好；一周后，顺序完全颠倒。读四遍的人实际读了平均 14.2 次，读一遍测三次的人只读了 3.4 次。数据来源：罗迪格与卡皮克（2006），实验二。</p>');
+
+  /* ===== 06-05 · Rohrer & Taylor (2007), Experiment 2: blocked versus mixed practice ===== */
+  F.interleave = (fig) => dpanels(fig, [
+    ['练习时：做对的比例', [['按题型集中练习', 89, 'fx-bar b', '89%'], ['不同题型混在一起练', 60, 'fx-bar', '60%']], 100],
+    ['一周后的测验：做对的比例', [['按题型集中练习', 20, 'fx-bar b', '20%'], ['不同题型混在一起练', 63, 'fx-bar', '63%']], 100],
+  ], '<p>大学生学习计算四种陌生几何体的体积。集中练习时，每讲完一种就做四道同类题；混合练习时，先讲完四种，再把十六道题打乱来做。练习时集中组明显领先，一周后的测验却是混合组领先。数据来源：罗勒与泰勒（2007），实验二。</p>');
+
   window.PPFig = F;
 })();

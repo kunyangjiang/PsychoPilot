@@ -877,5 +877,342 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit };
+  /* =====================================================================
+     Stage 06 · memory. Four short tasks the reader does in the browser, and one
+     illustrative model. Tasks keep results only in the page; none of them is a
+     validated test, and each says so on screen.
+     ===================================================================== */
+  // a timed sequence in a box: items[i] shown for on ms, then a blank of off ms; returns a cancel function
+  const present = (box, items, on, off, done) => {
+    let k = 0, t = 0, dead = false;
+    const next = () => {
+      if (dead) return;
+      if (k >= items.length) { box.textContent = ''; done(); return; }
+      box.textContent = items[k]; k++;
+      t = setTimeout(() => { box.textContent = ''; t = setTimeout(next, off); }, on);
+    };
+    next();
+    return () => { dead = true; clearTimeout(t); };
+  };
+  const recallArea = (label, hint) => {
+    const w = document.createElement('label'); w.className = 'lab-recall';
+    w.innerHTML = `<span class="lab-k">${label}</span><textarea rows="3" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="${hint}"></textarea>`;
+    return w;
+  };
+  const pick = (a, n) => shuffle([...a]).slice(0, n);
+
+  /* 06-01 · serial position: immediate recall versus recall after 30 s of counting backwards */
+  const WORDS = ['苹果', '钢琴', '蜡烛', '老虎', '雨伞', '镜子', '火车', '枕头', '剪刀', '地图', '月亮', '铃铛', '西瓜', '帽子', '钥匙', '轮船', '蝴蝶', '台灯', '篮球', '茶壶', '信封', '梯子', '手套', '骆驼', '风筝', '冰箱', '肥皂', '鸽子', '铅笔', '邮票', '窗帘', '面包', '花瓶', '沙发', '斧头', '口哨'];
+  const SP_N = 12, SP_DELAY = 30;
+  // schematic serial-position shapes (proportion recalled by position), not data from any study
+  const spShape = (i, delayed) => 0.3 + 0.32 * Math.exp(-(i - 1) / 1.4) + (delayed ? 0 : 0.5 * Math.exp(-(SP_N - i) / 1.5));
+  function serial(host) {
+    const o = { when: 'now' };
+    const { fig, out, actions } = shell(host, '先记住，再写下来',
+      `屏幕上会依次出现 ${SP_N} 个词，每个大约一秒半。看完以后，把你记得的词写下来，顺序不限，可以用空格隔开，也可以连在一起写。“立即回忆”是看完马上写；“30 秒后回忆”是看完先做 30 秒心算（从一个三位数开始，每次减 3，小声数出来），然后再写。`,
+      [['when', '什么时候回忆', [['now', '立即回忆'], ['delay', '30 秒后回忆']]]],
+      '这是一个教学演示，不是记忆测验。词表很短，每轮只有十几个词，偶然波动很大；你的结果只保存在这个页面里，刷新就会清空。图中的两条曲线是示意形状，不是任何研究的原始数据。', TASK);
+    const box = document.createElement('div'); box.className = 'lab-stroop lab-word'; box.setAttribute('aria-live', 'polite');
+    const rec = recallArea('你记得的词', '例如：苹果 钢琴 ……');
+    const area = rec.querySelector('textarea');
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    const chart = document.createElement('div');
+    fig.append(box, rec, ctl, status, chart);
+    const runs = { now: [], delay: [] }; // each run: array of 12 booleans by position
+    let list = [], cancel = () => {}, phase = 'idle', clock = 0;
+    const setPhase = (p) => { phase = p; rec.hidden = p !== 'recall'; ctl.innerHTML = ''; };
+    const stop = () => { cancel(); clearInterval(clock); };
+    const begin = () => {
+      stop(); list = pick(WORDS, SP_N); area.value = ''; setPhase('show');
+      status.textContent = '请注意看。';
+      cancel = present(box, list, 1500, 300, () => (o.when === 'delay' ? count() : recall()));
+    };
+    const count = () => {
+      setPhase('count');
+      let left = SP_DELAY; const n0 = 300 + Math.floor(Math.random() * 600);
+      box.textContent = `${n0} − 3 − 3 …`;
+      status.textContent = `从 ${n0} 开始，每次减 3，小声数出来。还剩 ${left} 秒。`;
+      clock = setInterval(() => { left--; if (left <= 0) { clearInterval(clock); recall(); } else status.textContent = `从 ${n0} 开始，每次减 3，小声数出来。还剩 ${left} 秒。`; }, 1000);
+    };
+    const recall = () => {
+      setPhase('recall'); box.textContent = '写下你记得的词';
+      status.textContent = '写好以后点“完成”。想不起来的不用猜。';
+      action(ctl, '完成', score); area.focus();
+    };
+    const score = () => {
+      if (phase !== 'recall') return;
+      const said = area.value.replace(/\s+/g, ' ');
+      const hit = list.map((w) => said.includes(w));
+      runs[o.when].push(hit); setPhase('done');
+      box.innerHTML = list.map((w, i) => `<span class="${hit[i] ? 'is-hit' : ''}">${w}</span>`).join('');
+      box.classList.add('lab-list');
+      status.innerHTML = `这一轮你写对了 <b>${hit.filter(Boolean).length}</b> / ${SP_N} 个。上面按出现的顺序列出全部词，写对的用红色标出。`;
+      action(ctl, '再来一轮', () => { box.classList.remove('lab-list'); begin(); });
+      ctl.querySelector('button').focus();
+      draw();
+    };
+    const draw = () => {
+      const W = widthOf(fig), H = 250;
+      chart.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `示意曲线：立即回忆时，开头和结尾的词都容易记住；30 秒后回忆时，结尾的优势消失，开头的优势仍在。${['now', 'delay'].map((k) => runs[k].length ? `你在${k === 'now' ? '立即回忆' : '30 秒后回忆'}中做了 ${runs[k].length} 轮。` : '').join('')}` }, chart);
+      const { X, Y } = lc(svg, W, H, { xMax: SP_N + 0.6, yMax: 1, xTicks: [1, 4, 8, 12], yTicks: [[0, '0'], [0.5, '50%'], [1, '100%']], xLab: '词在列表中的位置', yLab: '写对的比例', L: 46 });
+      const xs = Array.from({ length: SP_N }, (_, i) => i + 1);
+      line(svg, xs.map((i) => [X(i), Y(spShape(i, false))]), 'fx-ln fx-lr fx-curve');
+      line(svg, xs.map((i) => [X(i), Y(spShape(i, true))]), 'fx-ln fx-lb fx-dash fx-curve');
+      [['now', 'fx-node r'], ['delay', 'fx-dot lo']].forEach(([k, cls]) => {
+        const R = runs[k]; if (!R.length) return;
+        xs.forEach((i) => el('circle', { cx: X(i), cy: Y(R.filter((r) => r[i - 1]).length / R.length), r: 4.5, class: cls }, svg));
+      });
+      const n = runs.now.length, d = runs.delay.length;
+      const tail = (k) => { const R = runs[k]; let s = 0; R.forEach((r) => { s += r.slice(-3).filter(Boolean).length; }); return R.length ? s / (3 * R.length) : null; };
+      const head = (k) => { const R = runs[k]; let s = 0; R.forEach((r) => { s += r.slice(0, 3).filter(Boolean).length; }); return R.length ? s / (3 * R.length) : null; };
+      out.innerHTML = `<p class="fx-keys"><span><i class="k hi"></i>立即回忆（示意曲线）</span><span><i class="k dash"></i>30 秒后回忆（示意曲线）</span></p>
+        <p class="lab-note">圆点是你自己的结果：实心红点是立即回忆，空心圆圈是 30 秒后回忆。每个位置上的点表示，在你做过的几轮里，这个位置的词被写对的比例。</p>
+        ${n + d ? `<ul class="lab-parts lab-flow">${[['now', '立即回忆'], ['delay', '30 秒后回忆']].filter(([k]) => runs[k].length).map(([k, t]) => `<li><span>${t} · ${runs[k].length} 轮</span><b>开头 ${pct(head(k), 1)}｜结尾 ${pct(tail(k), 1)}</b></li>`).join('')}</ul>` : ''}
+        <p>${n && d ? '“开头”和“结尾”分别指列表中前 3 个和后 3 个词被写对的比例。经典结果是：先做 30 秒心算，结尾几个词的优势（近因效应）基本消失，而开头几个词的优势（首因效应）几乎不受影响。你只做了几轮，结果不一定这么整齐。' : '提示：两种条件各做一两轮，再比较开头和结尾的词。'}</p>`;
+    };
+    bindControls(host, o, () => { if (phase !== 'idle' && phase !== 'done') { stop(); setPhase('idle'); box.textContent = ''; status.textContent = '设置改变了，这一轮已作废。点“开始”重新来。'; } });
+    action(actions, '开始', () => { box.classList.remove('lab-list'); begin(); });
+    action(actions, '清空结果', () => { stop(); runs.now = []; runs.delay = []; setPhase('idle'); box.classList.remove('lab-list'); box.textContent = ''; status.textContent = '点“开始”。'; draw(); }, 'lab-clear');
+    setPhase('idle'); status.textContent = '点“开始”。'; draw();
+    onResize(draw);
+  }
+
+  /* 06-02 · digit span: one digit at a time, or the same digits in groups of three */
+  function span(host) {
+    const o = { mode: 'one' };
+    const { fig, out, actions } = shell(host, '一次能记住几位数字？',
+      '屏幕上会依次出现一串数字。数字消失后，按原来的顺序输入它们（用下面的数字键，或者直接用键盘输入，按 Enter 确定）。从 4 位开始；每个长度有两次机会，只要有一次全对，就增加一位；两次都错，这一轮就结束。',
+      [['mode', '呈现方式', [['one', '一个一个出现'], ['group', '三个一组出现']]]],
+      '这是一个教学演示，不是经过验证的测量。正式的数字广度测验有统一的速度、指导语和常模；这里的屏幕、环境和你的状态都会影响结果。它不能说明你的智力、注意力或记忆力好坏。结果只保存在这个页面里。', TASK);
+    const box = document.createElement('div'); box.className = 'lab-stroop'; box.setAttribute('aria-live', 'polite');
+    const typed = document.createElement('p'); typed.className = 'lab-typed'; typed.setAttribute('aria-live', 'polite');
+    const pad = document.createElement('div'); pad.className = 'lab-pad';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(box, typed, pad, status);
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '删除', '0', '确定'].map((k) => action(pad, k, () => press(k), k === '确定' ? '' : 'lab-clear'));
+    const history = [];
+    let len = 4, tries = 0, okAt = 0, best = 0, seq = [], input = '', phase = 'idle', cancel = () => {};
+    const setPad = (on) => { pad.hidden = !on; typed.hidden = !on; };
+    const make = (n) => { const a = []; while (a.length < n) { const d = Math.floor(Math.random() * 10); if (d !== a[a.length - 1]) a.push(d); } return a; };
+    const trial = () => {
+      seq = make(len); input = ''; phase = 'show'; setPad(false); box.classList.remove('lab-seq');
+      status.textContent = `${len} 位数字，第 ${tries + 1} 次机会。请注意看。`;
+      const items = o.mode === 'one' ? seq.map(String) : seq.join('').match(/.{1,3}/g);
+      const on = o.mode === 'one' ? 800 : 2400;
+      cancel = present(box, items, on, 250, () => { phase = 'type'; box.textContent = '？'; typed.textContent = '　'; setPad(true); status.textContent = '按顺序输入刚才的数字。'; keys[0].focus(); });
+    };
+    const start = () => { cancel(); len = 4; tries = 0; okAt = 0; best = 0; trial(); };
+    const press = (k) => {
+      if (phase !== 'type') return;
+      if (k === '删除') input = input.slice(0, -1);
+      else if (k === '确定') return check();
+      else if (input.length < len) input += k;
+      typed.textContent = input ? input.split('').join(' ') : '　';
+    };
+    const check = () => {
+      const ok = input === seq.join('');
+      tries++; if (ok) { okAt++; best = len; }
+      box.textContent = seq.join(' '); box.classList.add('lab-seq');
+      if (tries === 2 || (ok && tries === 1)) {
+        if (okAt > 0 && len < 14) { len++; tries = 0; okAt = 0; phase = 'wait'; setPad(false); status.textContent = `${ok ? '对了' : '这次没对'}。下一组：${len} 位。`; cancel = present(box, [seq.join(' ')], 1200, 400, trial); return; }
+        phase = 'idle'; setPad(false);
+        history.unshift({ mode: o.mode, best });
+        status.textContent = `${ok ? '对了' : `这次没对，你输入的是 ${input || '（空）'}`}。这一轮结束。`;
+        draw(); actions.querySelector('.lab-act')?.focus(); return;
+      }
+      phase = 'wait'; setPad(false);
+      status.textContent = `这次没对，你输入的是 ${input || '（空）'}。同样长度再试一次。`;
+      cancel = present(box, [seq.join(' ')], 1200, 400, trial);
+    };
+    const draw = () => {
+      if (history.length > 8) history.length = 8;
+      const by = (m) => history.filter((h) => h.mode === m).map((h) => h.best);
+      out.innerHTML = history.length ? `<p>已完成的各轮（最新的在最上面）：</p><ul class="lab-parts">${history.map((h) => `<li><span>${h.mode === 'one' ? '一个一个出现' : '三个一组出现'}</span><b>${h.best ? `最长记对 ${h.best} 位` : '4 位没有记对'}</b></li>`).join('')}</ul>
+        <p>${by('one').length && by('group').length ? '比较两种方式：很多人觉得三个一组更容易，因为几位数字被组织成一个更大的单位来记。但这里只是把呈现分了组，并没有给数字赋予意义；你的两种结果差多少，因人而异，也会受偶然波动影响。' : '提示：两种呈现方式各做一轮，再比较。'}</p>
+        <p>对大多数人来说，这类任务的结果落在五到九位左右，这也是“7±2”这个说法的来源。但这个数字取决于材料、速度和策略：用数字和用字词结果不同，能把材料组块的人记得更多，经过长期训练的人甚至能记住几十位。</p>`
+        : '<p>点“开始”。一轮通常需要两三分钟。</p>';
+    };
+    keyIn(host, (k) => { if (phase !== 'type') return false; if (/^[0-9]$/.test(k)) { press(k); return true; } if (k === 'backspace') { press('删除'); return true; } if (k === 'enter') { press('确定'); return true; } return false; });
+    bindControls(host, o, () => { if (phase !== 'idle') { cancel(); phase = 'idle'; setPad(false); box.textContent = ''; status.textContent = '设置改变了，这一轮已作废。点“开始”重新来。'; } });
+    action(actions, '开始', start);
+    action(actions, '清空结果', () => { cancel(); phase = 'idle'; setPad(false); box.textContent = ''; history.length = 0; status.textContent = ''; draw(); }, 'lab-clear');
+    setPad(false); draw();
+  }
+
+  /* 06-03 · retrieval cues: free recall first, then the same list again with its category names as cues */
+  const CATS = {
+    水果: ['葡萄', '樱桃', '香蕉', '菠萝', '柠檬'], 乐器: ['小提琴', '吉他', '二胡', '长笛', '琵琶'], 动物: ['熊猫', '海豚', '狐狸', '刺猬', '企鹅'],
+    交通工具: ['地铁', '卡车', '帆船', '飞机', '摩托车'], 天气: ['冰雹', '台风', '浓雾', '雷阵雨', '霜冻'], 厨房用品: ['菜刀', '砧板', '锅铲', '漏勺', '蒸笼'],
+    体育运动: ['游泳', '滑雪', '拳击', '射箭', '跳水'], 身体部位: ['肩膀', '膝盖', '眉毛', '手腕', '脚踝'],
+  };
+  function cue(host) {
+    const { fig, out, actions } = shell(host, '想不起来，还是没记住？',
+      '屏幕上会依次出现 18 个词，每个大约一秒半，它们分属 6 个类别，但顺序是打乱的。看完以后先把记得的词写下来；写完，屏幕会给出 6 个类别名称，请再写一次，可以把刚才写过的也写上。',
+      [], '这是一个教学演示，不是记忆测验。词表很短，结果受偶然波动影响很大；它不能说明你的记忆力好坏。结果只保存在这个页面里，刷新就会清空。', TASK);
+    host.querySelector('.lab-ctrls').remove();
+    const box = document.createElement('div'); box.className = 'lab-stroop lab-word'; box.setAttribute('aria-live', 'polite');
+    const hint = document.createElement('p'); hint.className = 'lab-cues';
+    const rec = recallArea('你记得的词', '例如：葡萄 地铁 ……');
+    const area = rec.querySelector('textarea');
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(box, hint, rec, ctl, status);
+    const rounds = [];
+    let items = [], cats = [], free = [], phase = 'idle', cancel = () => {};
+    const setPhase = (p) => { phase = p; rec.hidden = p !== 'free' && p !== 'cued'; hint.hidden = p !== 'cued'; ctl.innerHTML = ''; };
+    const begin = () => {
+      cancel(); box.classList.remove('lab-list');
+      cats = pick(Object.keys(CATS), 6);
+      items = shuffle(cats.flatMap((c) => pick(CATS[c], 3).map((w) => ({ c, w }))));
+      area.value = ''; setPhase('show'); status.textContent = '请注意看。';
+      cancel = present(box, items.map((x) => x.w), 1500, 300, () => {
+        setPhase('free'); box.textContent = '先不看提示，写下你记得的词';
+        status.textContent = '写好以后点“下一步”。'; action(ctl, '下一步', toCued); area.focus();
+      });
+    };
+    const toCued = () => {
+      if (phase !== 'free') return;
+      const said = area.value; free = items.map((x) => said.includes(x.w));
+      area.value = ''; setPhase('cued'); box.textContent = '再写一次，这次有类别提示';
+      hint.innerHTML = '这 18 个词分属：' + cats.map((c) => `<b>${c}</b>`).join('　');
+      status.textContent = '可以把刚才写过的也写上。写好以后点“完成”。'; action(ctl, '完成', done); area.focus();
+    };
+    const done = () => {
+      if (phase !== 'cued') return;
+      const said = area.value, cued = items.map((x, i) => free[i] || said.includes(x.w));
+      const nf = free.filter(Boolean).length, nc = cued.filter(Boolean).length;
+      rounds.unshift({ nf, nc }); setPhase('done');
+      box.classList.add('lab-list');
+      box.innerHTML = cats.map((c) => items.map((x, i) => [x, i]).filter(([x]) => x.c === c).map(([x, i]) => `<span class="${free[i] ? 'is-hit' : cued[i] ? 'is-cue' : ''}">${x.w}</span>`).join('')).join('');
+      status.innerHTML = `没有提示时写对 <b>${nf}</b> 个；有了类别提示，一共写对 <b>${nc}</b> 个。上面按类别列出全部词：红色是一开始就写出来的，蓝框是看到提示后才想起来的。`;
+      action(ctl, '再来一轮', begin); ctl.querySelector('button').focus();
+      draw();
+    };
+    const draw = () => {
+      out.innerHTML = rounds.length ? `<ul class="lab-parts lab-flow">${rounds.slice(0, 6).map((r, i) => `<li><span>第 ${rounds.length - i} 轮</span><b>没有提示 ${r.nf} · 有提示 ${r.nc} / 18</b></li>`).join('')}</ul>
+        <p>${rounds[0].nc > rounds[0].nf ? `这一轮，有 ${rounds[0].nc - rounds[0].nf} 个词在第一次没有写出来，看到类别名称后却想起来了。它们一直都在记忆里，只是第一次缺少一条通向它们的路。` : '这一轮，类别提示没有帮你多想起词来。如果第一次几乎全写出来了，提示自然没有用武之地；词表很短，偶然波动也很大。'}这种差别，正是心理学家区分“储存了没有”（可用性）和“此刻能不能提取”（可及性）的依据。</p>`
+        : '<p>点“开始”。一轮大约需要两分钟。</p>';
+    };
+    action(actions, '开始', begin);
+    action(actions, '清空结果', () => { cancel(); rounds.length = 0; setPhase('idle'); box.classList.remove('lab-list'); box.textContent = ''; status.textContent = ''; draw(); }, 'lab-clear');
+    setPhase('idle'); draw();
+  }
+
+  /* 06-04 · misinformation: a short story, questions that slip in details it never had, then a memory test */
+  const STORY = '周六上午十点左右，街角一家咖啡馆里人不多。靠窗的桌边坐着一位穿灰色外套的女士，她正在用笔记本电脑工作，手边放着一杯拿铁和一部手机。一个穿深蓝色运动衫、背着双肩包的年轻男子走进来，在柜台前排队。轮到他时，他点了一杯美式咖啡，用现金付了钱。等咖啡的时候，他走到窗边看外面的街道，顺手拿起女士桌上的手机，放进运动衫口袋，没有等咖啡就快步走出了门。女士过了大约一分钟才发现手机不见了。店员说，那个男子出门后向左拐，朝公交车站的方向走去。';
+  // [item asked about in the final test, misleading question, neutral question]
+  const LURES = [
+    ['男子戴着一顶帽子', '那名男子把帽子压得很低。你觉得店员能看清他的脸吗？', '那名男子在柜台前点单。你觉得店员能看清他的脸吗？'],
+    ['男子进门时带着一把雨伞', '男子进门时把雨伞靠在了门边。他在柜台前大约排了多久？', '男子进门后先去排队。他在柜台前大约排了多久？'],
+    ['男子骑自行车离开', '男子出门后骑上了停在门外的自行车。你觉得他是事先计划好的吗？', '男子出门后很快就不见了。你觉得他是事先计划好的吗？'],
+    ['女士桌上有一块蛋糕', '女士桌上除了拿铁，还有一块吃了一半的蛋糕。她当时在做什么？', '女士坐在靠窗的桌边。她当时在做什么？'],
+  ];
+  const TRUE_ITEMS = ['女士穿着灰色外套', '男子背着双肩包', '男子用现金付钱', '女士在喝拿铁'];
+  const CONF = ['不太确定', '比较确定', '非常确定'];
+  function misinfo(host) {
+    const { fig, out, actions } = shell(host, '问题里的一句话，会不会变成你的记忆？',
+      '先读一段很短的故事，读完点“读完了”。接着回答几个关于故事的问题，不用写下来，想一想就行。最后是一个记忆测验：对每一条说法，判断<b>故事里</b>有没有提到，并说明你有多确定。',
+      [], '这是一个教学演示，不是心理测验。一个人在一段故事上的表现，受阅读速度、注意、措辞和猜测等许多因素影响，不能说明你“容易”或“不容易”受暗示，更不能用来判断任何真实记忆的真假。你的回答只保存在这个页面里。', TASK);
+    host.querySelector('.lab-ctrls').remove();
+    const stage = document.createElement('div'); stage.className = 'lab-mis';
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(stage, ctl, status);
+    let misled = [], qs = [], q = 0, tests = [], ans = [], phase = 'idle', used = 0;
+    const buttons = (list) => { ctl.innerHTML = ''; list.forEach(([t, fn, cls]) => action(ctl, t, fn, cls)); };
+    const begin = () => {
+      used++;
+      const order = shuffle([0, 1, 2, 3]); misled = [order[0], order[1]];
+      qs = shuffle(LURES.map((l, i) => (misled.includes(i) ? l[1] : l[2])));
+      qs.splice(2, 0, '女士发现手机不见以后，你觉得她最可能先做什么？');
+      tests = shuffle([...LURES.map((l, i) => ({ s: l[0], real: false, misled: misled.includes(i) })), ...TRUE_ITEMS.map((s) => ({ s, real: true }))]);
+      ans = tests.map(() => null); q = 0; phase = 'read';
+      stage.innerHTML = `<p class="lab-story">${STORY}</p>`;
+      status.textContent = used > 1 ? '你已经知道这个演示的设计了，第二次的结果和第一次没有可比性，只适合看看流程。' : '按平常的速度读一遍，不用刻意背。';
+      buttons([['读完了', ask]]); ctl.querySelector('button').focus();
+    };
+    const ask = () => {
+      phase = 'ask';
+      stage.innerHTML = `<p class="lab-k">问题 ${q + 1} / ${qs.length}</p><p class="lab-q">${qs[q]}</p>`;
+      status.textContent = '想一想你的回答，不用写下来。';
+      buttons([[q + 1 < qs.length ? '下一个问题' : '进入记忆测验', () => { q++; if (q < qs.length) ask(); else test(); }]]); ctl.querySelector('button').focus();
+    };
+    const test = () => {
+      phase = 'test'; ctl.innerHTML = '';
+      stage.innerHTML = '<p class="lab-q">下面每一条，<b>故事本身</b>里有没有提到？只算故事里写到的，不算问题里说到的。</p>' + tests.map((t, i) => `
+        <div class="lab-item" role="group" aria-label="${t.s}"><p>${i + 1}. ${t.s}</p>
+          <div class="lab-opts" data-i="${i}">${['故事里有', '故事里没有'].map((x, j) => `<button type="button" class="choice" data-yes="${j === 0}" aria-pressed="false">${x}</button>`).join('')}
+          <span class="lab-conf">${CONF.map((c, j) => `<button type="button" class="choice" data-c="${j}" aria-pressed="false">${c}</button>`).join('')}</span></div></div>`).join('');
+      stage.querySelectorAll('.lab-opts').forEach((g) => g.addEventListener('click', (e) => {
+        const b = e.target.closest('.choice'); if (!b) return;
+        const i = Number(g.dataset.i); ans[i] = ans[i] || {};
+        if (b.dataset.yes) { ans[i].yes = b.dataset.yes === 'true'; g.querySelectorAll('[data-yes]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }
+        else { ans[i].c = Number(b.dataset.c); g.querySelectorAll('[data-c]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }
+        finishBtn.disabled = !ans.every((a) => a && a.yes !== undefined && a.c !== undefined);
+      }));
+      status.textContent = '每一条都选好“有／没有”和确定程度后，点“看结果”。';
+      const finishBtn = action(ctl, '看结果', reveal); finishBtn.disabled = true;
+      stage.querySelector('.choice').focus();
+    };
+    const reveal = () => {
+      if (phase !== 'test') return;
+      phase = 'done';
+      const fa = (m) => tests.map((t, i) => [t, ans[i]]).filter(([t]) => !t.real && t.misled === m);
+      const yesM = fa(true).filter(([, a]) => a.yes).length, yesN = fa(false).filter(([, a]) => a.yes).length;
+      const hits = tests.map((t, i) => [t, ans[i]]).filter(([t]) => t.real);
+      stage.innerHTML = `<p class="lab-k">故事原文（问题里加进去的细节都不在其中）</p><p class="lab-story">${STORY}</p>
+        <div class="l-table" role="region" tabindex="0" aria-label="逐条结果"><table><thead><tr><th>说法</th><th class="lab-nw">原文</th><th>你的回答</th></tr></thead><tbody>${tests.map((t, i) => `<tr><td>${t.s}${t.real ? '' : t.misled ? '<br><span class="lab-k">问题里暗示过</span>' : '<br><span class="lab-k">问题里没提过</span>'}</td><td class="lab-nw">${t.real ? '有' : '没有'}</td><td>${ans[i].yes ? '有' : '没有'}（${CONF[ans[i].c]}）${ans[i].yes !== t.real ? ' <b class="lab-wrong">✕</b>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
+      status.textContent = '';
+      buttons([['重新开始', begin, 'lab-clear']]);
+      out.innerHTML = `<ul class="lab-parts lab-flow"><li><span>问题里暗示过的两个细节：你说“故事里有”</span><b>${yesM} / 2</b></li><li><span>问题里没提过的两个细节：你说“故事里有”</span><b>${yesN} / 2</b></li><li><span>故事里真有的四个细节：你认出了</span><b>${hits.filter(([, a]) => a.yes).length} / 4</b></li></ul>
+        <p>${yesM > yesN ? '你把问题里暗示过的细节，更多地当成了故事里的内容。这正是误导信息效应的方向：事后接触的信息和原始经历混在一起，来源被记错了。' : yesM === yesN && yesM === 0 ? '你没有把任何一个暗示过的细节当成故事内容。这很常见：故事很短，测验紧接着问题，而且明确提醒了“只算故事里写到的”，这些都会削弱误导效应。' : '这一次，问题里的暗示没有让你更多地把那些细节当成故事内容。只有两对细节，偶然波动很大。'}</p>
+        <p>研究中，误导效应是比较许多人的平均结果得出的：被误导的一组，平均比没有被误导的一组更常报告那些细节。它说的是一种倾向，不是“每个人都会被误导”，也不能据此判断某一个人。</p>`;
+    };
+    action(actions, '开始', begin);
+    stage.innerHTML = '<p class="lab-q">点“开始”。整个过程大约三分钟。</p>';
+    out.innerHTML = '';
+  }
+
+  /* 06-05 · spacing: an illustrative model of one review, a gap after first study, and a final test.
+     Recall after t days with stability S is (1 + t/S)^-0.4. At the review, the item is recalled with that
+     probability; if it is, stability grows by a factor that is larger the harder the recall was
+     (1 + A·(1−r)^3); if it is not, the review counts as learning it again from scratch. */
+  const SPC = { S0: 2, D: 0.4, K: 3, A: { reread: 320, test: 640 } };
+  const RIS = [[7, '1 周后'], [35, '5 周后'], [70, '10 周后'], [350, '1 年后']];
+  const spR = (t, S) => Math.pow(1 + t / S, -SPC.D);
+  const spFinal = (g, ri, mode) => { const r = spR(g, SPC.S0), S1 = SPC.S0 * (1 + SPC.A[mode] * Math.pow(1 - r, SPC.K)); return r * spR(ri, S1) + (1 - r) * spR(ri, SPC.S0); };
+  function spacing(host) {
+    const o = { ri: 35, mode: 'reread' };
+    const { fig, out, actions } = shell(host, '隔多久复习一次最好？',
+      '一个模拟的学习者先学一组材料，过一段时间（横轴）复习一次，复习之后再过一段时间参加考试。你可以改变考试离复习有多远，以及复习的方式。四条曲线对应四个考试时间，当前选中的一条加粗；每条曲线的最高点用圆点标出。',
+      [['ri', '考试在复习之后', RIS.map(([v, t]) => [v, t])], ['mode', '复习的方式', [['reread', '重读一遍'], ['test', '先自测，再看答案']]]],
+      '这是一个说明原理的简化模型，不是实验数据。曲线的形状（最佳间隔随考试时间变长而变长、但占考试时间的比例越来越小）参考了切佩达等人（2008）的研究；具体的天数和百分比都由模型参数决定，换一组参数就会不同，不能直接用来安排复习。', MODEL);
+    const GMAX = 40;
+    const draw = () => {
+      const W = widthOf(fig), H = 290;
+      fig.innerHTML = '';
+      const gs = Array.from({ length: GMAX * 4 + 1 }, (_, i) => i / 4);
+      const all = RIS.map(([ri]) => { const v = gs.map((g) => spFinal(g, ri, o.mode)); let k = 0; v.forEach((x, i) => { if (x > v[k]) k = i; }); return { ri, v, k }; });
+      const cur = all.find((c) => c.ri === o.ri), gOpt = gs[cur.k], best = cur.v[cur.k], mass = cur.v[0], rAt = spR(gOpt, SPC.S0);
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型结果：考试在复习之后 ${o.ri} 天，复习方式为${o.mode === 'test' ? '先自测再看答案' : '重读'}。不间隔（当天复习）时考试成绩约 ${Math.round(mass * 100)}%；最佳间隔约 ${fmt(gOpt, 0)} 天，成绩约 ${Math.round(best * 100)}%。` }, fig);
+      const { X, Y } = lc(svg, W, H, { xMax: GMAX, yMax: 1, xTicks: [0, 10, 20, 30, 40], yTicks: [[0, '0'], [0.5, '50%'], [1, '100%']], xLab: '第一次学习到复习的间隔（天）', yLab: '考试时能回忆的比例', L: 46 });
+      all.forEach((c) => line(svg, gs.map((g, i) => [X(g), Y(c.v[i])]), c === cur ? 'fx-ln fx-lr fx-curve' : 'fx-ln fx-faint'));
+      line(svg, all.map((c) => [X(gs[c.k]), Y(c.v[c.k])]), 'fx-ln fx-lb fx-dash');
+      all.forEach((c) => el('circle', { cx: X(gs[c.k]), cy: Y(c.v[c.k]), r: c === cur ? 5.5 : 3.5, class: c === cur ? 'fx-node r' : 'fx-node b' }, svg));
+      text(svg, X(gs[cur.k]) + 8, Y(best) - 8, `约 ${fmt(gOpt, 0)} 天`, 'lab-s b fx-halo');
+      const other = o.mode === 'test' ? 'reread' : 'test', bestOther = Math.max(...gs.map((g) => spFinal(g, o.ri, other)));
+      out.innerHTML = `<p class="fx-keys"><span><i class="k hi"></i>当前选中的考试时间</span><span><i class="k dash"></i>连接各条曲线最高点的“山脊线”</span></p>
+        <ul class="lab-parts lab-flow"><li><span>当天复习（间隔为 0）</span><b>${Math.round(mass * 100)}%</b></li><li><span>最佳间隔：约 ${fmt(gOpt, 0)} 天（约为考试间隔的 ${Math.round((gOpt / o.ri) * 100)}%）</span><b>${Math.round(best * 100)}%</b></li><li><span>在最佳间隔复习时，复习前能先想起来的比例</span><b>${Math.round(rAt * 100)}%</b></li><li><span>同样的间隔，如果${o.mode === 'test' ? '只是重读' : '改成先自测'}，最好的成绩</span><b>${Math.round(bestOther * 100)}%</b></li></ul>
+        <p>在这个模型里，间隔太短，复习时材料还很熟，复习几乎没有加固作用；间隔太长，材料已经忘了，复习只能从头学起。最好的间隔落在两者之间：复习时要费点劲才想得起来，但还想得起来。考试越远，这个“恰好”的点就越靠后；可它占考试间隔的比例反而越来越小。</p>
+        <p>注意第三行：在最佳间隔复习时，学习者往往只能先想起一部分，复习的感觉并不顺畅。这正是“合意困难”的含义：当时更吃力的安排，长远来看记得更牢。</p>`;
+    };
+    bindControls(host, o, draw);
+    action(actions, '恢复默认设置', () => { o.ri = 35; o.mode = 'reread'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(o[b.dataset.k])))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing };
 })();
