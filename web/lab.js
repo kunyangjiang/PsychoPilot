@@ -1963,5 +1963,175 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt };
+  /* 10-01 · rewards and later interest. Illustrative levels only; the direction of each case follows the
+     1999 meta-analysis (expected, task-contingent tangible rewards undermine later free-choice interest in an
+     activity that was already interesting; unexpected rewards do not; informational positive feedback tends to
+     enhance it). */
+  const RWD = {
+    none: ['没有奖励', [0.7, 0.7, 0.7], [0.15, 0.15, 0.15], '对照情况：兴趣保持在原来的水平。'],
+    unexp: ['画完后意外得到奖状', [0.7, 0.7, 0.7], [0.15, 0.15, 0.15], '事先不知道有奖励，做事的理由仍然是兴趣本身。经典研究和元分析都没有发现意外奖励会削弱兴趣。'],
+    expect: ['事先许诺：画了就有奖品', [0.7, 0.92, 0.48], [0.15, 0.75, 0.15], '事先许诺、只要参与或完成就给的实物奖励，在元分析中显著削弱了奖励取消后自由时间里的兴趣，对儿童尤其明显。'],
+    perf: ['事先许诺：画得好才有奖品', [0.7, 0.9, 0.56], [0.15, 0.7, 0.15], '与表现水平挂钩的奖励平均也有削弱作用，但较小；如果奖励真实地反映了一个人的胜任，影响会因条件而不同。'],
+    verbal: ['具体的积极反馈', [0.7, 0.78, 0.8], [0.15, 0.3, 0.15], '“这幅画的颜色搭配得很好”这类信息性的积极反馈，总体上增强了兴趣，对大学生的作用比对儿童更明显。'],
+  };
+  function reward(host) {
+    const o = { kind: 'expect', int: 'hi' };
+    const { fig, out } = shell(host, '奖励会不会让兴趣消失？',
+      '一个假设的孩子在幼儿园的自由活动时间里画画。选择一种奖励方式，以及这项活动对他来说原本是否有趣，看看研究预期他在奖励取消以后，自由时间里还会花多少时间画画。',
+      [['kind', '奖励方式', Object.entries(RWD).map(([k, v]) => [k, v[0]])], ['int', '这项活动原本', [['hi', '很有兴趣'], ['lo', '不太感兴趣']]]],
+      '这是一个模型演示。柱的高度是示意，只表示研究中观察到的大致方向，不是任何研究的真实数据，也不能预测某一个孩子或你自己的反应。', MODEL);
+    const box = document.createElement('div'); fig.append(box);
+    const draw = () => {
+      const [lab, hi, lo, note] = RWD[o.kind], v = o.int === 'hi' ? hi : lo, W = widthOf(fig), H = 210, L = 12, B = 44, T = 26;
+      box.innerHTML = '';
+      const names = ['奖励之前', '有奖励期间', '奖励取消以后'];
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `示意：${lab}。自由时间里画画的时间，奖励之前${fmt(v[0] * 10, 0)}，有奖励期间${fmt(v[1] * 10, 0)}，奖励取消以后${fmt(v[2] * 10, 0)}（相对单位）。` }, box);
+      text(svg, 0, 13, '花在画画上的时间（示意）', 'lab-tick');
+      const cw = (W - L * 2) / 3, bw = Math.min(70, cw * 0.5), Y = (x) => H - B - x * (H - B - T);
+      el('line', { x1: 0, x2: W, y1: Y(0), y2: Y(0), class: 'lab-axis' }, svg);
+      el('line', { x1: 0, x2: W, y1: Y(v[0]), y2: Y(v[0]), class: 'fx-hair fx-dash' }, svg);
+      v.forEach((x, i) => {
+        const cx = L + cw * i + cw / 2;
+        el('rect', { x: cx - bw / 2, y: Y(x), width: bw, height: Y(0) - Y(x), class: i === 2 ? 'fx-bar' : 'fx-bar b' }, svg);
+        text(svg, cx, H - B + 18, names[i], 'lab-tick', 'middle');
+        if (i === 1) text(svg, cx, H - B + 33, '（做的时间）', 'lab-tick', 'middle');
+        if (i !== 1) text(svg, cx, H - B + 33, '（自由时间）', 'lab-tick', 'middle');
+      });
+      const d = v[2] - v[0];
+      out.innerHTML = `<p class="lab-q">${lab}${o.int === 'hi' ? '，活动原本很有兴趣' : '，活动原本不太感兴趣'}</p>
+        <p>${o.int === 'lo' && o.kind !== 'none' && o.kind !== 'unexp' ? '对原本不感兴趣的活动，奖励能让人在奖励期间去做；因为几乎没有可以被削弱的兴趣，奖励取消后通常只是回到原来的水平。元分析中的削弱效应，主要出现在原本有趣的活动上。' : note}</p>
+        <p>${o.int === 'hi' ? (d < -0.05 ? '红色的柱低于虚线：奖励取消以后，自由时间里画画的时间比奖励之前少了。' : d > 0.05 ? '红色的柱高于虚线：兴趣有所增加。' : '红色的柱与虚线持平：兴趣没有明显变化。') : ''}关键不在于“有没有奖励”，而在于奖励是否被事先期待、是否与做这件事直接挂钩，以及它被体验为控制还是信息。</p>`;
+    };
+    bindControls(host, o, draw);
+    draw(); onResize(draw);
+  }
+
+  /* 10-02 · temporal motivation: utility of working = E·V / (1 + I·D) − aversiveness, against the appeal of
+     an immediate alternative. Fourteen days to the deadline; optional three sub-deadlines (days 5, 10, 14). */
+  const PRA = { low: ['不太讨厌', 1], mid: ['比较讨厌', 2.5], high: ['非常讨厌', 4] };
+  function procras(host) {
+    const o = { av: 'mid', mood: 'calm', st: 'one' };
+    const { fig, out, actions } = shell(host, '为什么总是“明天再开始”',
+      '一项任务第 14 天截止。每一天，模型都会比较两样东西：现在开始做这项任务的吸引力（完成的好处要等到截止时才得到，所以被打了折扣，还要减去做它的不适感），以及做一件立刻就让人好受的事情的吸引力。前者第一次超过后者的那一天，就是模型中“开始工作”的一天。',
+      [['av', '任务让人觉得', Object.entries(PRA).map(([k, v]) => [k, v[0]])], ['mood', '此刻的心情', [['calm', '平静'], ['bad', '很糟，想让自己好受一点']]], ['st', '任务结构', [['one', '只有一个最终截止日期'], ['three', '拆成三部分，各有截止日期']]]],
+      '这是一个模型演示，依据时间动机理论的简化公式，所有数字都是假设的。它说明的是一种理论机制，不是对你或任何人拖延原因的测量或诊断。', MODEL);
+    const sI = slider('模型中的“冲动性”参数（对延迟的敏感程度）：', 0.1, 1.5, 0.1, 0.5);
+    const box = document.createElement('div'); fig.append(sI.box, box);
+    sI.input.addEventListener('input', () => draw());
+    const EV = 8, END = 14;
+    const parts = () => (o.st === 'one' ? [[0, END, 1]] : [[0, 5, 0.6], [5, 10, 0.6], [10, END, 0.6]]);
+    const draw = () => {
+      const I = Number(sI.input.value), A = PRA[o.av][1], alt = 1.5 + (o.mood === 'bad' ? 1.5 : 0);
+      sI.val.textContent = ` ${fmt(I, 1)}`; sI.input.setAttribute('aria-valuetext', fmt(I, 1));
+      const W = widthOf(fig), H = 250;
+      box.innerHTML = '';
+      const P = parts().map(([from, d, k]) => {
+        const m = (t) => (EV * k) / (1 + I * (d - t)) - A * k;
+        let start = null;
+        for (let t = from; t <= d; t++) if (m(t) >= alt) { start = t; break; }
+        return { from, d, m, start: start == null ? d : start, forced: start == null };
+      });
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：${P.map((p, i) => `${P.length > 1 ? `第 ${i + 1} 部分` : '任务'}在第 ${p.start} 天开始${p.forced ? '（截止当天被迫开始）' : ''}`).join('；')}。` }, box);
+      const { X, Y } = lc(svg, W, H, { xMax: END, yMax: 8, xTicks: [0, 2, 4, 6, 8, 10, 12, 14], yTicks: [0, 2, 4, 6, 8].map((v) => [v, String(v)]), xLab: '天（第 14 天截止）', yLab: '此刻的吸引力（模型单位）' });
+      el('line', { x1: X(0), x2: X(END), y1: Y(alt), y2: Y(alt), class: 'fx-ln fx-lb fx-dash' }, svg);
+      text(svg, X(0) + 4, Y(alt) - 6, '立刻让人好受的事', 'lab-tick fx-halo');
+      P.forEach((p) => {
+        const pts = []; for (let t = p.from; t <= p.d + 1e-9; t += 0.1) pts.push([X(t), Y(Math.max(0, p.m(t)))]);
+        line(svg, pts, 'fx-ln fx-lr');
+        el('line', { x1: X(p.d), x2: X(p.d), y1: Y(0), y2: Y(8), class: 'fx-hair fx-dash' }, svg);
+        el('circle', { cx: X(p.start), cy: Y(Math.max(0, p.m(p.start))), r: 5, class: p.forced ? 'fx-node m' : 'fx-node r' }, svg);
+      });
+      const days = P.reduce((s, p) => s + (p.d - p.start + 1), 0);
+      out.innerHTML = `<ul class="lab-parts">${P.map((p, i) => `<li><span>${P.length > 1 ? `第 ${i + 1} 部分（第 ${p.d} 天截止）` : '开始工作'}</span><b>第 ${p.start} 天${p.forced ? '，截止当天被迫开始' : ''}</b></li>`).join('')}<li><span>开始后到截止，可用于工作的天数</span><b>${days} 天</b></li></ul>
+        <p>${P.some((p) => p.forced) ? '在这组设定下，直到截止日期，做任务的吸引力都没有超过“让自己好受一点”的选择：任务带来的不适感太强，或者此刻太想修复心情。拆分任务、缩短延迟也解决不了这个问题，需要处理的是任务本身的不适感和情绪。' : o.st === 'three' ? '把任务拆成三部分、各有截止日期以后，每一部分的好处都更近了，开始的时间被分散到整个两周里。这就是“设立中间截止日期”这类建议背后的机制。' : '红色曲线随着截止日期临近而上升：好处越近，被打的折扣越少。在它超过蓝色虚线之前，模型中的人一直在做“立刻让人好受的事”。'}</p>
+        <p class="lab-note">${o.mood === 'bad' ? '心情不好时，“让自己好受一点”的吸引力提高了，所以开始得更晚。这对应蒂斯等人的实验：心情不好、又相信心情可以改变时，人们更多地拖延。' : '把冲动性参数调大，曲线在早期会更低，开始得更晚；调小，开始得更早。这个参数只是模型的一部分，现实中它很难被精确地测量。'}</p>`;
+    };
+    action(actions, '恢复默认设置', () => { o.av = 'mid'; o.mood = 'calm'; o.st = 'one'; sI.input.value = 0.5; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o[b.dataset.k]))); draw(); }, 'lab-clear');
+    bindControls(host, o, draw);
+    draw(); onResize(draw);
+  }
+
+  /* 10-03 · reactive vs proactive self-control over a two-hour evening study session (expected values). */
+  const PRS = {
+    react: ['手机放在桌上，每次想看时忍住', 1, 0],
+    remove: ['事先把手机放到另一个房间', 0.2, 0],
+    plan: ['手机在桌上，但事先定好“如果想看，就……”', 1, 0.5],
+  };
+  function proreact(host) {
+    const o = { s: 'react' };
+    const { fig, out, actions } = shell(host, '每次都忍住，还是事先安排？',
+      '一个假设的人晚上要专心学习两个小时。手机上的通知、屏幕亮起等线索会不时引起“想看一眼”的冲动。比较三种做法下，他需要抵抗冲动的次数和预计失手的次数。',
+      [['s', '做法', Object.entries(PRS).map(([k, v]) => [k, v[0]])]],
+      '这是一个模型演示。所有数字都是假设的期望值，用来说明“在冲动出现之前介入”的思路，不代表任何研究的真实数据，也不能衡量任何人的自控力。', MODEL);
+    const sC = slider('每小时出现的诱惑线索：', 2, 20, 1, 8), sP = slider('每次抵抗成功的可能性：', 50, 95, 5, 80);
+    const box = document.createElement('div'); fig.append(sC.box, sP.box, box);
+    [sC, sP].forEach((s) => s.input.addEventListener('input', () => draw()));
+    const HRS = 2, INNER = 1; // urges per hour that arise without any outside cue
+    const draw = () => {
+      const c = Number(sC.input.value), p = Number(sP.input.value) / 100, [lab, keep, help] = PRS[o.s];
+      sC.val.textContent = ` ${c} 次`; sP.val.textContent = ` ${sP.input.value}%`;
+      sC.input.setAttribute('aria-valuetext', `${c} 次`); sP.input.setAttribute('aria-valuetext', `${sP.input.value}%`);
+      const urges = (c * keep + INNER) * HRS, pp = p + (1 - p) * help, lapses = urges * (1 - pp);
+      const W = widthOf(fig), H = 96, L = 6, R = 6;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：两个小时里，约 ${fmt(urges, 0)} 次冲动需要抵抗，预计失手约 ${fmt(lapses, 1)} 次。` }, box);
+      text(svg, 0, 13, '两个小时里的冲动（示意）', 'lab-tick');
+      const y = 52, X = (t) => L + (t / HRS) * (W - L - R);
+      el('line', { x1: X(0), x2: X(HRS), y1: y, y2: y, class: 'lab-axis' }, svg);
+      [0, 1, 2].forEach((h) => text(svg, X(h), H - 8, `${h} 小时`, 'lab-tick', h === 0 ? 'start' : h === 2 ? 'end' : 'middle'));
+      const n = Math.round(urges), every = lapses > 0.05 ? urges / lapses : Infinity;
+      for (let i = 0; i < n; i++) {
+        const t = ((i + 0.5) / n) * HRS, lapse = Number.isFinite(every) && Math.floor((i + 1) / every) > Math.floor(i / every);
+        el('circle', { cx: X(t), cy: y, r: lapse ? 6 : 4, class: lapse ? 'fx-node r' : 'fx-node b' }, svg);
+      }
+      text(svg, W - R, 32, '蓝点：抵抗住的冲动　红点：失手', 'lab-tick', 'end');
+      out.innerHTML = `<p class="lab-q">${lab}</p><ul class="lab-parts"><li><span>需要抵抗的冲动（两小时）</span><b>约 ${fmt(urges, 0)} 次</b></li><li><span>每次抵抗成功的可能性</span><b>${fmt(pp * 100, 0)}%</b></li><li><span>预计失手</span><b>约 ${fmt(lapses, 1)} 次</b></li></ul>
+        <p>${o.s === 'react' ? '每一条线索都要当场抵抗。即使每次的成功率不低，次数多了，失手的总数也会累积起来；而且每一次抵抗都伴随着内心的拉扯。' : o.s === 'remove' ? '线索大部分被事先移除，剩下的主要是没有外部线索时自己冒出的念头。需要抵抗的次数大大减少，这正是“选择或改变情境”这类策略省力的原因。' : '冲动出现的次数没有变，但事先定好的计划让每次的反应更自动、更容易成功。它减少了失手，却没有减少需要应对的次数。'}</p>
+        <p class="lab-note">模型假设每小时还有 ${INNER} 次不依赖外部线索的冲动。现实中，改变环境有时做不到，也可能有代价（比如错过重要的电话）；几种做法也可以结合使用。</p>`;
+    };
+    action(actions, '恢复默认设置', () => { o.s = 'react'; sC.input.value = 8; sP.input.value = 80; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o[b.dataset.k]))); draw(); }, 'lab-clear');
+    bindControls(host, o, draw);
+    draw(); onResize(draw);
+  }
+
+  /* 10-04 · is waiting worth it? Expected value of a promised larger reward (2 units) that is kept with
+     probability p, discounted hyperbolically for the wait, against 1 unit now. */
+  const DLY = { rel: ['一向说话算话的大人', 95], mid: ['有时守信、有时不守信', 60], unrel: ['刚刚看到他不守承诺', 30] };
+  function delay(host) {
+    const o = { env: 'rel' };
+    const { fig, out, actions } = shell(host, '等一等，值得吗？',
+      '一个假设的孩子可以马上吃一块点心，也可以等大人回来，得到两块。但两块点心只有在大人兑现承诺时才能得到。选择一种环境，或者自己调整承诺兑现的可能性和等待的时长，看看等待的“预期价值”怎样变化。',
+      [['env', '主持实验的大人', Object.entries(DLY).map(([k, v]) => [k, v[0]])]],
+      '这是一个模型演示，所有数字都是假设的。它说明的是“等待是否划算取决于环境”这一思路，不是对任何孩子或成年人自控力的测量。', MODEL);
+    const sP = slider('承诺兑现的可能性：', 0, 100, 5, 95), sD = slider('需要等待的时间：', 1, 20, 1, 10);
+    const box = document.createElement('div'); fig.append(sP.box, sD.box, box);
+    [sP, sD].forEach((s) => s.input.addEventListener('input', () => { o.env = ''; sync(); draw(); }));
+    const sync = () => host.querySelectorAll('.lab-opts .choice[data-k="env"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o.env)));
+    const K = 0.03; // hyperbolic discount per minute
+    const draw = () => {
+      const p = Number(sP.input.value) / 100, D = Number(sD.input.value), ev = (q) => (2 * q) / (1 + K * D), v = ev(p), be = (1 + K * D) / 2;
+      sP.val.textContent = ` ${sP.input.value}%`; sD.val.textContent = ` ${D} 分钟`;
+      sP.input.setAttribute('aria-valuetext', `${sP.input.value}%`); sD.input.setAttribute('aria-valuetext', `${D} 分钟`);
+      const W = widthOf(fig), H = 230;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：等待的预期价值约 ${fmt(v, 2)} 块，马上吃是 1 块。承诺兑现的可能性高于约 ${fmt(Math.min(1, be) * 100, 0)}% 时，等待才更划算。` }, box);
+      const { X, Y } = lc(svg, W, H, { xMax: 100, yMax: 2, xTicks: [0, 25, 50, 75, 100], yTicks: [[0, '0'], [0.5, '0.5'], [1, '1'], [1.5, '1.5'], [2, '2']], xLab: '承诺兑现的可能性（%）', yLab: '预期能得到的点心（块，已考虑等待）' });
+      el('line', { x1: X(0), x2: X(100), y1: Y(1), y2: Y(1), class: 'fx-ln fx-lb' }, svg);
+      text(svg, X(2), Y(1) - 7, '马上吃：1 块', 'lab-tick fx-halo');
+      line(svg, [[X(0), Y(0)], [X(100), Y(ev(1))]], 'fx-ln fx-lr');
+      if (be <= 1) { el('line', { x1: X(be * 100), x2: X(be * 100), y1: Y(0), y2: Y(1), class: 'fx-hair fx-dash' }, svg); }
+      el('circle', { cx: X(p * 100), cy: Y(v), r: 6, class: 'fx-node r' }, svg);
+      const better = v > 1.005 ? 'wait' : v < 0.995 ? 'now' : 'tie';
+      out.innerHTML = `<ul class="lab-parts"><li><span>马上吃</span><b>1 块</b></li><li><span>等待的预期价值</span><b>约 ${fmt(v, 2)} 块</b></li><li><span>等待更划算的条件</span><b>${be <= 1 ? `兑现可能性高于约 ${fmt(be * 100, 0)}%` : '在这个等待时长下，等待总是不划算'}</b></li></ul>
+        <p>${better === 'wait' ? '在这组设定下，等待的预期价值更高：承诺足够可靠时，等一等是划算的。' : better === 'now' ? '在这组设定下，马上吃更划算。一个不等待的孩子，可能并不是“自控力差”，而是对“等了也未必能得到”作出了合理的判断。' : '在这组设定下，两种选择大致相当。'}</p>
+        <p class="lab-note">研究发现，孩子看到大人不守信用之后，等待的时间明显更短。现实中，环境的可靠性往往比这个模型复杂得多，等待的时长本身也常常是不确定的。</p>`;
+    };
+    const preset = () => { const e = DLY[o.env]; if (e) sP.input.value = e[1]; };
+    bindControls(host, o, () => { preset(); draw(); });
+    action(actions, '恢复默认设置', () => { o.env = 'rel'; sD.input.value = 10; preset(); sync(); draw(); }, 'lab-clear');
+    preset(); draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay };
 })();

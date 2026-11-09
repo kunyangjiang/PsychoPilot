@@ -1941,5 +1941,131 @@
     }, { dur: 1000, ctrls: { value: 'lin', items: [['lin', '等距刻度'], ['log', '翻倍刻度'], ['split', '按幸福程度分组']], onChange: (v) => { S.v = v; } } });
   };
 
+  /* ===== 10-01 · the self-determination continuum: amotivation, four kinds of extrinsic regulation, intrinsic
+     motivation; controlled vs autonomous. One everyday example (reviewing English) under each form. ===== */
+  const SDTC = [
+    ['amot', '无动机', '', '“我不知道为什么要复习英语，也不打算复习；就算复习了，也觉得没什么用。”', '没有做这件事的意图，或者觉得做了也不会有什么结果。'],
+    ['ext', '外部调节', 'c', '“我复习，是因为妈妈说不复习就没收手机。”', '受控动机：靠外部的奖励和惩罚维持；一旦没人检查，行为很容易停下来。'],
+    ['intro', '内摄调节', 'c', '“我复习，是因为不复习我会内疚，觉得自己很差劲。”', '受控动机：压力已经来自内心，但这件事还没有被真正接受，主要靠内疚、焦虑或自尊推动。'],
+    ['ident', '认同调节', 'a', '“我复习，是因为我想以后能看懂英文资料，我知道这很重要。”', '自主动机：理解并认同这件事的价值，即使它本身不一定有趣。'],
+    ['integ', '整合调节', 'a', '“坚持学一门外语，是我看重的生活方式的一部分。”', '自主动机：这种价值与自己的其他价值观和身份协调一致。在实际测量中，它很难与认同调节区分开。'],
+    ['intr', '内在动机', 'a', '“我喜欢用英语读小说，读着读着就忘了时间。”', '自主动机：因为活动本身有趣、令人满足而去做。'],
+  ];
+  F.sdtcont = (fig) => {
+    const S = { v: 'ident' };
+    return figure(fig, (box, w, api) => {
+      const wide = w >= 560, i0 = SDTC.findIndex((r) => r[0] === S.v), gs = [];
+      let s;
+      if (wide) {
+        const gap = 8, bw = (w - gap * 5) / 6, by = 34, bh = 54, H = by + bh + 58;
+        s = svgIn(box, w, H, fig);
+        const X = (i) => i * (bw + gap);
+        const brace = (g, a, b, y, label, cls, up) => {
+          const x1 = X(a) + 2, x2 = X(b) + bw - 2, d = up ? 6 : -6;
+          el('path', { d: `M${x1},${y + d} V${y} H${x2} V${y + d}`, class: 'fx-ln ' + cls }, g);
+          tx(g, (x1 + x2) / 2, up ? y - 7 : y + 17, label, 'fx-n', 'middle');
+        };
+        const top = el('g', {}, s); gs.push(top);
+        brace(top, 1, 2, 20, '受控动机', 'fx-lb', true); brace(top, 3, 5, 20, '自主动机', 'fx-lr', true);
+        SDTC.forEach(([, t, grp], i) => {
+          const g = el('g', {}, s); gs.push(g);
+          el('rect', { x: X(i), y: by, width: bw, height: bh, rx: 6, class: 'fx-pill ' + (i === i0 ? 'r' : grp ? 'b' : 'm') }, g);
+          tx(g, X(i) + bw / 2, by + bh / 2 + 5, t, 'fx-h', 'middle');
+        });
+        const bot = el('g', {}, s); gs.push(bot);
+        brace(bot, 1, 4, by + bh + 12, '外在动机的四种形式', 'fx-hair', false);
+        arrow(bot, 0, H - 8, w, H - 8, '', 6); tx(bot, 0, H - 14, '较少自主', 'fx-n'); tx(bot, w - 10, H - 14, '较多自主', 'fx-n', 'end');
+      } else {
+        const bh = 40, gap = 6, head = 24, groups = [[0, 0, ''], [1, 2, '受控动机（外在动机）'], [3, 4, '自主动机（外在动机）'], [5, 5, '自主动机']];
+        const H = groups.reduce((h, [a, b, l]) => h + (l ? head : 4) + (b - a + 1) * (bh + gap), 0) + 4;
+        s = svgIn(box, w, H, fig);
+        let y = 0;
+        groups.forEach(([a, b, l]) => {
+          const g = el('g', {}, s); gs.push(g);
+          if (l) { tx(g, 0, y + 16, l, 'fx-n'); y += head; } else y += 4;
+          for (let i = a; i <= b; i++) {
+            const [, t, grp] = SDTC[i];
+            el('rect', { x: 0, y, width: w, height: bh, rx: 6, class: 'fx-pill ' + (i === i0 ? 'r' : grp ? 'b' : 'm') }, g);
+            tx(g, w / 2, y + bh / 2 + 5, t, 'fx-h', 'middle');
+            y += bh + gap;
+          }
+        });
+      }
+      const [, t, , ex, note] = SDTC[i0];
+      api.out.innerHTML = `<p><b>${t}。</b>${ex}</p><p>${note}</p><p class="fx-n">例子是为了说明概念而编写的。现实中，同一个人做同一件事，常常同时有好几种理由。</p>`;
+      return (p) => gs.forEach((g, i) => show(g, stage(p, i * 0.1, 0.35)));
+    }, { dur: 1000, ctrls: { value: 'ident', items: SDTC.map((r) => [r[0], r[1]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 10-03 · one hypothetical sequential-task experiment, read through four accounts of self-control
+     performance. Bar lengths are illustrative only. ===== */
+  const SCM = {
+    res: ['资源模型', [['先做容易的任务', 0.8, '较好'], ['先做困难的任务', 0.5, '明显下降'], ['先做困难的任务，第二个任务有奖励', 0.68, '部分恢复']],
+      '力量模型的预测：第一个任务消耗了有限的资源，所以第二个任务表现下降；奖励可以让人暂时调动剩余的资源，但资源仍然不足。'],
+    opp: ['机会成本与动机', [['先做容易的任务', 0.8, '较好'], ['先做困难的任务', 0.64, '有所下降'], ['先做困难的任务，第二个任务有奖励', 0.8, '恢复']],
+      '机会成本和动机转移的解释：下降不是因为资源用完，而是继续投入显得越来越“不值得”；只要第二个任务变得更值得，表现就能恢复。'],
+    bel: ['对意志力的信念', [['先做容易的任务', 0.8, '较好'], ['先做困难的任务：认为意志力有限的人', 0.58, '下降'], ['先做困难的任务：认为意志力不易耗尽的人', 0.79, '基本不变']],
+      '信念的解释：下降部分取决于人们是否相信意志力是有限的。2010 年的研究支持这一点，但 2021 年的大型预注册研究没有发现信念的调节作用。'],
+    rep: ['大规模重复研究', [['先做容易的任务', 0.8, ''], ['先做困难的任务', 0.785, '差异很小']],
+      '几项大规模预注册重复研究得到的效应很小或接近零（例如 d 约为 0.06 或 0.10）。在这类实验室方法中，两种条件之间几乎看不出差别。这不等于证明人从不疲劳。'],
+  };
+  F.scmodels = (fig) => {
+    const S = { v: 'res' };
+    return figure(fig, (box, w, api) => {
+      const [, rows, note] = SCM[S.v], title = '第二个任务的表现（示意）';
+      const R = rows.map(([l, v, t]) => [l, v, l.startsWith('先做容易') ? 'fx-bar b' : 'fx-bar', t]);
+      const probe = el('svg', {}, box), h = dbars(probe, 0, 0, w, title, R, 1).h;
+      box.innerHTML = '';
+      const s = svgIn(box, w, h, fig), set = dbars(s, 0, 0, w, title, R, 1).set;
+      api.out.innerHTML = `<p><b>${SCM[S.v][0]}。</b>${note}</p><p class="fx-n">柱的长度是示意，不是真实数据。蓝色为对照条件，红色为先做困难任务的条件。</p>`;
+      return (t) => set(ease(t));
+    }, { dur: 900, ctrls: { value: 'res', items: Object.entries(SCM).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 10-04 · goal intention vs implementation intention ("if situation, then action"), four examples ===== */
+  const IFT = {
+    study: ['学习', '这学期我要多复习英语', '每天吃完晚饭、把碗放进水池以后', '就打开单词软件，复习 15 分钟', '情境是每天都会出现的、具体的时刻，行动是一个明确、容易开始的动作。'],
+    work: ['工作', '我要早一点开始写季度报告', '周一上午到办公室、打开电脑之后', '就先写报告的提纲，再看邮件', '计划针对的是“没能开始”：把一个模糊的打算，变成一个有固定时间和第一步的行动。'],
+    daily: ['日常生活', '我要多运动', '周二和周四晚上八点到了', '就换上运动鞋，出门快走 30 分钟', '计划越具体，越容易在情境出现时被想起；但如果那个时间经常有别的安排，计划就很难执行。'],
+    obst: ['针对障碍', '我要专心写完论文', '我想拿起手机看消息的时候', '就把手机放到另一个房间，继续写完这一段', '先想清楚主要的障碍，再为它制定计划。这对应“心理对比结合实施意图”方法中的制定计划一步；完整的方法还要先想象愿望实现的结果，再与现实障碍对比。'],
+  };
+  F.ifthen = (fig) => {
+    const S = { v: 'study' };
+    return figure(fig, (box, w, api) => {
+      const [, goal, cue, act, note] = IFT[S.v], wide = w >= 520, cw = Math.min(w, 560), x0 = (w - cw) / 2, gap = 34;
+      const hg = cardH(cw, goal, 60), half = (cw - 40) / 2;
+      const hc = wide ? Math.max(cardH(half, cue, 70), cardH(half, act, 70)) : cardH(cw, cue, 60), ha = wide ? hc : cardH(cw, act, 60);
+      const H = hg + gap + (wide ? hc : hc + gap + ha) + 4, s = svgIn(box, w, H, fig), gs = [];
+      const g1 = el('g', {}, s); gs.push(g1);
+      card(g1, x0, 0, cw, '目标意图：我打算……', goal, 'm', hg);
+      const g2 = el('g', {}, s); gs.push(g2);
+      arrow(g2, w / 2, hg + 4, w / 2, hg + gap - 4);
+      tx(g2, w / 2 + 10, hg + gap / 2 + 4, '加上一个具体的计划', 'fx-n');
+      const y2 = hg + gap, g3 = el('g', {}, s), g4 = el('g', {}, s); gs.push(g3, g4);
+      if (wide) {
+        card(g3, x0, y2, half, '如果（情境）', cue, 'b', hc);
+        arrow(g4, x0 + half + 6, y2 + hc / 2, x0 + half + 34, y2 + hc / 2, 'r');
+        card(g4, x0 + half + 40, y2, half, '就（行动）', act, 'r', hc);
+      } else {
+        card(g3, x0, y2, cw, '如果（情境）', cue, 'b', hc);
+        arrow(g4, w / 2, y2 + hc + 4, w / 2, y2 + hc + gap - 4, 'r');
+        card(g4, x0, y2 + hc + gap, cw, '就（行动）', act, 'r', ha);
+      }
+      api.out.innerHTML = `<p><b>${IFT[S.v][0]}。</b>${note}</p><p class="fx-n">例子是为了说明计划的结构而编写的。研究发现这类计划平均有帮助，但不保证成功；目标本身是否真正被认同同样重要。</p>`;
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.35)));
+    }, { dur: 1100, ctrls: { value: 'study', items: Object.entries(IFT).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 10-05 · nudge effects in academic journals vs. all trials of two US nudge units (DellaVigna & Linos,
+     2022): reported averages, drawn to scale. ===== */
+  F.pubbias = (fig) => figure(fig, (box, w, api) => {
+    const title = '助推使目标行为平均提高的百分点', rows = [['学术期刊中发表的助推研究', 8.7, 'fx-bar', '8.7'], ['两个政府助推部门的全部试验', 1.4, 'fx-bar b', '1.4']];
+    const probe = el('svg', {}, box), h = dbars(probe, 0, 0, w, title, rows, 10).h;
+    box.innerHTML = '';
+    const s = svgIn(box, w, h, fig), set = dbars(s, 0, 0, w, title, rows, 10).set;
+    api.out.innerHTML = '<p>研究者估计，两者差异的约 70% 可以用选择性发表来解释，样本量小又加剧了这一问题；剩下的差异主要与两类研究中干预的类型不同有关。政府部门的结果仍然显著，只是小得多。</p>';
+    return (t) => set(ease(t));
+  }, { dur: 1000, replay: true });
+
   window.PPFig = F;
 })();
