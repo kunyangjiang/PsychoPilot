@@ -1852,5 +1852,116 @@
     stage.innerHTML = '<p class="lab-q">点“开始”。一共十道题，大约三分钟。</p>';
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib };
+  /* =====================================================================
+     Stage 09 · emotion, stress and well-being. One scenario explorer and one
+     illustrative model. Neither is an assessment; both say so on screen.
+     ===================================================================== */
+
+  /* 09-02 · emotion regulation: three hypothetical situations × seven strategies, placed on Gross's process model.
+     The readout summarizes average research findings; it does not predict what would happen to the reader. */
+  const RSCEN = {
+    exam: ['下周有一场重要的考试，你很紧张。', '这个情境在很大程度上是可以控制的：准备得越充分，结果越可能改变。'],
+    wait: ['一份重要的申请已经交上去了，结果要两周后才知道。', '这个情境基本无法控制：现在做什么都不会改变结果。'],
+    tease: ['聚会上，一位朋友当众开了一个让你难堪的玩笑。', '这是一个社会情境：你的反应会被别人看到，也会影响你们的关系。'],
+  };
+  const STAGES = ['情境', '注意', '评价', '反应'];
+  const RSTRAT = {
+    sel: ['避开这个情境', 0, '情境选择', '事先选择进入或避开某个情境。短期内能有效地减少不愉快的情绪；但如果长期、广泛地回避，也会失去机会，并且使人没有机会发现，自己担心的事情其实能够应付。',
+      { exam: '考试本身很难避开；如果“回避”变成不去复习、不去想，短期轻松，长期可能更糟。', wait: '结果无法回避，但可以避开那些让你不断去查看、比较的情境。', tease: '可以提前离开，但这可能被别人误解，问题本身也没有解决。' }],
+    mod: ['动手改变情境', 0, '情境修正', '直接改变情境本身，也就是解决问题。当情境可以改变时，这往往是最直接的办法；当情境无法改变时，强求改变反而会增加挫败感。',
+      { exam: '制定复习计划、找同学讨论，都在改变“准备不足”这个情境本身。在可以控制的情境中，这类做法通常很合适。', wait: '结果已经无法改变，能修正的部分很少。', tease: '可以用一句轻松的话把话题带开，或者事后私下告诉朋友你的感受。' }],
+    dis: ['把注意力转到别处', 1, '注意分配', '把注意力从引起情绪的事情上移开，比如去做别的事。元分析发现，分心在短期内能减轻不愉快的情绪；在情绪很强烈时，人们也更倾向于选择分心。但它不改变事情的意义，事后情绪可能再回来。',
+      { exam: '短暂休息有帮助；但如果分心代替了复习，焦虑的来源仍在。', wait: '在一件无法控制、只能等待的事情上，分心常常是合理的选择。', tease: '在当场转移注意，可以避免情绪失控；事后是否需要处理，取决于这件事对你们关系的意义。' }],
+    rum: ['反复想这件事', 1, '注意分配', '把注意力反复集中在不愉快的感受及其原因和后果上，也就是反刍。研究发现，反刍往往使不愉快的情绪持续更久。但并非所有反复的思考都有害：具体地想“下一步该怎么做”，与抽象地反复追问“为什么偏偏是我”，效果很不相同。',
+      { exam: '具体地想“哪些章节还不熟”有助于准备；反复想“考砸了怎么办”则多半只会增加焦虑。', wait: '在无法改变结果的事情上反复思考，很少带来新的信息。', tease: '反复回放当时的场景，常常让人越想越生气或越难堪。' }],
+    rea: ['换一个角度理解', 2, '认知改变', '改变对情境意义的评价，即重新评价，比如把紧张理解为身体在为挑战做准备。实验室研究发现，它通常能减轻不愉快的体验，而不像压抑表情那样增加生理负担。但它需要认知资源，在情绪非常强烈时较难使用；它的效果也取决于情境。',
+      { exam: '把紧张看作“在乎这件事”的信号是有帮助的；但如果用“其实不重要”来说服自己，可能减少准备的动力。在可以控制的情境中，重新评价并不总是比解决问题更好。', wait: '一项研究发现，在难以控制的压力情境中，善于重新评价的人抑郁症状较少；而在可以控制的情境中，情况相反。', tease: '“他可能只是想活跃气氛”这样的解释能减轻怒气；但如果对方确实有意冒犯，一味地往好处想也可能让问题反复发生。' }],
+    acc: ['接受这种感受', 3, '接受', '不评判、也不试图消除当下的情绪，允许它存在。实验研究的元分析发现，接受的效果至少不比其他调节方式差，在忍受疼痛方面还略有优势；习惯于接受自己消极情绪的人，心理健康状况往往较好，但这类研究多是相关研究。它在过程模型中的位置有争议，这里把它放在反应阶段，只是一种简化。',
+      { exam: '接受紧张，并不意味着放弃准备；接受和解决问题可以同时进行。', wait: '对无法改变的等待，接受常常是合适的选择。', tease: '接受自己的难堪和不快，不等于认同对方的做法。' }],
+    sup: ['压住，不表现出来', 3, '反应调节', '在情绪已经产生之后，抑制表情和行为，即表达抑制。实验发现，它能减少外在的表情，却不太能减轻内在的体验，还可能增加生理唤醒、占用记忆资源，并影响交谈对象的感受。但它的后果因文化和情境而不同：在某些场合，暂时不表露情绪是恰当的。',
+      { exam: '在考场上压住紧张的表情没有坏处，但它不会让人更不紧张。', wait: '独自等待时，压抑表情的意义不大。', tease: '在众人面前暂时不发作，常常是合乎情境的选择；但如果长期在亲密关系中压抑，研究发现可能损害彼此的亲近感。' }],
+  };
+  function regulate(host) {
+    const o = { scen: 'exam', strat: 'rea' };
+    const { fig, out } = shell(host, '同一种情绪，七种调节方式',
+      '选一个情境，再选一种调节方式。图中会标出这种方式在情绪产生过程中的哪个环节起作用，下方汇总研究中的一般发现。',
+      [['scen', '情境', [['exam', '考试前'], ['wait', '等待结果'], ['tease', '被当众取笑']]],
+        ['strat', '调节方式', Object.entries(RSTRAT).map(([k, v]) => [k, v[0]])]],
+      '这是一个教学演示。下面的说明概括的是研究中的平均趋势，不是对任何人的预测，也不是心理测评或治疗建议。同一种方式对不同的人、在不同的时刻，效果可能很不一样。', MODEL);
+    const box = document.createElement('div'); fig.append(box);
+    const draw = () => {
+      const [lab, at, fam, gen, by] = RSTRAT[o.strat], [scen, ctx] = RSCEN[o.scen];
+      const W = widthOf(fig), nar = W < 460, H = nar ? 146 : 128, gap = nar ? 12 : 22, bw = (W - gap * 3) / 4, by0 = nar ? 70 : 52, fy = nar ? 42 : 26;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `情绪产生过程：情境、注意、评价、反应。“${lab}”属于${fam}，作用在“${STAGES[at]}”环节。` }, box);
+      text(svg, 0, 14, '情绪产生的过程（格罗斯的过程模型，简化）', 'lab-tick');
+      STAGES.forEach((t, i) => {
+        const x = i * (bw + gap), on = i === at;
+        el('rect', { x: x + 1, y: by0, width: bw - 2, height: 40, rx: 6, class: on ? 'fx-pill r' : 'fx-pill b' }, svg);
+        text(svg, x + bw / 2, by0 + 25, t, 'fx-h', 'middle');
+        if (i) { el('line', { x1: x - gap + 3, x2: x - 4, y1: by0 + 20, y2: by0 + 20, class: 'fx-ln' }, svg); el('path', { d: `M${x - 3},${by0 + 20} l-6,-4 v8 z`, class: 'fx-node' }, svg); }
+      });
+      const cx = at * (bw + gap) + bw / 2;
+      el('line', { x1: cx, x2: cx, y1: fy + 4, y2: by0 - 4, class: 'fx-ln fx-lr' }, svg);
+      text(svg, Math.min(Math.max(cx, 40), W - 40), fy, fam, 'lab-tick fx-halo', 'middle');
+      text(svg, W, H - 10, nar ? '箭头表示时间顺序' : '箭头表示时间顺序；反应又会改变情境', 'lab-tick', 'end');
+      out.innerHTML = `<p class="lab-q">${scen}</p><p class="lab-note">${ctx}</p>
+        <ul class="lab-parts lab-flow"><li><span>你选择的方式</span><b>${lab}</b></li><li><span>属于</span><b>${fam}</b></li></ul>
+        <p><b>研究中的一般发现：</b>${gen}</p><p><b>在这个情境中：</b>${by[o.scen]}</p>
+        <p class="lab-note">没有一种方式在所有情境中都最好。研究者越来越强调<b>灵活性</b>：能否根据情境的要求，选择并调整调节方式。</p>`;
+    };
+    bindControls(host, o, draw);
+    draw();
+    onResize(draw);
+  }
+
+  /* 09-04 · hedonic adaptation: life satisfaction (0–10) after an event at year 2.
+     Mean path: base + d · (keep + (1 − keep) · 0.5^(months / half)). Individual paths scale d by a seeded factor. */
+  const ADAPT = {
+    win: ['意外得到一大笔钱', 0.8, 18, 70, '针对瑞典彩票中奖者的研究发现，中大奖的人在多年后对生活的总体满意度仍然较高；在日常的快乐和心理健康上，效应则要小得多。'],
+    marry: ['结婚', 0.6, 12, 0, '长期追踪发现，平均而言，人们在结婚前后满意度略有上升，几年后回到接近原来的水平；但个人之间的差别很大，有些人长期上升，有些人下降。'],
+    unemp: ['失业', -1.0, 24, 40, '长期追踪发现，失业后满意度明显下降，平均而言即使重新就业，也没有完全回到原来的水平。'],
+    health: ['长期的健康问题', -1.2, 30, 70, '长期追踪发现，严重而持久的健康问题往往伴随满意度的持续下降，下降的程度与严重性有关。'],
+  };
+  function adapt(host) {
+    const o = { ev: 'win', ind: 'off' };
+    const { fig, out, actions } = shell(host, '事件发生之后：适应的模型',
+      '选择一类生活事件，或者拖动滑块自己设定。曲线显示一个假设的人群对生活的总体满意度（0–10 分）在事件前后怎样变化。',
+      [['ev', '事件', Object.entries(ADAPT).map(([k, v]) => [k, v[0]])], ['ind', '个人之间的差别', [['off', '只看平均'], ['on', '同时显示几个假设的人']]]],
+      '这是一个模型演示。所有曲线都由公式计算出来，数值是假设的；预设只表示研究中观察到的大致方向，不是研究的真实数据，也不能预测任何人的感受。', MODEL);
+    const box = document.createElement('div');
+    const sD = slider('事件带来的初始变化：', -3, 3, 0.1, 0.8), sH = slider('适应一半所需的时间：', 3, 60, 3, 18), sK = slider('长期保留下来的变化：', 0, 100, 5, 70);
+    fig.append(box, sD.box, sH.box, sK.box);
+    [sD, sH, sK].forEach((s) => s.input.addEventListener('input', () => { o.ev = ''; sync(); draw(); }));
+    const sync = () => host.querySelectorAll('.lab-opts .choice[data-k="ev"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o.ev)));
+    const BASE = 7, YRS = 8, T0 = 2, IND = [1.6, 1.25, 0.9, 0.55, 0.2, -0.4];
+    const path = (d, half, keep, t) => (t < T0 ? BASE : BASE + d * (keep + (1 - keep) * Math.pow(0.5, ((t - T0) * 12) / half)));
+    const draw = () => {
+      const d = Number(sD.input.value), half = Number(sH.input.value), keep = Number(sK.input.value) / 100;
+      sD.val.textContent = ` ${d > 0 ? '+' : d < 0 ? '−' : ''}${fmt(Math.abs(d), 1)} 分`; sH.val.textContent = ` ${half} 个月`; sK.val.textContent = ` ${sK.input.value}%`;
+      sD.input.setAttribute('aria-valuetext', `${fmt(d, 1)} 分`); sH.input.setAttribute('aria-valuetext', `${half} 个月`); sK.input.setAttribute('aria-valuetext', `${sK.input.value}%`);
+      const W = widthOf(fig), H = 250;
+      box.innerHTML = '';
+      const at = (t) => path(d, half, keep, t);
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `假设的平均满意度：事件前 ${BASE} 分，事件后一年约 ${fmt(at(T0 + 1), 1)} 分，五年后约 ${fmt(at(T0 + 5), 1)} 分。` }, box);
+      const { X, Y } = lc(svg, W, H, { xMax: YRS, yMax: 10, xTicks: [0, 2, 4, 6, 8], yTicks: [0, 2, 4, 6, 8, 10].map((v) => [v, String(v)]), xLab: '年', yLab: '对生活的总体满意度（假设）' });
+      el('line', { x1: X(T0), x2: X(T0), y1: 24, y2: Y(0), class: 'fx-hair fx-dash' }, svg);
+      text(svg, X(T0) + 5, Y(0) - 8, '事件', 'lab-tick');
+      el('line', { x1: X(0), x2: X(YRS), y1: Y(BASE), y2: Y(BASE), class: 'fx-hair fx-dash' }, svg);
+      const pts = (f) => { const p = []; for (let t = 0; t <= YRS + 1e-9; t += 0.05) p.push([X(t), Y(Math.max(0, Math.min(10, f(t))))]); return p; };
+      if (o.ind === 'on') IND.forEach((m, i) => line(svg, pts((t) => path(d * m, half * (0.6 + 0.16 * i), Math.min(1, keep * (1.3 - 0.12 * i)), t) + (i - 2.5) * 0.18), 'fx-hair'));
+      line(svg, pts(at), 'fx-ln fx-lr fx-curve');
+      const ev = ADAPT[o.ev];
+      out.innerHTML = `<ul class="lab-parts"><li><span>事件前（假设的平均）</span><b>${BASE} 分</b></li><li><span>事件后一年</span><b>${fmt(at(T0 + 1), 1)} 分</b></li><li><span>事件后五年</span><b>${fmt(at(T0 + 5), 1)} 分</b></li></ul>
+        <p>${ev ? `<b>${ev[0]}。</b>${ev[4]}` : '你正在使用自己设定的数字。'}</p>
+        <p>${keep === 0 ? '“长期保留”为 0 时，曲线最终回到原来的水平，这就是“享乐适应”最强的形式。' : keep === 1 ? '“长期保留”为 100% 时，完全没有适应：变化一直维持。' : '适应往往是部分的：变化随时间减弱，但不一定完全消失。研究发现，不同事件的适应程度相差很大。'}${o.ind === 'on' ? '细线是几个假设的人：平均曲线相同，个人的反应却可以很不一样，甚至方向相反。' : ''}</p>`;
+    };
+    const preset = () => { const ev = ADAPT[o.ev]; if (!ev) return; sD.input.value = ev[1]; sH.input.value = ev[2]; sK.input.value = ev[3]; };
+    bindControls(host, o, (k) => { if (k === 'ev') preset(); draw(); });
+    action(actions, '恢复默认设置', () => { o.ev = 'win'; o.ind = 'off'; preset(); host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o[b.dataset.k]))); draw(); }, 'lab-clear');
+    preset(); draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt };
 })();

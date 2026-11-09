@@ -1795,5 +1795,151 @@
     return api;
   };
 
+  /* ===== 09-01 · one evening, six accounts: what comes first, and what the feeling is made of =====
+     Each account is a list of rows; a row with two items is drawn side by side (two things at once). */
+  const SCENE = ['深夜，身后传来急促的脚步声', '同一个情境'];
+  const ETH = {
+    jl: ['詹姆斯–兰格', [[['身体先反应', '心跳加快、肌肉绷紧、想要快跑']], [['大脑感受到这些身体变化', '']], [['这种感受就是恐惧', '']]],
+      '身体反应在先，情绪是对身体变化的感受：“我们因为颤抖而害怕”。它提出的问题至今仍有价值：身体信号在情绪体验中起什么作用？但“每种情绪都有自己独特的身体模式”这一推论，没有得到一致的支持。'],
+    cb: ['坎农–巴德', [[['大脑处理这个刺激', '坎农认为关键在丘脑']], [['身体反应', '心跳加快、准备逃跑'], ['恐惧的体验', '']]],
+      '身体反应和情绪体验同时发生、彼此独立，前者不是后者的原因。坎农对詹姆斯的批评（内脏反应太慢、太笼统）影响很大；但他把关键放在丘脑，这一点已被后来的神经科学修正。'],
+    ss: ['沙赫特–辛格', [[['身体被唤醒', '心跳加快，但这种唤醒本身没有方向']], [['寻找解释', '“深夜、陌生人，可能有危险”']], [['唤醒 + 解释 = 恐惧', '如果你刚跑完步，同样的心跳可能不被当成恐惧']]],
+      '情绪 = 生理唤醒 + 对唤醒的认知解释。这个理论影响很大，但支持它的经典实验结果并不强，后来的重复研究也不一致。比较稳妥的结论是：对唤醒的解释有时会影响情绪的强度，但唤醒并不是情绪的必要条件。'],
+    ap: ['认知评价', [[['评价这件事的意义', '与我有关吗？是威胁吗？我能应对吗？']], [['恐惧', '身体反应、表情、想逃的倾向，都由评价引发']]],
+      '决定情绪的不是事件本身，而是人对它的评价。如果你认出那是常在附近跑步的邻居，就不会害怕。评价可以非常快，不一定是有意识的推理。争议在于：评价是情绪的原因，还是情绪本身的一部分？'],
+    be: ['基本情绪', [[['触发“恐惧”这一类情绪', '一套在进化中形成的反应程序']], [['一组协调的反应', '特定的表情、生理变化、逃避的倾向']]],
+      '少数几种基本情绪（如恐惧、愤怒、厌恶）各自有相对固定的触发条件和反应模式，并且在不同文化中都能被识别。批评者指出，同一种情绪在不同的人和情境中，表情和生理反应差别很大。'],
+    pc: ['心理建构', [[['身体的整体状态', '不愉快、高度唤醒'], ['情境与过去的经验', '深夜、陌生的街道、新闻里的事件']], [['大脑把这些归类为“恐惧”', '也可能归类为“紧张”或“兴奋”']]],
+      '情绪不是由专门的程序触发的，而是大脑利用身体信号、情境和已有的情绪概念，在当下“建构”出来的。它解释了情绪的多样性；批评者则认为它很难说明，为什么某些情绪模式在不同文化中相当一致。'],
+  };
+  F.etheory = (fig) => {
+    const S = { v: 'jl' };
+    return figure(fig, (box, w, api) => {
+      const [, rows, note] = ETH[S.v], cw = Math.min(w, 480), x0 = (w - cw) / 2, gap = 30, half = (cw - 14) / 2;
+      const rowH = (r) => Math.max(...r.map(([t, sub]) => cardH(r.length > 1 ? half : cw, sub, 44)));
+      const all = [[SCENE], ...rows], hs = all.map(rowH), H = hs.reduce((s, h) => s + h + gap, -gap) + 4;
+      const s = svgIn(box, w, H, fig), gs = [];
+      let y = 0;
+      all.forEach((r, i) => {
+        const g = el('g', {}, s), h = hs[i];
+        if (i) {
+          if (r.length > 1 && rows[i - 2]?.length !== 2) { arrow(g, w / 2, y - gap + 4, x0 + half / 2, y - 4); arrow(g, w / 2, y - gap + 4, x0 + cw - half / 2, y - 4); } else arrow(g, w / 2, y - gap + 4, w / 2, y - 4);
+        }
+        r.forEach(([t, sub], j) => {
+          const cls = i === 0 ? 'm' : i === all.length - 1 ? 'r' : 'b';
+          const bw = r.length > 1 ? half : cw, bx = r.length > 1 ? x0 + j * (half + 14) : x0;
+          const c = card(g, bx, y, bw, t, sub, cls, h);
+          if (r.length > 1 && i < all.length - 1) { /* side-by-side inputs meet in the next row */ arrow(g, bx + bw / 2, y + h + 4, w / 2, y + h + gap - 4); }
+          return c;
+        });
+        gs.push(g); y += h + gap;
+      });
+      api.out.innerHTML = `<p><b>${ETH[S.v][0]}。</b>${note}</p>`;
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.3)));
+    }, { dur: 1300, ctrls: { value: 'jl', items: Object.entries(ETH).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 09-03 · stress responses over time: one acute episode, repeated episodes with recovery, repeated
+     episodes without full recovery. Hypothetical curves; arousal on an arbitrary 0–1 scale. ===== */
+  const STRESS = {
+    acute: ['一次急性压力', [[2, 1.5]], 0.8, 0, '一次短暂的压力：唤醒迅速上升，压力源消失后，在较短时间内回到原来的水平。这种反应本身是适应性的，它帮助身体和注意力应对眼前的挑战。'],
+    rep: ['反复，但能恢复', [[1.5, 1], [4.5, 1], [7.5, 1]], 0.8, 0, '压力源反复出现，但每次之后都能恢复。许多日常的压力属于这种情况；只要恢复充分，反复的急性反应并不一定带来长期的损害。'],
+    chr: ['反复，恢复不完全', [[1.5, 1], [4, 1], [6.5, 1]], 2.6, 0.22, '压力源反复出现，而每次之后恢复得慢、不完全；在压力源出现之前，对它的担心和反复思考也会维持唤醒。研究者认为，正是这种长期得不到恢复的状态，而不是短暂的压力反应本身，与健康风险的关系更密切。'],
+  };
+  F.stresst = (fig) => {
+    const S = { v: 'acute' };
+    return figure(fig, (box, w, api) => {
+      const [, eps, tau, drift, note] = STRESS[S.v], H = 230, L = 34, R = 10, T = 26, B = 40, X1 = 10;
+      const s = svgIn(box, w, H, fig), X = (t) => L + (t / X1) * (w - L - R), Y = (v) => H - B - v * (H - T - B);
+      const sat = (v) => 0.95 * (1 - Math.exp(-1.4 * v)), y0 = sat(0.18);
+      const base = (t) => 0.18 + drift * Math.min(1, t / 9);
+      const resp = (t) => eps.reduce((a, [t0, d]) => {
+        const ant = drift ? 0.12 : 0;
+        if (t < t0) return a + ant * Math.exp(-(t0 - t) / 0.5);
+        const rise = 1 - Math.exp(-(t - t0) / 0.15), up = ant + (0.62 - ant) * rise;
+        return a + (t <= t0 + d ? up : 0.62 * (1 - Math.exp(-d / 0.15)) * Math.exp(-(t - t0 - d) / tau));
+      }, 0);
+      eps.forEach(([t0, d]) => el('rect', { x: X(t0), y: T - 6, width: X(t0 + d) - X(t0), height: H - B - T + 6, class: 'fx-band2' }, s));
+      el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'lab-axis' }, s);
+      el('line', { x1: L, x2: L, y1: T - 6, y2: Y(0), class: 'lab-axis' }, s);
+      el('line', { x1: L, x2: w - R, y1: Y(y0), y2: Y(y0), class: 'fx-hair fx-dash' }, s);
+      tx(s, 0, 13, '生理和心理唤醒（示意）', 'fx-n'); tx(s, w - R, H - 6, '时间 →', 'fx-n', 'end');
+      tx(s, X(eps[0][0]) + 4, H - B + 16, w < 420 ? '灰色：压力源' : '灰色区域：压力源出现', 'fx-n');
+      tx(s, w - R, Y(y0) - 6, '原来的水平', 'fx-n', 'end');
+      const pts = []; for (let t = 0; t <= X1; t += 0.04) pts.push([X(t), Y(sat(base(t) + resp(t)))]);
+      const p = el('path', { d: pathOf(pts), class: 'fx-ln fx-lr fx-curve' }, s), draw = drawOn(p);
+      api.out.innerHTML = `<p><b>${STRESS[S.v][0]}。</b>${note}</p><p class="fx-n">曲线是示意，没有单位，不是任何人的测量结果。</p>`;
+      return (t) => draw(t);
+    }, { dur: 1600, ctrls: { value: 'acute', items: Object.entries(STRESS).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 09-03 · four prototypical trajectories after a potentially traumatic event (schematic) ===== */
+  const TRAJ = {
+    res: ['韧性', [0.15, 0.25, 0.2, 0.17, 0.15, 0.15], '事件后出现短暂、轻微的困扰，但日常功能基本保持稳定。在许多研究中，这是最常见的一种轨迹。韧性不等于“没有感觉”，也不是少数“强者”的特质。'],
+    rec: ['恢复', [0.15, 0.75, 0.6, 0.4, 0.25, 0.18], '事件后出现明显的症状，持续数月甚至一两年，然后逐渐回到接近原来的水平。'],
+    chr: ['长期困扰', [0.18, 0.8, 0.78, 0.76, 0.75, 0.74], '事件后症状明显，并在很长时间里没有明显减轻。这部分人最需要专业的帮助。'],
+    del: ['延迟出现', [0.15, 0.35, 0.42, 0.55, 0.65, 0.7], '事件后起初症状不重，后来逐渐加重。这种轨迹较少见，在不同研究中是否稳定存在也有争议。'],
+  };
+  F.traject = (fig) => {
+    const S = { v: 'res' };
+    return figure(fig, (box, w, api) => {
+      const H = 240, L = 34, R = 12, T = 28, B = 42, xs = [0, 1, 2, 3, 4, 5];
+      const s = svgIn(box, w, H, fig), X = (i) => L + 10 + (i / 5) * (w - L - R - 10), Y = (v) => H - B - v * (H - T - B);
+      el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'lab-axis' }, s);
+      el('line', { x1: L, x2: L, y1: T - 6, y2: Y(0), class: 'lab-axis' }, s);
+      el('line', { x1: X(0.5), x2: X(0.5), y1: T - 6, y2: Y(0), class: 'fx-hair fx-dash' }, s);
+      tx(s, 0, 13, '症状和功能受损（示意）', 'fx-n');
+      const labs = w < 420 ? ['事件前', '', '半年', '', '', '两年'] : ['事件前', '一个月', '半年', '一年', '一年半', '两年'];
+      xs.forEach((i) => { if (labs[i]) tx(s, X(i), H - B + 17, labs[i], 'fx-n', 'middle'); });
+      tx(s, X(0.5) + 4, T + 2, '事件', 'fx-n');
+      const others = el('g', {}, s), mine = el('g', {}, s);
+      Object.entries(TRAJ).forEach(([k, [, v]]) => {
+        const pts = v.map((y, i) => [X(i), Y(y)]);
+        el('path', { d: pathOf(pts), class: k === S.v ? 'fx-ln fx-lr fx-curve' : 'fx-hair' }, k === S.v ? mine : others);
+      });
+      const [lab, v, note] = TRAJ[S.v];
+      tx(mine, X(5) - 4, Y(v[5]) - 10, lab, 'fx-h fx-halo', 'end');
+      api.out.innerHTML = `<p><b>${lab}。</b>${note}</p><p class="fx-n">曲线的形状是示意，没有真实的数值；各种轨迹所占的比例，因事件类型、测量方法和统计模型的不同而有很大差别。</p>`;
+      return (t) => { show(others, stage(t, 0, 0.4)); show(mine, stage(t, 0.35, 0.5)); };
+    }, { dur: 1100, ctrls: { value: 'res', items: Object.entries(TRAJ).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 09-04 · income and well-being: the same log-linear pattern on a linear and on a log axis, and the
+     pattern split by how happy people are (after Killingsworth, Kahneman & Mellers, 2023). Schematic. ===== */
+  const INC = [15, 30, 60, 120, 240, 480]; // thousand USD per year
+  F.income = (fig) => {
+    const S = { v: 'lin' };
+    return figure(fig, (box, w, api) => {
+      const H = 250, L = 34, R = 14, T = 28, B = 44, lo = Math.log(15), hi = Math.log(480);
+      const s = svgIn(box, w, H, fig), Y = (v) => H - B - v * (H - T - B);
+      const X = S.v === 'lin' ? (k) => L + ((k - 15) / (480 - 15)) * (w - L - R) : (k) => L + ((Math.log(k) - lo) / (hi - lo)) * (w - L - R);
+      el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'lab-axis' }, s);
+      el('line', { x1: L, x2: L, y1: T - 6, y2: Y(0), class: 'lab-axis' }, s);
+      tx(s, 0, 13, '平均的幸福感（示意）', 'fx-n');
+      tx(s, w - R, H - 4, S.v === 'lin' ? '家庭年收入（千美元，等距刻度）' : '家庭年收入（千美元，每格翻一倍）', 'fx-n', 'end');
+      (S.v === 'lin' ? [15, 120, 240, 480] : INC).forEach((k) => tx(s, X(k), H - B + 17, String(k), 'fx-n', 'middle'));
+      const curve = (f, kmax = 480) => { const p = []; for (let k = 15; k <= kmax; k *= 1.03) p.push([X(k), Y(f(k))]); p.push([X(kmax), Y(f(kmax))]); return p; };
+      const lin = (a, b) => (k) => a + b * (Math.log(k) - lo) / (hi - lo);
+      const gs = [];
+      if (S.v !== 'split') {
+        const g = el('g', {}, s); gs.push(g);
+        el('path', { d: pathOf(curve(lin(0.25, 0.5))), class: 'fx-ln fx-lr fx-curve' }, g);
+      } else {
+        const groups = [[0.62, 0.32, '最幸福的人'], [0.48, 0.3, ''], [0.36, 0.28, ''], [0.22, 0.26, '']];
+        groups.forEach(([a, b, t]) => { const g = el('g', {}, s); gs.push(g); el('path', { d: pathOf(curve(lin(a, b))), class: 'fx-ln fx-lb' }, g); if (t) tx(g, w - R, Y(a + b) - 8, t, 'fx-n', 'end'); });
+        const g = el('g', {}, s); gs.push(g);
+        const sat = (k) => 0.04 + 0.22 * Math.min(1, (Math.log(k) - lo) / (Math.log(100) - lo));
+        el('path', { d: pathOf(curve(sat)), class: 'fx-ln fx-lr fx-curve' }, g);
+        tx(g, w - R, Y(0.26) + 18, '最不幸福的约 15%–20%', 'fx-n', 'end');
+      }
+      api.out.innerHTML = {
+        lin: '<p><b>等距的收入刻度。</b>曲线越往右越平：同样多出 1 万美元，对低收入者的影响远大于对高收入者。这容易让人以为，收入高到一定程度后，幸福感就“不再增长”。</p>',
+        log: '<p><b>翻倍的收入刻度。</b>同一条曲线，换成每格翻一倍的刻度，就变成了一条直线：收入每翻一倍，平均的幸福感大致增加同样的量。“递减”和“继续增长”在这里并不矛盾。</p>',
+        split: '<p><b>按幸福程度分组。</b>2023 年的合作研究发现：对大多数人来说，收入越高，平均的情绪幸福感越高；只有最不幸福的大约 15%–20% 的人，在家庭年收入达到约 10 万美元后不再明显上升。这个位置是这项研究数据中的结果，不是普遍的“幸福门槛”。这是美国在职成年人的观察性相关数据，不说明收入是原因，也不能直接推广到其他国家。</p>',
+      }[S.v] + '<p class="fx-n">示意图：曲线的形状依据研究的结论绘制，不是研究的原始观测数据，具体高度也不是真实数值。</p>';
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.12, 0.4)));
+    }, { dur: 1000, ctrls: { value: 'lin', items: [['lin', '等距刻度'], ['log', '翻倍刻度'], ['split', '按幸福程度分组']], onChange: (v) => { S.v = v; } } });
+  };
+
   window.PPFig = F;
 })();
