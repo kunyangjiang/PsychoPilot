@@ -1,0 +1,152 @@
+<!-- PsychoPilot · 11-02 · MBTI、九型人格与流行人格测试究竟可靠吗？
+     Manuscript of the lesson body. Loaded by lesson.js into course.html.
+     Conventions: each <section> has an <h2> (numbered by the reader); [n] marks link to #ref-n;
+     <figure data-figure="…"> is drawn by figs.js, <div data-demo="…"> by lab.js, <div data-quiz> by lesson.js. -->
+
+<p class="l-open">“你是什么人格？”在今天的社交网络上，这个问题的答案常常是四个字母：INFJ、ENTP、ISTJ……有人把它写进个人简介，有人用它来解释自己和朋友的相处方式，还有一些招聘启事、恋爱软件也会问起它。另一种流行的人格分类“九型人格”，则把人分成九种类型，并配有丰富的描述。</p>
+<p>很多人做完这类测试的感受是：“太准了，写的就是我。”那么，这些测试到底测到了什么？它们的结果稳定吗？能预测一个人的工作表现、适合什么职业、和谁合得来吗？</p>
+<p>这一讲的核心问题是：<strong>人格类型测试为什么这么吸引人？心理学怎样判断一个测试到底有没有测到有用的东西？</strong>我们会介绍 MBTI 和九型人格的来历，用上一讲讨论过的“维度还是类型”来分析它们，讨论信度、效度以及“觉得准”的心理原因，最后说明这类测试在什么情况下可以使用、在什么情况下不应该使用。</p>
+
+<section id="s1">
+  <h2>为什么人们喜欢人格类型</h2>
+  <p>人格类型之所以流行，并不是因为人们容易受骗，而是因为它们满足了一些真实的需要：</p>
+  <ul class="l-points">
+    <li><b>简单。</b>“你是 INFJ”比“你在外向性上处于第 30 百分位，在宜人性上处于第 75 百分位……”好记得多，也好说得多。</li>
+    <li><b>提供一套语言。</b>类型名称让人可以谈论彼此的差异：“我需要独处来恢复精力，不是不喜欢你们。”</li>
+    <li><b>带来认同和归属。</b>知道“和我同类型的人”也有类似的经历，会让人感到被理解。</li>
+    <li><b>描述大多是正面的。</b>流行的类型描述很少说某种类型“更差”，每种类型都有自己的长处。</li>
+  </ul>
+  <p>这些都是真实的好处。但一个测试受欢迎、让人感觉良好，与它是否<em>测量准确</em>、能否<em>预测</em>什么，是两个不同的问题。心理测量学正是用来回答后一个问题的。</p>
+</section>
+
+<section id="s2">
+  <h2>MBTI 是怎样来的</h2>
+  <p><strong>迈尔斯—布里格斯类型指标</strong>（MBTI）的理论来源，是瑞士精神病学家荣格在 1921 年出版的《心理类型》。荣格根据自己的临床观察和思考，提出人在态度上有“外倾”和“内倾”之分，在心理功能上有感觉、直觉、思维和情感之分。这是一套思辨性的理论，而不是基于系统测量得出的结论。</p>
+  <p>美国的凯瑟琳·布里格斯和她的女儿伊莎贝尔·布里格斯·迈尔斯对荣格的理论很感兴趣，从 20 世纪 40 年代开始编制问卷，希望帮助人们找到适合自己的工作。她们都没有接受过心理测量方面的专业训练。此后，问卷经过多次修订，被出版商推广到企业培训、职业咨询等领域，成为世界上使用最广泛的人格问卷之一。[1]</p>
+  <p>MBTI 有几十年的历史和多个版本，不同版本的题目、计分方法和研究证据都不完全相同。还要注意，网络上流行的许多免费“16 型人格”测试，并不是官方的 MBTI 问卷：它们的题目和计分方法各不相同，有的还额外加入了第五个维度。所以，针对官方 MBTI 的研究结果，不一定适用于你在网上做的某一个测试；反过来，某个网络测试的问题，也不一定是官方问卷的问题。下面的讨论针对的是这类测试共同的核心设计：把人分成 16 种类型。</p>
+</section>
+
+<section id="s3">
+  <h2>四个二分与 16 种类型</h2>
+  <p>MBTI 用四组对立的“偏好”来描述人：</p>
+  <ul class="l-points">
+    <li><b>外倾（E）—内倾（I）：</b>精力更多来自外部世界，还是内心世界。</li>
+    <li><b>感觉（S）—直觉（N）：</b>更关注具体的事实和细节，还是模式和可能性。</li>
+    <li><b>思维（T）—情感（F）：</b>做决定时更看重逻辑和客观标准，还是人际关系和价值。</li>
+    <li><b>判断（J）—感知（P）：</b>更喜欢有计划、有定论，还是保持灵活和开放。</li>
+  </ul>
+  <p>每一组取一个字母，就得到 2 × 2 × 2 × 2 = 16 种类型。MBTI 的理论还认为，每个人都有一个“真实类型”，各种心理功能在其中有固定的主次顺序。</p>
+  <p>在网络讨论中，人们还常常谈论每种类型的“功能顺序”，比如某种类型以“内倾直觉”为主导、以“外倾情感”为辅助，并以此解释人的思考方式和人际关系。这部分内容来自荣格理论的延伸，但几乎没有经过系统的检验；斯坦因和斯旺认为，类型理论的这些部分难以检验，而且彼此之间存在矛盾。[2] 用复杂的术语描述一种说法，并不会让它更有证据。</p>
+  <p>这里有一个关键的技术细节：问卷实际得到的是每一组上的<em>连续分数</em>，然后以中间某个点为界，把分数切成两个字母。换句话说，MBTI 先测量了维度，再把维度变成了类型。这一步是否合理，取决于人们的分数是否真的分成两堆。</p>
+</section>
+
+<section id="s4">
+  <h2>九型人格：另一种流行的分类</h2>
+  <p><strong>九型人格</strong>把人分为九种类型，比如“完美型”“助人型”“成就型”等，并用一个九角星图形描述类型之间的关系，比如每种类型旁边的“侧翼”，以及在压力或成长时向其他类型“移动”。</p>
+  <p>它常被描述为一种流传已久的古老智慧，但这种说法缺乏历史证据。作为人格分类的九型人格，主要形成于 20 世纪六七十年代，与奥斯卡·伊恰索和智利精神科医生克劳迪奥·纳兰霍的教学有关；它更多来自灵性传统和个人观察，而不是心理测量研究。[3]</p>
+  <p>2021 年，胡克等人系统回顾了关于九型人格的实证研究，共 104 个独立样本。他们发现证据好坏参半：一些研究的子量表与大五人格有符合理论的关系，也有研究报告它对个人成长有帮助；但因素分析通常得不到九个因素，没有研究用聚类方法从数据中得出这九种类型，而对“侧翼”和“类型之间的移动”等理论内容，几乎没有研究支持。[3] 因此，九型人格可以作为一种自我反思的语言，但不能被当作经过验证的人格分类体系，更不能用于临床判断。</p>
+</section>
+
+<section id="s5">
+  <h2>维度还是类型：数据怎样回答</h2>
+  <p>上一讲提到，正常人格更接近连续的维度。MBTI 的四组偏好是否例外？</p>
+  <p>如果人真的分成“外倾型”和“内倾型”，那么大量人的得分就应该呈现<strong>双峰分布</strong>：两头各有一个高峰，中间较少。可是，在约 1.2 万名参与者的数据中，贝斯和哈维发现，早先关于双峰的报告其实是计分软件设置造成的假象；改用更精细的计算后，四组分数都呈现中间多、两头少的单峰分布。[4] 使用分类计量方法的研究，也没有找到这四组偏好是真正类别的证据。[5]</p>
+  <p>麦克雷和科斯塔在 1989 年用 468 名成年人的数据，比较了 MBTI 和大五人格。他们没有发现 MBTI 测的是真正的二分偏好或性质不同的类型；但 MBTI 的四组分数确实与大五中的四个维度相关：外倾—内倾对应外向性，感觉—直觉对应开放性，思维—情感与宜人性有关，判断—感知与尽责性有关。[6] 值得注意的是，MBTI 没有直接测量大五中的神经质，也就是情绪稳定性这一在许多研究中很重要的维度。</p>
+  <p>这说明，批评 MBTI 时需要把两件事分开：它的<em>四组分数</em>测到了人格中真实的、与主流模型有关的差异；问题主要出在把这些连续的分数<em>切成类型</em>，以及围绕类型建立起来的理论。</p>
+</section>
+
+<section id="s6">
+  <h2>信度：为什么类型会“变”</h2>
+  <p>很多人有过这样的经历：第一次测是 INTJ，过一段时间再测，变成了 INTP。这是不是说明人格变了？</p>
+  <p>大多数时候并不是。对 MBTI 研究的汇总发现，四组<em>分数</em>的内部一致性和重测信度总体上不差，尽管不同研究之间有差别。[7] 问题在于分界点。既然大多数人的分数都集中在中间附近，而每一次测量都有一些误差，那么分数靠近分界点的人，只要分数稍微一波动，就会落到另一边，得到另一个字母。四个字母中只要有一个变了，类型就变了。</p>
+  <div data-demo="cutoff"></div>
+  <p>还可以用一个简单的算术说明问题的规模。假设某个人在每一组偏好上，重测时字母发生变化的可能性都是 15%（这是为了说明而设定的数字，不是研究结果），并且四组之间互不影响。那么，四个字母全部保持不变的可能性只有 0.85 × 0.85 × 0.85 × 0.85，约等于 52%。也就是说，即使每一个字母看起来“相当稳定”，整个四字母类型仍然可能有将近一半的机会改变。真实的比例因人、因版本、因间隔时间而不同，但道理是一样的：组合的类别越多，整体标签就越不稳定。</p>
+  <p>这个问题不是 MBTI 独有的：任何把连续分数切成类别的做法，都会在分界点附近产生大量“不稳定”的分类。这也是人格研究者更愿意报告分数而不是类型的原因之一。</p>
+</section>
+
+<section id="s7">
+  <h2>效度：它测到了想测的东西吗？能预测什么？</h2>
+  <p>第 2 阶段介绍过，<strong>效度</strong>问的是一个测验是否真的测量了它想测量的东西，以及它的结果能否用来作出某种推断。对人格类型测试来说，有两个问题最重要。</p>
+  <p><strong>构念效度：</strong>测验背后的理论站得住吗？斯坦因和斯旺在 2019 年系统评价了 MBTI 背后的理论，认为它在几个方面存在问题：“每个人都有一个真实类型”的假设与数据不符，理论的许多部分难以检验，而且存在内部矛盾。[2] 皮滕杰也认为，MBTI 虽然直观上很吸引人，但还不足以支持推广者的许多说法。[1]</p>
+  <p><strong>预测效度：</strong>它能否预测重要的结果？这里最常见的两种商业用法是招聘和恋爱配对。</p>
+  <ul class="l-points">
+    <li><b>招聘。</b>MBTI 的出版商自己就明确表示，它认为把 MBTI 用于招聘和人员选拔是不符合伦理的，这个工具不是为此设计的。[8]人员选拔研究中，有更充分证据的方法是结构化面试、工作样本测试和认知能力测验等；即使是这些方法，最新的分析也认为过去对它们效度的估计偏高，修订后的估计中，结构化面试约为 0.42，认知能力测验约为 0.31。[9] 用一个类型标签来决定录用谁，既缺乏证据，也不公平。</li>
+    <li><b>恋爱配对。</b>“哪两种类型最合适”的说法，没有可靠的研究支持。一项使用澳大利亚、英国和德国三个大型全国代表性样本、共 2 万多对夫妻的研究发现，夫妻双方人格的<em>相似程度</em>对关系满意度的解释力不到 0.5%；更重要的是每个人自己的人格，比如自己的情绪稳定性。[10]</li>
+  </ul>
+</section>
+
+<section id="s8">
+  <h2>为什么结果读起来“这么准”</h2>
+  <p>如果类型测试的科学基础有这么多问题，为什么很多人觉得结果准得惊人？第 1 阶段第 1 讲介绍过<strong>福勒效应</strong>（也叫巴纳姆效应）：人们倾向于把模糊、笼统、适用于大多数人的描述，当成对自己独特人格的准确刻画。研究回顾发现，描述越正面，越被说成是“专门为你写的”，人们就越容易接受。[11] 流行的类型描述恰好具备这些特点。</p>
+  <p>除此之外，还有几个心理过程在起作用：</p>
+  <ul class="l-points">
+    <li><b>答案来自自己。</b>测试结果是根据你自己的回答得出的，它把你说过的话换一种方式说回来，自然会“像你”。这能说明测试有一定的一致性，却不能说明它预测了你还不知道的东西。</li>
+    <li><b>证实偏差。</b>第 8 阶段讨论过，人倾向于注意符合已有看法的证据。知道自己是某种类型以后，人更容易想起符合它的经历，忽略不符合的经历。</li>
+    <li><b>标签会反过来影响自我看法。</b>一个人相信“我是内向型，不适合当众讲话”，可能就更少去尝试，从而失去改变的机会。类型标签本来是描述，却可能被当成了规定。</li>
+  </ul>
+  <p>所以，“觉得准”是一种真实的体验，但它不能代替信度和效度的证据。</p>
+</section>
+
+<section id="s9">
+  <h2>与主流特质模型的比较</h2>
+  <p>把 MBTI 式的类型测试与大五等特质模型放在一起，可以更清楚地看到差别：</p>
+  <div class="l-table" role="region" aria-label="人格类型测试与主流特质模型的比较" tabindex="0">
+    <table>
+      <thead><tr><th scope="col">比较的方面</th><th scope="col">MBTI 式类型测试</th><th scope="col">大五等特质模型</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">结果的形式</th><td>16 种类型之一</td><td>每个维度上的连续分数</td></tr>
+        <tr><th scope="row">结构从哪里来</th><td>主要来自荣格的理论</td><td>来自对大量数据的因素分析，并在多种语言中检验</td></tr>
+        <tr><th scope="row">分界点附近的人</th><td>容易在重测时变换类型</td><td>分数小幅波动，不会“变成另一种人”</td></tr>
+        <tr><th scope="row">情绪稳定性</th><td>没有直接测量</td><td>作为一个基本维度测量</td></tr>
+        <tr><th scope="row">与生活结果的关系</th><td>可靠的预测证据很少</td><td>与健康、关系、职业等结果有可重复的、多为中小程度的关系</td></tr>
+        <tr><th scope="row">适合的用途</th><td>讨论和自我反思的起点</td><td>科学研究；在专业人员指导下的评估</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>需要说明的是，大五模型同样有局限，上一讲讨论过；而且任何人格测验，包括大五问卷，都不应该被用来单独决定一个人的工作、教育或人际关系。</p>
+</section>
+
+<section id="s10">
+  <h2>它们什么时候可以用</h2>
+  <p>认识到这些问题，并不意味着人格类型测试一无是处，也不意味着喜欢它们的人是错的。更合理的态度是：区分<em>用途</em>。</p>
+  <ul class="l-points">
+    <li><b>比较合适：</b>作为开启对话的话题，帮助团队成员讨论各自的工作习惯和沟通偏好；作为自我反思的提示，问问自己“这段描述哪里像我，哪里不像”。在这些用途中，测试是讨论的起点，不是结论。</li>
+    <li><b>不合适：</b>用于招聘、晋升或分配任务；用于判断两个人是否合适做伴侣；用于给自己或别人下定论，比如“他是某某型，所以永远不会改变”；当作心理问题的诊断。</li>
+  </ul>
+  <p>最后，一个测试的<strong>流行程度</strong>，不能证明它的准确性。一个测试可以在几十年里被数以百万计的人使用，同时仍然缺乏预测效度的证据。评价一个人格测试，要问的是：它的结构是否得到数据支持？分数在重测时稳定吗？它能预测哪些具体的结果，预测力有多大？这些问题的答案，都需要来自研究，而不是来自使用人数或个人感受。</p>
+</section>
+
+<section id="sum" class="l-sum">
+  <h2>本讲要点</h2>
+  <ul>
+    <li>人格类型测试满足了简单、认同和交流的需要，但受欢迎和让人感觉良好，不等于测量准确或有预测力。</li>
+    <li>MBTI 源于荣格的思辨理论，把四组连续分数切成 16 种类型；九型人格主要形成于 20 世纪六七十年代，并不是经过验证的分类体系，其核心理论内容缺乏研究支持。</li>
+    <li>数据显示 MBTI 的分数呈单峰分布，不支持真正的类型；但四组分数确实与大五中的四个维度有关，MBTI 没有直接测量情绪稳定性。</li>
+    <li>分数本身的信度尚可，但分界点附近的人在重测时很容易得到不同的类型，这是把连续分数切成类别的必然结果。</li>
+    <li>没有可靠证据支持用类型测试进行招聘或恋爱配对；出版商本身也反对将 MBTI 用于招聘。</li>
+    <li>“觉得准”可能来自福勒效应、证实偏差，以及测试把自己的回答换一种方式说回来；类型标签还可能反过来限制人的尝试。</li>
+    <li>类型测试可以作为讨论和反思的起点，但不应用于决定工作、关系或诊断；流行程度不能证明预测效度。</li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <h2>检验一下</h2>
+  <div data-quiz></div>
+</section>
+
+<section id="refs" class="l-refs">
+  <h2>参考文献</h2>
+  <ol>
+    <li id="ref-1">Pittenger, D. J. (2005). Cautionary comments regarding the Myers-Briggs Type Indicator. <i>Consulting Psychology Journal: Practice and Research, 57</i>(3), 210–221. <a href="https://doi.org/10.1037/1065-9293.57.3.210">doi:10.1037/1065-9293.57.3.210</a></li>
+    <li id="ref-2">Stein, R., &amp; Swan, A. B. (2019). Evaluating the validity of Myers‐Briggs Type Indicator theory: A teaching tool and window into intuitive psychology. <i>Social and Personality Psychology Compass, 13</i>(2), e12434. <a href="https://doi.org/10.1111/spc3.12434">doi:10.1111/spc3.12434</a></li>
+    <li id="ref-3">Hook, J. N., Hall, T. W., Davis, D. E., Van Tongeren, D. R., &amp; Conner, M. (2021). The Enneagram: A systematic review of the literature and directions for future research. <i>Journal of Clinical Psychology, 77</i>(4), 865–883. <a href="https://doi.org/10.1002/jclp.23097">doi:10.1002/jclp.23097</a></li>
+    <li id="ref-4">Bess, T. L., &amp; Harvey, R. J. (2002). Bimodal score distributions and the Myers-Briggs Type Indicator: Fact or artifact? <i>Journal of Personality Assessment, 78</i>(1), 176–186. <a href="https://doi.org/10.1207/s15327752jpa7801_11">doi:10.1207/s15327752jpa7801_11</a></li>
+    <li id="ref-5">Arnau, R. C., Green, B. A., Rosen, D. H., Gleaves, D. H., &amp; Melancon, J. G. (2003). Are Jungian preferences really categorical? An empirical investigation using taxometric analysis. <i>Personality and Individual Differences, 34</i>(2), 233–251. <a href="https://doi.org/10.1016/s0191-8869(02)00040-5">doi:10.1016/s0191-8869(02)00040-5</a></li>
+    <li id="ref-6">McCrae, R. R., &amp; Costa, P. T. (1989). Reinterpreting the Myers-Briggs Type Indicator from the perspective of the five-factor model of personality. <i>Journal of Personality, 57</i>(1), 17–40. <a href="https://doi.org/10.1111/j.1467-6494.1989.tb00759.x">doi:10.1111/j.1467-6494.1989.tb00759.x</a></li>
+    <li id="ref-7">Capraro, R. M., &amp; Capraro, M. M. (2002). Myers-Briggs Type Indicator score reliability across studies: A meta-analytic reliability generalization study. <i>Educational and Psychological Measurement, 62</i>(4), 590–602. <a href="https://doi.org/10.1177/0013164402062004004">doi:10.1177/0013164402062004004</a></li>
+    <li id="ref-8">The Myers-Briggs Company. (2021, June). <i>Should personality assessments be used in hiring?</i> [Press release]. <a href="https://www.themyersbriggs.com/en-US/Access-Resources/News-Press/2021/June/Should-Personality-Assessments-Be-Used-in-Hiring">themyersbriggs.com</a></li>
+    <li id="ref-9">Sackett, P. R., Zhang, C., Berry, C. M., &amp; Lievens, F. (2022). Revisiting meta-analytic estimates of validity in personnel selection: Addressing systematic overcorrection for restriction of range. <i>Journal of Applied Psychology, 107</i>(11), 2040–2068. <a href="https://doi.org/10.1037/apl0000994">doi:10.1037/apl0000994</a></li>
+    <li id="ref-10">Dyrenforth, P. S., Kashy, D. A., Donnellan, M. B., &amp; Lucas, R. E. (2010). Predicting relationship and life satisfaction from personality in nationally representative samples from three countries: The relative importance of actor, partner, and similarity effects. <i>Journal of Personality and Social Psychology, 99</i>(4), 690–702. <a href="https://doi.org/10.1037/a0020385">doi:10.1037/a0020385</a></li>
+    <li id="ref-11">Dickson, D. H., &amp; Kelly, I. W. (1985). The “Barnum effect” in personality assessment: A review of the literature. <i>Psychological Reports, 57</i>(2), 367–382. <a href="https://doi.org/10.2466/pr0.1985.57.2.367">doi:10.2466/pr0.1985.57.2.367</a></li>
+  </ol>
+</section>

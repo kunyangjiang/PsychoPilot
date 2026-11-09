@@ -1951,51 +1951,68 @@
     ['integ', '整合调节', 'a', '“坚持学一门外语，是我看重的生活方式的一部分。”', '自主动机：这种价值与自己的其他价值观和身份协调一致。在实际测量中，它很难与认同调节区分开。'],
     ['intr', '内在动机', 'a', '“我喜欢用英语读小说，读着读着就忘了时间。”', '自主动机：因为活动本身有趣、令人满足而去做。'],
   ];
-  F.sdtcont = (fig) => {
-    const S = { v: 'ident' };
-    return figure(fig, (box, w, api) => {
-      const wide = w >= 560, i0 = SDTC.findIndex((r) => r[0] === S.v), gs = [];
-      let s;
-      if (wide) {
-        const gap = 8, bw = (w - gap * 5) / 6, by = 34, bh = 54, H = by + bh + 58;
-        s = svgIn(box, w, H, fig);
-        const X = (i) => i * (bw + gap);
-        const brace = (g, a, b, y, label, cls, up) => {
-          const x1 = X(a) + 2, x2 = X(b) + bw - 2, d = up ? 6 : -6;
-          el('path', { d: `M${x1},${y + d} V${y} H${x2} V${y + d}`, class: 'fx-ln ' + cls }, g);
-          tx(g, (x1 + x2) / 2, up ? y - 7 : y + 17, label, 'fx-n', 'middle');
-        };
-        const top = el('g', {}, s); gs.push(top);
-        brace(top, 1, 2, 20, '受控动机', 'fx-lb', true); brace(top, 3, 5, 20, '自主动机', 'fx-lr', true);
-        SDTC.forEach(([, t, grp], i) => {
-          const g = el('g', {}, s); gs.push(g);
-          el('rect', { x: X(i), y: by, width: bw, height: bh, rx: 6, class: 'fx-pill ' + (i === i0 ? 'r' : grp ? 'b' : 'm') }, g);
-          tx(g, X(i) + bw / 2, by + bh / 2 + 5, t, 'fx-h', 'middle');
-        });
-        const bot = el('g', {}, s); gs.push(bot);
-        brace(bot, 1, 4, by + bh + 12, '外在动机的四种形式', 'fx-hair', false);
-        arrow(bot, 0, H - 8, w, H - 8, '', 6); tx(bot, 0, H - 14, '较少自主', 'fx-n'); tx(bot, w - 10, H - 14, '较多自主', 'fx-n', 'end');
-      } else {
-        const bh = 40, gap = 6, head = 24, groups = [[0, 0, ''], [1, 2, '受控动机（外在动机）'], [3, 4, '自主动机（外在动机）'], [5, 5, '自主动机']];
-        const H = groups.reduce((h, [a, b, l]) => h + (l ? head : 4) + (b - a + 1) * (bh + gap), 0) + 4;
-        s = svgIn(box, w, H, fig);
-        let y = 0;
-        groups.forEach(([a, b, l]) => {
-          const g = el('g', {}, s); gs.push(g);
-          if (l) { tx(g, 0, y + 16, l, 'fx-n'); y += head; } else y += 4;
-          for (let i = a; i <= b; i++) {
-            const [, t, grp] = SDTC[i];
-            el('rect', { x: 0, y, width: w, height: bh, rx: 6, class: 'fx-pill ' + (i === i0 ? 'r' : grp ? 'b' : 'm') }, g);
-            tx(g, w / 2, y + bh / 2 + 5, t, 'fx-h', 'middle');
-            y += bh + gap;
-          }
-        });
-      }
-      const [, t, , ex, note] = SDTC[i0];
-      api.out.innerHTML = `<p><b>${t}。</b>${ex}</p><p>${note}</p><p class="fx-n">例子是为了说明概念而编写的。现实中，同一个人做同一件事，常常同时有好几种理由。</p>`;
-      return (p) => gs.forEach((g, i) => show(g, stage(p, i * 0.1, 0.35)));
-    }, { dur: 1000, ctrls: { value: 'ident', items: SDTC.map((r) => [r[0], r[1]]), onChange: (v) => { S.v = v; } } });
-  };
+  F.sdtcont = (fig) => figure(fig, (box, w) => {
+    const wide = w >= 560, gs = [];
+    let s;
+    if (wide) {
+      const gap = 8, bw = (w - gap * 5) / 6, by = 34, bh = 54, H = by + bh + 58;
+      s = svgIn(box, w, H, fig);
+      const X = (i) => i * (bw + gap);
+      const brace = (g, a, b, y, label, cls, up) => {
+        const x1 = X(a) + 2, x2 = X(b) + bw - 2, d = up ? 6 : -6;
+        el('path', { d: `M${x1},${y + d} V${y} H${x2} V${y + d}`, class: 'fx-ln ' + cls }, g);
+        tx(g, (x1 + x2) / 2, up ? y - 7 : y + 17, label, 'fx-n', 'middle');
+      };
+      const top = el('g', {}, s); gs.push(top);
+      brace(top, 1, 2, 20, '受控动机', 'fx-lb', true); brace(top, 3, 5, 20, '自主动机', 'fx-lr', true);
+      SDTC.forEach(([, t, grp], i) => {
+        const g = el('g', {}, s); gs.push(g);
+        el('rect', { x: X(i), y: by, width: bw, height: bh, rx: 6, class: 'fx-pill ' + (grp ? 'b' : 'm') }, g);
+        tx(g, X(i) + bw / 2, by + bh / 2 + 5, t, 'fx-h', 'middle');
+      });
+      const bot = el('g', {}, s); gs.push(bot);
+      brace(bot, 1, 4, by + bh + 12, '外在动机的四种形式', 'fx-hair', false);
+      arrow(bot, 0, H - 8, w, H - 8, '', 6); tx(bot, 0, H - 14, '较少自主', 'fx-n'); tx(bot, w - 10, H - 14, '较多自主', 'fx-n', 'end');
+    } else {
+      const bh = 40, gap = 6, head = 24, groups = [[0, 0, ''], [1, 2, '受控动机（外在动机）'], [3, 4, '自主动机（外在动机）'], [5, 5, '自主动机']];
+      const H = groups.reduce((h, [a, b, l]) => h + (l ? head : 4) + (b - a + 1) * (bh + gap), 0) + 4;
+      s = svgIn(box, w, H, fig);
+      let y = 0;
+      groups.forEach(([a, b, l]) => {
+        const g = el('g', {}, s); gs.push(g);
+        if (l) { tx(g, 0, y + 16, l, 'fx-n'); y += head; } else y += 4;
+        for (let i = a; i <= b; i++) {
+          const [, t, grp] = SDTC[i];
+          el('rect', { x: 0, y, width: w, height: bh, rx: 6, class: 'fx-pill ' + (grp ? 'b' : 'm') }, g);
+          tx(g, w / 2, y + bh / 2 + 5, t, 'fx-h', 'middle');
+          y += bh + gap;
+        }
+      });
+    }
+    return (p) => gs.forEach((g, i) => show(g, stage(p, i * 0.1, 0.35)));
+  }, { dur: 1000 });
+
+  /* ===== 10-01 · Maslow's hierarchy as it is usually drawn in textbooks (the pyramid is not Maslow's own
+     drawing). Static; tiers appear bottom-up. ===== */
+  const MAS = ['生理需要', '安全需要', '爱与归属的需要', '尊重的需要', '自我实现'];
+  F.maslow = (fig) => figure(fig, (box, w) => {
+    const wide = w >= 560, th = 46, gap = 4, n = MAS.length, PH = n * th + (n - 1) * gap;
+    const cw = wide ? Math.min(420, w - 230) : w, H = PH + 4, s = svgIn(box, w, H, fig), gs = [];
+    const half = (y) => (cw / 2) * (0.28 + 0.72 * (y / PH)), cx = cw / 2;
+    for (let k = 0; k < n; k++) {
+      const i = n - 1 - k, y0 = i * (th + gap), y1 = y0 + th, g = el('g', {}, s);
+      el('path', { d: `M${cx - half(y0)},${y0} H${cx + half(y0)} L${cx + half(y1)},${y1} H${cx - half(y1)} Z`, class: 'fx-pill b' }, g);
+      tx(g, cx, y0 + th / 2 + 5, MAS[n - 1 - i], 'fx-h', 'middle');
+      gs.push(g);
+    }
+    if (wide) {
+      const g = el('g', {}, s), ax = cw + 28; gs.push(g);
+      arrow(g, ax, PH - 4, ax, 6, '', 6);
+      [['通常的解释：', 'fx-h'], ['下层需要满足之后，', ''], ['才会追求上层需要。', '']].forEach(([t, c], j) => tx(g, ax + 16, 22 + j * 22, t, c || 'fx-t'));
+      [['研究证据：', 'fx-h'], ['这种严格的顺序', ''], ['没有得到一致的支持。', '']].forEach(([t, c], j) => tx(g, ax + 16, PH - 56 + j * 22, t, c || 'fx-t'));
+    }
+    return (p) => gs.forEach((g, i) => show(g, stage(p, i * 0.12, 0.35)));
+  }, { dur: 1100 });
 
   /* ===== 10-03 · one hypothetical sequential-task experiment, read through four accounts of self-control
      performance. Bar lengths are illustrative only. ===== */
@@ -2066,6 +2083,269 @@
     api.out.innerHTML = '<p>研究者估计，两者差异的约 70% 可以用选择性发表来解释，样本量小又加剧了这一问题；剩下的差异主要与两类研究中干预的类型不同有关。政府部门的结果仍然显著，只是小得多。</p>';
     return (t) => set(ease(t));
   }, { dur: 1000, replay: true });
+
+
+  /* ===== 11-01 · a hypothetical Big Five profile: the same raw answers read against two comparison groups.
+     Every number here is invented for illustration; bands are ±1.96 standard errors with reliability 0.85. ===== */
+  const B5 = [
+    ['开放性', '偏好熟悉、务实', '好奇、喜欢新想法', 3.9],
+    ['尽责性', '随性、灵活', '有条理、自律', 3.1],
+    ['外向性', '安静、独处时自在', '健谈、喜欢热闹', 2.7],
+    ['宜人性', '直率、爱争论', '体贴、愿意合作', 3.8],
+    ['神经质', '情绪平稳', '容易焦虑和担心', 3.2],
+  ];
+  const B5N = { adult: ['全国成年人样本（假设）', [3.4, 3.6, 3.2, 3.7, 2.9]], student: ['大学生样本（假设）', [3.7, 3.3, 3.4, 3.6, 3.2]] };
+  F.profile = (fig) => {
+    const S = { v: 'adult' };
+    return figure(fig, (box, w, api) => {
+      const [nm, means] = B5N[S.v], sd = 0.65, sem = sd * Math.sqrt(1 - 0.85), rh = 62, H = 22 + B5.length * rh + 26;
+      const s = svgIn(box, w, H, fig), X = (p) => 4 + p * (w - 8), gs = [];
+      tx(s, 0, 14, w < 380 ? '百分位：与比较样本相比排在哪里' : '与比较样本中的人相比，大约排在百分之几（百分位）', 'fx-s');
+      B5.forEach(([t, lo, hi, raw], i) => {
+        const y = 22 + i * rh, g = el('g', {}, s); gs.push(g);
+        const z = (raw - means[i]) / sd, p = Phi(z), pa = Phi(z - 1.96 * sem / sd), pb = Phi(z + 1.96 * sem / sd);
+        tx(g, 0, y + 16, t, 'fx-h');
+        tx(g, w, y + 16, `约第 ${Math.round(p * 100)} 百分位`, 'fx-n', 'end');
+        el('line', { x1: X(0), x2: X(1), y1: y + 34, y2: y + 34, class: 'fx-ln fx-faint' }, g);
+        el('line', { x1: X(0.5), x2: X(0.5), y1: y + 28, y2: y + 40, class: 'fx-hair' }, g);
+        el('rect', { x: X(pa), y: y + 29, width: Math.max(2, X(pb) - X(pa)), height: 10, rx: 5, class: 'fx-band1' }, g);
+        el('circle', { cx: X(p), cy: y + 34, r: 6, class: 'fx-node r' }, g);
+        tx(g, 0, y + 55, lo, 'fx-n'); tx(g, w, y + 55, hi, 'fx-n', 'end');
+      });
+      tx(s, X(0.5), H - 4, '比较样本的中间位置', 'fx-n', 'middle');
+      api.out.innerHTML = `<p><b>比较对象：${nm}。</b>同一份假设的答卷，原始分完全没有变；换一个比较样本，百分位就会移动，有时移动得很明显（比如尽责性和外向性）。</p><p class="fx-n">红点是这份答卷的估计位置，浅色带表示测量误差造成的大致范围（假设信度为 0.85）。所有数字都是为了说明而编写的，不是任何真实量表或常模。</p>`;
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.12, 0.4)));
+    }, { dur: 1100, ctrls: { value: 'adult', items: Object.entries(B5N).map(([k, v]) => [k, v[0].replace('（假设）', '')]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 11-01 · traits as distributions of states (after Fleeson, 2001): two hypothetical people's momentary
+     extraversion, overall and in two kinds of situations. Illustrative curves, not data. ===== */
+  const STS = {
+    all: ['所有时刻', [3.4, 4.6], '把很多个时刻放在一起看，两个人的分布大面积重叠：小林并不是“总是内向”，小周也不是“总是外向”。但两个分布的中心不同，这个稳定的差别就是特质层面的差异。'],
+    party: ['朋友聚会时', [4.5, 5.4], '在聚会上，两个人都比平时更外向，情境的影响很明显；但在同样的情境里，小周平均仍然比小林更外向。'],
+    meet: ['正式会议时', [2.9, 3.6], '在正式会议上，两个人都更拘谨。这里的变化幅度也不同：情境对不同的人影响程度不一样，这就是“人 × 情境”的交互作用。'],
+  };
+  F.states = (fig) => {
+    const S = { v: 'all' };
+    return figure(fig, (box, w, api) => {
+      const [, [ma, mb], note] = STS[S.v], H = 232, base = 182, top = 58, L = 6, R = 6;
+      const s = svgIn(box, w, H, fig), X = (v) => L + (v - 1) / 6 * (w - L - R), pdf = (v, m) => Math.exp(-0.5 * ((v - m) / 1.0) ** 2);
+      const curve = (m) => { const pts = []; for (let v = 1; v <= 7.001; v += 0.05) pts.push([X(v), base - pdf(v, m) * (base - top)]); return pts; };
+      el('line', { x1: L, x2: w - R, y1: base, y2: base, class: 'fx-ln' }, s);
+      [1, 2, 3, 4, 5, 6, 7].forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: base, y2: base + 5, class: 'fx-ln' }, s); tx(s, X(v), base + 19, String(v), 'fx-n', 'middle'); });
+      tx(s, w - R, H - 4, '此刻有多外向（假设的 1–7 分自评）', 'fx-n', 'end');
+      tx(s, 0, 14, '某一时刻处在各个位置的相对频率（示意）', 'fx-s');
+      const ga = el('g', {}, s), gb = el('g', {}, s);
+      const pa = el('path', { d: pathOf(curve(ma)), class: 'fx-ln fx-lb fx-curve' }, ga);
+      const pb = el('path', { d: pathOf(curve(mb)), class: 'fx-ln fx-lr fx-curve' }, gb);
+      el('line', { x1: X(ma), x2: X(ma), y1: top - 4, y2: base, class: 'fx-hair fx-dash' }, ga);
+      el('line', { x1: X(mb), x2: X(mb), y1: top - 4, y2: base, class: 'fx-hair fx-dash' }, gb);
+      tx(ga, X(ma) - 6, top - 8, '小林', 'fx-s fx-b', 'end'); tx(gb, X(mb) + 6, top - 8, '小周', 'fx-s fx-r');
+      const da = drawOn(pa), db = drawOn(pb);
+      api.out.innerHTML = `<p><b>${STS[S.v][0]}。</b>${note}</p><p class="fx-n">两个人和所有曲线都是为了说明概念而虚构的。研究中，这类数据来自让参与者在一天中多次报告自己此刻的状态。</p>`;
+      return (t) => { da(stage(t, 0, 0.6)); db(stage(t, 0.2, 0.6)); };
+    }, { dur: 1200, ctrls: { value: 'all', items: Object.entries(STS).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 11-01 / 11-04 · a hypothetical correlation matrix, first in the order the items were written,
+     then reordered so that items that go together sit together. data-set="traits" or "tests". ===== */
+  const CM = {
+    traits: {
+      items: ['健谈', '做事有条理', '喜欢参加聚会', '注意细节', '精力充沛、爱热闹', '总是按时完成'],
+      grp: [0, 1, 0, 1, 0, 1], within: [[0.58, 0.52, 0.55], [0.5, 0.47, 0.53]], across: 0.08,
+      names: ['外向性', '尽责性'],
+      raw: '按题目原来的顺序，看不出什么结构：相关高的格子和相关低的格子交错在一起。',
+      sorted: '把相关高的题目排在一起，就出现了两块颜色较深的区域：前三道题彼此相关较高，后三道题彼此相关较高，两组之间的相关接近零。因素分析就是用数学方法寻找这样的“块”，并把每一块概括为一个维度。',
+    },
+    tests: {
+      items: ['词汇', '图形推理', '阅读理解', '数列推理', '常识', '心理旋转'],
+      grp: [0, 1, 0, 1, 0, 1], within: [[0.68, 0.62, 0.65], [0.55, 0.5, 0.52]], across: 0.38,
+      names: ['语言与知识', '推理与空间'],
+      raw: '按原来的顺序看，有一个最明显的特点：所有格子都带有颜色，也就是说，所有测验两两之间都是正相关。',
+      sorted: '重新排列以后，可以同时看到两层结构：所有测验之间都有中等程度的正相关（这是“一般智力”的统计基础），同时，语言类测验之间、推理和空间类测验之间的相关更高（这对应更具体的能力）。',
+    },
+  };
+  const cmR = (c, i, j) => {
+    if (i === j) return 1;
+    if (c.grp[i] !== c.grp[j]) return c.across + ((i * 7 + j * 3) % 5) * 0.012;
+    const g = c.grp[i], a = [i, j].map((k) => c.grp.slice(0, k).filter((x) => x === g).length).sort().join('');
+    return c.within[g][{ '01': 0, '02': 1, '12': 2 }[a]];
+  };
+  F.corrmap = (fig) => {
+    const c = CM[fig.dataset.set] || CM.traits, S = { v: 'raw' };
+    return figure(fig, (box, w, api) => {
+      const ord = S.v === 'raw' ? [0, 1, 2, 3, 4, 5] : [0, 2, 4, 1, 3, 5], n = 6;
+      const lw = w >= 520 ? 132 : 122, cs = Math.min(64, Math.floor((w - lw) / n)), H = 26 + cs * n + 8;
+      const s = svgIn(box, w, H, fig), gs = [];
+      ord.forEach((i, col) => tx(s, lw + col * cs + cs / 2, 16, String(i + 1), 'fx-n', 'middle'));
+      ord.forEach((i, row) => {
+        const g = el('g', {}, s); gs.push(g);
+        const y = 26 + row * cs;
+        tx(g, lw - 8, y + cs / 2 + 4, `${i + 1} ${c.items[i]}`, cs < 44 ? 'fx-n' : 'fx-s', 'end');
+        ord.forEach((j, col) => {
+          const r = cmR(c, i, j), x = lw + col * cs;
+          el('rect', { x: x + 1, y: y + 1, width: cs - 2, height: cs - 2, class: i === j ? 'fx-c' : 'fx-seg b', 'fill-opacity': i === j ? 1 : (0.08 + r * 0.92).toFixed(2) }, g);
+          if (i !== j && cs >= 38) tx(g, x + cs / 2, y + cs / 2 + 4, r.toFixed(2).replace(/^0/, ''), r > 0.45 ? 'fx-n fx-inv' : 'fx-n', 'middle');
+        });
+      });
+      if (S.v === 'sorted') {
+        const g = el('g', {}, s); gs.push(g);
+        [0, 3].forEach((k) => el('rect', { x: lw + k * cs, y: 26 + k * cs, width: cs * 3, height: cs * 3, class: 'fx-ln fx-lr', fill: 'none', 'stroke-width': 2.5 }, g));
+      }
+      api.out.innerHTML = `<p>${S.v === 'raw' ? c.raw : c.sorted}</p>${S.v === 'sorted' ? `<p>两个红框可以概括为“${c.names[0]}”和“${c.names[1]}”。名字是研究者根据题目内容起的，数据本身只告诉我们哪些题目一起变化。</p>` : ''}<p class="fx-n">格子里的数字是两道题（或两项测验）得分之间的相关系数，颜色越深相关越高。这些数字是为了说明而编写的，不是真实数据。</p>`;
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.08, 0.35)));
+    }, { dur: 1000, ctrls: { value: 'raw', items: [['raw', '原来的顺序'], ['sorted', '把相关高的排在一起']], onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 11-03 · an average age trend versus individual trajectories (illustrative only) ===== */
+  F.trajs = (fig) => {
+    const S = { v: 'mean' }, r = rng(31), N = 14;
+    const ppl = Array.from({ length: N }, () => ({ a: gauss(r) * 0.75, b: 0.35 + gauss(r) * 0.45, c: gauss(r) * 0.12 }));
+    return figure(fig, (box, w, api) => {
+      const H = 240, L = 34, R = 10, T = 26, B = 36, s = svgIn(box, w, H, fig);
+      const X = (age) => L + (age - 20) / 50 * (w - L - R), Y = (v) => T + (1 - (v + 2) / 4) * (H - T - B);
+      const f = (p, age) => { const u = (age - 20) / 50; return p.a + p.b * Math.sqrt(u) * 1.6 - 0.4 + p.c * Math.sin(u * 6); };
+      const avg = (age) => 0.35 * Math.sqrt((age - 20) / 50) * 1.6 - 0.4;
+      el('line', { x1: L, x2: w - R, y1: Y(-2), y2: Y(-2), class: 'fx-ln' }, s);
+      el('line', { x1: L, x2: L, y1: T - 6, y2: Y(-2), class: 'fx-ln' }, s);
+      [20, 30, 40, 50, 60, 70].forEach((a) => tx(s, X(a), H - B + 17, String(a), 'fx-n', 'middle'));
+      tx(s, w - R, H - 4, '年龄（岁）', 'fx-n', 'end'); tx(s, 0, 14, '尽责性（示意，标准分）', 'fx-n');
+      tx(s, L - 6, Y(1.5) + 4, '高', 'fx-n', 'end'); tx(s, L - 6, Y(-1.5) + 4, '低', 'fx-n', 'end');
+      const ind = el('g', {}, s), pts = (fn) => { const a = []; for (let age = 20; age <= 70.01; age += 1) a.push([X(age), Y(fn(age))]); return a; };
+      if (S.v !== 'mean') ppl.forEach((p) => el('path', { d: pathOf(pts((age) => f(p, age))), class: 'fx-ln fx-faint' }, ind));
+      const m = el('path', { d: pathOf(pts(avg)), class: 'fx-ln fx-lr fx-thick' }, s), dm = drawOn(m);
+      const down = ppl.filter((p) => f(p, 70) < f(p, 20)).length;
+      api.out.innerHTML = S.v === 'mean'
+        ? '<p><b>平均趋势。</b>许多纵向研究发现，从成年早期到中年，人群的平均尽责性逐渐上升。但一条平均线可能掩盖很多东西。</p><p class="fx-n">曲线的形状和幅度是示意，不是某一项研究的结果。</p>'
+        : `<p><b>加上 ${N} 个假设的个体。</b>平均线仍然上升，但每个人的轨迹差别很大：有的人上升得多，有的人几乎不变，这里还有 ${down} 个人在这段时间里是下降的。“人群平均会上升”不等于“每个人都会上升”。</p><p class="fx-n">个体轨迹是程序生成的示意数据。</p>`;
+      return (t) => { dm(stage(t, 0, 0.6)); show(ind, stage(t, 0.4, 0.6)); };
+    }, { dur: 1200, ctrls: { value: 'mean', items: [['mean', '只看平均'], ['ind', '加上个体轨迹']], onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 11-04 · a simplified hierarchical (CHC-style) model: g, broad abilities, example tests. Conceptual. ===== */
+  const CHC = [
+    ['流体推理', '图形推理、数列推理'],
+    ['晶体知识', '词汇、常识'],
+    ['视觉空间', '心理旋转、拼图'],
+    ['工作记忆', '倒序复述数字'],
+    ['加工速度', '符号替换、快速比较'],
+  ];
+  F.chc = (fig) => figure(fig, (box, w) => {
+    const wide = w >= 600, gs = [];
+    let s;
+    if (wide) {
+      const gap = 10, bw = (w - gap * 4) / 5, H = 248;
+      s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      el('rect', { x: w / 2 - 80, y: 4, width: 160, height: 44, rx: 22, class: 'fx-latent' }, g0);
+      tx(g0, w / 2, 31, '一般智力 g', 'fx-h', 'middle');
+      tx(g0, w / 2 + 92, 31, '第三层：最概括', 'fx-n');
+      const g1 = el('g', {}, s), g2 = el('g', {}, s); gs.push(g1, g2);
+      CHC.forEach(([t, ex], i) => {
+        const x = i * (bw + gap), cx = x + bw / 2;
+        el('line', { x1: w / 2, y1: 48, x2: cx, y2: 96, class: 'fx-ln' }, g1);
+        el('rect', { x, y: 96, width: bw, height: 44, rx: 22, class: 'fx-latent' }, g1);
+        tx(g1, cx, 123, t, 'fx-h', 'middle');
+        el('line', { x1: cx, y1: 140, x2: cx, y2: 172, class: 'fx-ln' }, g2);
+        el('rect', { x: x + 6, y: 172, width: bw - 12, height: 50, rx: 4, class: 'fx-box' }, g2);
+        lines(g2, cx, 192, wrapZh(ex, bw - 24, 12.5), 'fx-s', 17, 'middle');
+      });
+      tx(g1, 0, 66, '第二层：较宽的能力', 'fx-n');
+      tx(g2, 0, 242, '第一层：具体测验（举例）', 'fx-n');
+    } else {
+      const rh = 58, H = 64 + CHC.length * rh;
+      s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      el('rect', { x: 0, y: 4, width: 150, height: 40, rx: 20, class: 'fx-latent' }, g0);
+      tx(g0, 75, 29, '一般智力 g', 'fx-h', 'middle');
+      tx(g0, 160, 29, '最概括的一层', 'fx-n');
+      const g1 = el('g', {}, s); gs.push(g1);
+      el('line', { x1: 18, y1: 44, x2: 18, y2: 64 + (CHC.length - 1) * rh + 20, class: 'fx-ln' }, g1);
+      CHC.forEach(([t, ex], i) => {
+        const y = 64 + i * rh, bw = Math.min(124, w * 0.42);
+        el('line', { x1: 18, y1: y + 20, x2: 34, y2: y + 20, class: 'fx-ln' }, g1);
+        el('rect', { x: 34, y, width: bw, height: 40, rx: 20, class: 'fx-latent' }, g1);
+        tx(g1, 34 + bw / 2, y + 25, t, 'fx-h', 'middle');
+        lines(g1, 34 + bw + 10, y + 16, wrapZh('测验举例：' + ex, w - bw - 58, 12.5), 'fx-s', 16);
+      });
+    }
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1100 });
+
+  /* ===== 11-05 · high heritability within each generation does not stop the whole distribution from moving.
+     Two hypothetical cohorts; the numbers are assumptions, not estimates for any real population. ===== */
+  F.heritenv = (fig) => {
+    const S = { v: 'one' };
+    return figure(fig, (box, w, api) => {
+      const H = 220, base = 168, top = 40, L = 6, R = 6, s = svgIn(box, w, H, fig);
+      const X = (z) => L + (z + 3.2) / 7.4 * (w - L - R), pdf = (z, m) => Math.exp(-0.5 * (z - m) ** 2);
+      const curve = (m) => { const a = []; for (let z = -3.2; z <= 4.2; z += 0.05) a.push([X(z), base - pdf(z, m) * (base - top)]); return a; };
+      el('line', { x1: L, x2: w - R, y1: base, y2: base, class: 'fx-ln' }, s);
+      tx(s, w - R, base + 20, '某项测验的得分 →', 'fx-n', 'end');
+      tx(s, 0, 14, '同一个国家，前后两代人（假设）', 'fx-s');
+      const g1 = el('g', {}, s), p1 = el('path', { d: pathOf(curve(0)), class: 'fx-ln fx-lb fx-curve' }, g1);
+      tx(g1, X(0), top - 8, '上一代', 'fx-s fx-b', 'middle');
+      const g2 = el('g', {}, s);
+      if (S.v === 'two') {
+        el('path', { d: pathOf(curve(1)), class: 'fx-ln fx-lr fx-curve' }, g2);
+        tx(g2, X(1), top - 8, '下一代', 'fx-s fx-r', 'middle');
+        arrow(g2, X(0) + 4, base - 30, X(1) - 4, base - 30, 'r', 6);
+      }
+      const d1 = drawOn(p1);
+      api.out.innerHTML = S.v === 'one'
+        ? '<p><b>一代人内部。</b>假设在这一代人中，测验分数的遗传力很高，比如 0.7：同一代人之间的分数差异，有很大一部分与基因差异相关。</p><p class="fx-n">0.7 是为了说明而设定的数字，不是对任何真实人群的估计。</p>'
+        : '<p><b>几十年后。</b>假设营养、教育和生活环境整体改善，下一代的平均分高出了整整一个标准差；而在下一代内部，遗传力仍然可以同样高。几十年里人群的基因库几乎不会改变，所以这种整体的移动来自环境。遗传力描述的是群体<em>内部</em>的差异来源，它既不说明特质不能改变，也不能解释两个群体平均数的差别。</p><p class="fx-n">现实中确实观察到过大幅的代际提高（弗林效应），但这里的曲线和幅度都是示意。</p>';
+      return (t) => { d1(stage(t, 0, 0.5)); show(g2, stage(t, 0.45, 0.45)); };
+    }, { dur: 1200, ctrls: { value: 'one', items: [['one', '一代人内部'], ['two', '几十年后']], onChange: (v) => { S.v = v; } } });
+  };
+
+  /* ===== 11-06 · the Dark Triad: three related but distinct research constructs ===== */
+  F.dtriad = (fig) => figure(fig, (box, w, api) => {
+    const H = Math.min(300, Math.max(240, w * 0.5)), s = svgIn(box, w, H, fig), cx = w / 2, cy = H / 2 + 6;
+    const rad = Math.min(H * 0.3, w * 0.22), off = rad * 0.62;
+    const C = [[cx - off, cy - off * 0.55], [cx + off, cy - off * 0.55], [cx, cy + off * 0.7]], gs = [];
+    C.forEach(([x, y]) => {
+      const g = el('g', {}, s); gs.push(g);
+      el('circle', { cx: x, cy: y, r: rad, class: 'fx-pill b', 'fill-opacity': 0.35 }, g);
+    });
+    const gl = el('g', {}, s); gs.push(gl);
+    const lab = [[C[0][0] - rad * 0.38, C[0][1] - rad * 0.35, '自恋'], [C[1][0] + rad * 0.38, C[1][1] - rad * 0.35, w < 420 ? '马基' : '马基雅维利'], [C[2][0], C[2][1] + rad * 0.55, '精神病态']];
+    lab.forEach(([x, y, t]) => tx(gl, x, y, t, 'fx-h', 'middle'));
+    if (w < 420) tx(gl, C[1][0] + rad * 0.38, C[1][1] - rad * 0.35 + 22, '主义', 'fx-h', 'middle');
+    el('circle', { cx, cy: cy - off * 0.12, r: 5, class: 'fx-node r' }, gl);
+    tx(gl, cx, cy - off * 0.12 + 22, '共同部分', 'fx-n', 'middle');
+    api.out.innerHTML = '<p class="fx-n">圆的大小和重叠程度只是示意。黑暗三联征是一个研究框架，用来描述一般人群中连续变化的人格特质，不是诊断类别。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.15, 0.4)));
+  }, { dur: 1000 });
+
+  /* ===== 11-06 · one observed behaviour, several possible explanations (hypothetical everyday scenes) ===== */
+  const EXP = {
+    talk: ['聊天时总在谈论自己', ['紧张时不知道说什么，用讲自己的事来填补沉默', '刚经历一件大事，急于找人倾诉', '不太擅长察觉别人想说话的信号', '确实有较强的被关注需要（一种人格特质，程度因人而异）'], '他在别的场合也这样吗？持续了多长时间？别人提醒以后会不会调整？'],
+    reply: ['分手后很快开始了新恋情', ['这段关系其实早就结束了，只是外人不知道', '用新的关系来应对孤独和难过', '遇到了真正合适的人', '对亲密关系投入较少（一种依恋或人格倾向）'], '只看一个结果，无法知道过程；第 14 阶段会讨论亲密关系与依恋的研究。'],
+    credit: ['会议上把团队的成果说成自己的', ['没有意识到自己的表述让别人误解', '公司的考核制度只奖励个人表现', '在压力下想证明自己', '习惯性地利用他人来获得好处（与马基雅维利主义或自恋相关的倾向）'], '这是偶然一次，还是反复出现？在不同的团队和制度下也一样吗？'],
+  };
+  F.explain = (fig) => {
+    const S = { v: 'talk' };
+    return figure(fig, (box, w, api) => {
+      const [beh, xs, ask] = EXP[S.v], two = w >= 520, gap = 12, cw = two ? (w - gap) / 2 : w;
+      const ht = cardH(w, '', 46), hs = xs.map((x) => cardH(cw, x, 56));
+      const rowH = two ? [Math.max(hs[0], hs[1]), Math.max(hs[2], hs[3])] : hs;
+      const H = ht + 34 + rowH.reduce((a, b) => a + b + gap, 0), s = svgIn(box, w, H, fig), gs = [];
+      const g0 = el('g', {}, s); gs.push(g0);
+      card(g0, 0, 0, w, (w < 400 ? '' : '看到的行为：') + beh, '', 'm', ht);
+      tx(g0, 0, ht + 22, '可能的解释（举例，不是全部）', 'fx-n');
+      let y = ht + 34;
+      xs.forEach((x, i) => {
+        const g = el('g', {}, s); gs.push(g);
+        const col = two ? i % 2 : 0, row = two ? Math.floor(i / 2) : i;
+        const yy = ht + 34 + rowH.slice(0, row).reduce((a, b) => a + b + gap, 0);
+        card(g, col * (cw + gap), yy, cw, `解释 ${i + 1}`, x, i === 3 ? 'r' : 'b', rowH[row]);
+        y = yy;
+      });
+      api.out.innerHTML = `<p><b>还需要知道什么？</b>${ask}</p><p>即使是红框里与人格特质有关的解释，也只是“一种倾向”，不是诊断；而且同一个人身上，几种解释可能同时成立。</p><p class="fx-n">情景是为了说明推理方法而编写的，不涉及任何真实的人。</p>`;
+      return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.12, 0.35)));
+    }, { dur: 1000, ctrls: { value: 'talk', items: Object.entries(EXP).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+  };
 
   window.PPFig = F;
 })();

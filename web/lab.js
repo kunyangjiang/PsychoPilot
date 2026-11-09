@@ -2133,5 +2133,198 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay };
+
+  /* =====================================================================
+     Stage 11 · individual differences. Every demo draws hypothetical scores
+     from a stated rule; none scores the reader, and each says so on screen.
+     ===================================================================== */
+  const nPhi = (x) => { // standard normal CDF (Abramowitz–Stegun 7.1.26)
+    const t = 1 / (1 + 0.3275911 * Math.abs(x) / Math.SQRT2), y = 1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x / 2);
+    return x >= 0 ? 0.5 * (1 + y) : 0.5 * (1 - y);
+  };
+  const seeded = (seed) => { let a = seed >>> 0; return () => { a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
+  const sNorm = (r) => { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const pctP = (p) => (p < 0.01 ? '不到 1%' : p > 0.99 ? '超过 99%' : `约 ${Math.round(p * 100)}%`);
+  // a bell curve over [a, b] on a baseline; returns the path string
+  const bell = (X, Y, m, sd, a, b) => { let d = ''; for (let v = a; v <= b + 1e-9; v += (b - a) / 160) d += (d ? ' L' : 'M') + `${X(v).toFixed(1)},${Y(Math.exp(-0.5 * ((v - m) / sd) ** 2)).toFixed(1)}`; return d; };
+
+  /* 11-02 · cutoff: two hypothetical people on one continuous preference score; a fixed cut turns
+     the score into a letter. Error on retest = 10 × √(1 − reliability) on a scale with SD 10. */
+  function cutoff(host) {
+    const { fig, out, actions } = shell(host, '差两分，就是另一种“类型”？',
+      '下面是一个假设的“外倾—内倾”连续分数，人群平均为 50 分，标准差为 10 分。像许多类型测试一样，以 50 分为界：高于 50 分记为 E（外倾），否则记为 I（内倾）。甲的分数固定为 48 分；拖动滑块改变乙的分数和测验的信度，看看标签会怎样。',
+      [], '这是一个模型演示。人群分布、两个人的分数和信度都是假设的，不来自任何真实问卷，也不会测量你的人格。', MODEL);
+    const sB = slider('乙的分数：', 35, 65, 1, 52), sR = slider('测验的信度：', 0.7, 0.95, 0.05, 0.8);
+    const box = document.createElement('div'); fig.append(sB.box, sR.box, box);
+    let retest = null;
+    [sB, sR].forEach((s) => s.input.addEventListener('input', () => { retest = null; draw(); }));
+    const draw = () => {
+      const b = Number(sB.input.value), rel = Number(sR.input.value), sem = 10 * Math.sqrt(1 - rel), a = 48;
+      sB.val.textContent = ` ${b} 分`; sR.val.textContent = ` ${fmt(rel, 2)}`;
+      sB.input.setAttribute('aria-valuetext', `${b} 分`); sR.input.setAttribute('aria-valuetext', fmt(rel, 2));
+      const lab = (s) => (s > 50 ? 'E' : 'I'), W = widthOf(fig), H = 220, L = 8, R = 8, base = 120, top = 26;
+      const X = (v) => L + (v - 20) / 60 * (W - L - R), Y = (k) => base - k * (base - top);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：甲 48 分，记为 I；乙 ${b} 分，记为 ${lab(b)}。两人相差 ${Math.abs(b - a)} 分。` }, box);
+      el('path', { d: bell(X, Y, 50, 10, 20, 80), class: 'fx-ln fx-curve' }, svg);
+      el('line', { x1: L, x2: W - R, y1: base, y2: base, class: 'lab-axis' }, svg);
+      [20, 30, 40, 50, 60, 70, 80].forEach((v) => text(svg, X(v), base + 16, String(v), 'lab-tick', 'middle'));
+      el('line', { x1: X(50), x2: X(50), y1: top - 10, y2: base, class: 'fx-ln fx-dash' }, svg);
+      text(svg, X(50) - 6, top - 12, '← I（内倾）', 'lab-tick', 'end'); text(svg, X(50) + 6, top - 12, 'E（外倾）→', 'lab-tick');
+      const person = (s, y, cls, name) => {
+        el('rect', { x: X(Math.max(20, s - 1.96 * sem)), y: y - 5, width: Math.max(2, X(Math.min(80, s + 1.96 * sem)) - X(Math.max(20, s - 1.96 * sem))), height: 10, rx: 5, class: 'fx-band1' }, svg);
+        el('circle', { cx: X(s), cy: y, r: 6, class: 'fx-node ' + cls }, svg);
+        const right = X(s) < W * 0.55; text(svg, X(s) + (right ? 12 : -12), y + 4, `${name} ${s} 分 → ${lab(s)}`, 'lab-tick fx-halo', right ? 'start' : 'end');
+      };
+      person(a, 152, 'b', '甲'); person(b, 182, 'r', '乙');
+      if (retest) retest.forEach(([s, y]) => { el('circle', { cx: X(Math.max(20, Math.min(80, s))), cy: y, r: 5, class: 'fx-node m' }, svg); });
+      text(svg, 0, H - 4, W < 400 ? '浅色带：重测分数的大致范围（约 95%）' : '浅色带：重测时分数大致会落在的范围（约 95%）', 'lab-tick');
+      const flip = (s) => nPhi(-Math.abs(s - 50) / sem);
+      const rt = retest ? `<li><span>模拟重测一次</span><b>甲 ${fmt(retest[0][0], 0)} 分 → ${lab(retest[0][0])}；乙 ${fmt(retest[1][0], 0)} 分 → ${lab(retest[1][0])}</b></li>` : '';
+      out.innerHTML = `<ul class="lab-parts"><li><span>两人的分数相差</span><b>${Math.abs(b - a)} 分（${fmt(Math.abs(b - a) / 10, 1)} 个标准差）</b></li><li><span>得到的标签</span><b>甲 I；乙 ${lab(b)}</b></li><li><span>重测时得到另一个字母的可能性</span><b>甲 ${pctP(flip(a))}；乙 ${pctP(flip(b))}</b></li>${rt}</ul>
+        <p>${lab(b) !== 'I' && Math.abs(b - a) <= 6 ? '两个人的分数几乎一样，却被分到了相反的“类型”；而分数相差更多、但在分界点同一侧的两个人，却被看作同一类。' : lab(b) === 'I' ? '现在两个人都被记为 I。注意：在同一类别里，分数仍然可以相差很多。' : '两个人分数相差较大，标签不同。但即使如此，标签也丢掉了“差多少”的信息。'}越靠近分界点，测量误差越容易让标签在重测时翻转；信度越低，翻转越常见。</p>
+        <p class="lab-note">这里假设两个人的真实分数就是图中的值，只考虑测量误差，没有考虑人格本身的变化。</p>`;
+    };
+    action(actions, '模拟重测一次', () => {
+      const rel = Number(sR.input.value), sem = 10 * Math.sqrt(1 - rel);
+      retest = [[48 + sem * sNorm(Math.random), 152], [Number(sB.input.value) + sem * sNorm(Math.random), 182]];
+      draw();
+    });
+    action(actions, '恢复默认设置', () => { sB.input.value = 52; sR.input.value = 0.8; retest = null; draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 11-03 · rankmean: 12 hypothetical people measured twice. Time-2 score = r × z1 + √(1 − r²) × e + shift,
+     with z1 and e fixed (seeded), so the sliders change only rank-order stability (r) and mean-level change. */
+  const RMP = { both: ['均值上升，排序大致稳定', 0.8, 0.5], mean: ['只有均值上升', 1, 0.5], rank: ['均值不变，排序被打乱', 0.2, 0] };
+  function rankmean(host) {
+    const o = { mode: 'both' };
+    const { fig, out, actions } = shell(host, '排序稳定与均值变化',
+      '12 个假设的人在 20 岁和 30 岁时各测了一次尽责性（标准分）。每条线连接同一个人的两次分数。选择一种情况，或者自己调整两个参数。',
+      [['mode', '情况', Object.entries(RMP).map(([k, v]) => [k, v[0]])]],
+      '这是一个模型演示，12 个人和他们的分数都是按规则生成的假设数据，不是真实研究的结果。', MODEL);
+    const sr = slider('排序稳定性（前后相关）：', 0, 1, 0.05, 0.8), sm = slider('平均水平的变化（标准差）：', -1, 1, 0.1, 0.5);
+    const box = document.createElement('div'); fig.append(sr.box, sm.box, box);
+    const sync = () => host.querySelectorAll('.lab-opts .choice[data-k="mode"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o.mode)));
+    [sr, sm].forEach((s) => s.input.addEventListener('input', () => { o.mode = ''; sync(); draw(); }));
+    const r0 = seeded(11), N = 12;
+    let z = Array.from({ length: N }, () => sNorm(r0)), e = Array.from({ length: N }, () => sNorm(r0));
+    const std = (a) => { const m = mean(a), s = Math.sqrt(mean(a.map((x) => (x - m) ** 2))); return a.map((x) => (x - m) / s); };
+    z = std(z); e = std(e); const k = corr(z, e); e = std(e.map((x, i) => x - k * z[i])); // make e uncorrelated with z
+    const draw = () => {
+      const r = Number(sr.input.value), sh = Number(sm.input.value);
+      sr.val.textContent = ` ${fmt(r, 2)}`; sm.val.textContent = ` ${sh > 0 ? '+' : ''}${fmt(sh, 1)}`;
+      sr.input.setAttribute('aria-valuetext', fmt(r, 2)); sm.input.setAttribute('aria-valuetext', `${fmt(sh, 1)} 个标准差`);
+      const t2 = z.map((x, i) => r * x + Math.sqrt(Math.max(0, 1 - r * r)) * e[i] + sh);
+      const W = widthOf(fig), H = 260, L = 64, R = 64, T = 26, B = 24, Y = (v) => T + (1 - (v + 2.6) / 6) * (H - T - B);
+      box.innerHTML = '';
+      const rk = (a) => { const s = a.map((v, i) => [v, i]).sort((p, q) => q[0] - p[0]); const out2 = []; s.forEach(([, i], j) => { out2[i] = j; }); return out2; };
+      const k1 = rk(z), k2 = rk(t2), moved = Math.max(...k1.map((v, i) => Math.abs(v - k2[i])));
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：两次测量的相关约 ${fmt(corr(z, t2), 2)}，平均变化 ${fmt(sh, 1)} 个标准差。` }, box);
+      [[L, '20 岁'], [W - R, '30 岁']].forEach(([x, s]) => { el('line', { x1: x, x2: x, y1: T - 4, y2: H - B, class: 'lab-axis' }, svg); text(svg, x, 14, s, 'lab-tick', 'middle'); });
+      [-2, 2].forEach((v) => { text(svg, L - 8, Y(v) + 4, v > 0 ? `+${v}` : String(v), 'lab-tick', 'end'); });
+      z.forEach((x, i) => {
+        const top3 = k1[i] < 3;
+        el('line', { x1: L, y1: Y(x), x2: W - R, y2: Y(t2[i]), class: top3 ? 'fx-ln fx-lr' : 'fx-ln fx-faint' }, svg);
+        el('circle', { cx: L, cy: Y(x), r: 4, class: 'fx-node ' + (top3 ? 'r' : 'b') }, svg);
+        el('circle', { cx: W - R, cy: Y(t2[i]), r: 4, class: 'fx-node ' + (top3 ? 'r' : 'b') }, svg);
+      });
+      [[L, 0], [W - R, mean(t2)]].forEach(([x, m], j) => { el('line', { x1: x - 14, x2: x + 14, y1: Y(m), y2: Y(m), class: 'fx-ln fx-thick' }, svg); text(svg, j ? x + 18 : x - 18, Y(m) + 4, j ? '平均' : '平均 0', 'lab-tick fx-halo', j ? 'start' : 'end'); });
+      const rr = corr(z, t2), mc = mean(t2);
+      out.innerHTML = `<ul class="lab-parts"><li><span>前后两次的相关（排序稳定性）</span><b>${fmt(rr, 2)}</b></li><li><span>平均水平的变化</span><b>${mc >= 0 ? '+' : ''}${fmt(mc, 1)} 个标准差</b></li><li><span>名次变化最大的人移动了</span><b>${moved} 位</b></li></ul>
+        <p>${r >= 0.95 && Math.abs(sh) >= 0.3 ? '每个人都改变了，而且改变的幅度一样，所以相对位置完全不变：“人都在变”和“排序很稳定”可以同时成立。' : r <= 0.35 && Math.abs(sh) < 0.15 ? '平均水平几乎没有变，但人与人之间的相对位置被大幅打乱：只看平均数，会以为“什么都没变”。' : '红线是 20 岁时得分最高的三个人。排序稳定性越高，他们 30 岁时越可能仍然排在前面；平均水平的变化则让所有人一起上移或下移。'}</p>
+        <p class="lab-note">真实研究中，成年人在几年间隔上的排序稳定性大多在中等到较高之间，均值变化通常小于这里的最大值。</p>`;
+    };
+    const preset = () => { const p = RMP[o.mode]; if (p) { sr.input.value = p[1]; sm.input.value = p[2]; } };
+    bindControls(host, o, () => { preset(); draw(); });
+    action(actions, '恢复默认设置', () => { o.mode = 'both'; preset(); sync(); draw(); }, 'lab-clear');
+    preset(); draw();
+    onResize(draw);
+  }
+
+  /* 11-04 · iqerror: a standard score (mean 100, SD 15) and the range implied by measurement error,
+     ±1.96 × 15 × √(1 − reliability). Simplified: real reports often centre the range on an estimated true score. */
+  function iqerror(host) {
+    const { fig, out, actions } = shell(host, '一个分数，一个范围',
+      '假设一个人在一项智力测验上得到了某个标准分数（平均 100，标准差 15）。拖动滑块改变这个分数和测验的信度，看看这个分数在同龄人中的位置，以及测量误差意味着什么。',
+      [], '这是一个模型演示，分数和信度都是假设的，不是对任何人的测量。几道网页题目也无法测出智商。', MODEL);
+    const sS = slider('观测到的分数：', 70, 130, 1, 112), sR = slider('测验的信度：', 0.7, 0.97, 0.01, 0.9);
+    const box = document.createElement('div'); fig.append(sS.box, sR.box, box);
+    [sS, sR].forEach((s) => s.input.addEventListener('input', () => draw()));
+    const draw = () => {
+      const s = Number(sS.input.value), rel = Number(sR.input.value), sem = 15 * Math.sqrt(1 - rel), lo = s - 1.96 * sem, hi = s + 1.96 * sem;
+      sS.val.textContent = ` ${s}`; sR.val.textContent = ` ${fmt(rel, 2)}`;
+      sS.input.setAttribute('aria-valuetext', String(s)); sR.input.setAttribute('aria-valuetext', fmt(rel, 2));
+      const W = widthOf(fig), H = 206, L = 8, R = 8, base = 150, top = 30;
+      const X = (v) => L + (v - 52) / 96 * (W - L - R), Y = (k) => base - k * (base - top);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：分数 ${s}，约高于 ${Math.round(nPhi((s - 100) / 15) * 100)}% 的同龄人；考虑测量误差，大致范围是 ${Math.round(lo)} 到 ${Math.round(hi)}。` }, box);
+      const a = Math.max(52, lo), b = Math.min(148, hi);
+      let band = `M${X(a)},${base}`; for (let v = a; v <= b + 1e-9; v += (b - a) / 60) band += ` L${X(v)},${Y(Math.exp(-0.5 * ((v - 100) / 15) ** 2))}`; band += ` L${X(b)},${base} Z`;
+      el('path', { d: band, class: 'fx-band1' }, svg);
+      el('path', { d: bell(X, Y, 100, 15, 52, 148), class: 'fx-ln fx-curve' }, svg);
+      el('line', { x1: L, x2: W - R, y1: base, y2: base, class: 'lab-axis' }, svg);
+      [55, 70, 85, 100, 115, 130, 145].forEach((v) => text(svg, X(v), base + 19, String(v), 'lab-tick', 'middle'));
+      el('line', { x1: X(s), x2: X(s), y1: Y(Math.exp(-0.5 * ((s - 100) / 15) ** 2)) - 8, y2: base, class: 'fx-ln fx-lr' }, svg);
+      el('circle', { cx: X(s), cy: base, r: 5, class: 'fx-node r' }, svg);
+      el('path', { d: `M${X(lo)},${base + 31} v-5 H${X(hi)} v5`, class: 'fx-ln fx-lb' }, svg);
+      text(svg, X(s), base + 47, `大致范围 ${Math.round(lo)}–${Math.round(hi)}`, 'lab-tick fx-halo', 'middle');
+      out.innerHTML = `<ul class="lab-parts"><li><span>这个分数约高于同龄人中的</span><b>${pctP(nPhi((s - 100) / 15))}</b></li><li><span>测量标准误</span><b>约 ${fmt(sem, 1)} 分</b></li><li><span>考虑误差的大致范围（约 95%）</span><b>${Math.round(lo)} 到 ${Math.round(hi)}</b></li><li><span>范围两端对应的位置</span><b>${pctP(nPhi((lo - 100) / 15))} 到 ${pctP(nPhi((hi - 100) / 15))}</b></li></ul>
+        <p>同样是 ${s} 分，信度为 ${fmt(rel, 2)} 时，这个分数对应的可能范围宽约 ${Math.round(hi - lo)} 分。信度越低，范围越宽；两个人相差几分，往往在测量误差之内。</p>
+        <p class="lab-note">这是简化的算法。专业报告通常由受过训练的人员解释，会使用更精确的方法计算范围，并结合其他信息。</p>`;
+    };
+    action(actions, '恢复默认设置', () => { sS.input.value = 112; sR.input.value = 0.9; draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 11-05 · overlap: two hypothetical groups, normal with equal SD, means d apart.
+     Overlap = 2Φ(−d/2); P(random member of the higher group scores higher) = Φ(d/√2). */
+  const OVP = { s1: ['很小（0.1）', 0.1], s2: ['小（0.2）', 0.2], s5: ['中等（0.5）', 0.5], s8: ['较大（0.8）', 0.8] };
+  function overlap(host) {
+    const o = { size: 's2' };
+    const { fig, out, actions } = shell(host, '两个分布重叠了多少',
+      '甲组和乙组是两个虚构的群体，某项测验分数在两组内部的分散程度相同，只是乙组的平均数高一些。选择一个效应量 d，或者拖动滑块，看看两个分布重叠了多少；也可以从两组中各随机抽人比较。',
+      [['size', '效应量 d', Object.entries(OVP).map(([k, v]) => [k, v[0]])]],
+      '甲组和乙组是虚构的，不代表任何真实的性别、民族、国家或其他群体；随机抽取的结果由程序在你的浏览器里生成。');
+    const sd = slider('两组平均数之差 d：', 0, 1.5, 0.05, 0.2);
+    const box = document.createElement('div'); fig.append(sd.box, box);
+    const sync = () => host.querySelectorAll('.lab-opts .choice[data-k="size"]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o.size)));
+    sd.input.addEventListener('input', () => { o.size = ''; sync(); pairs = null; draw(); });
+    let pairs = null;
+    const draw = () => {
+      const d = Number(sd.input.value);
+      sd.val.textContent = ` ${fmt(d, 2)}`; sd.input.setAttribute('aria-valuetext', fmt(d, 2));
+      const W = widthOf(fig), H = pairs ? 228 : 174, L = 8, R = 8, base = 150, top = 34, lo = -3.4, hi = 3.4 + d;
+      const X = (v) => L + (v - lo) / (hi - lo) * (W - L - R), Y = (k) => base - k * (base - top), f = (v, m) => Math.exp(-0.5 * (v - m) ** 2);
+      box.innerHTML = '';
+      const ovl = 2 * nPhi(-d / 2), ps = nPhi(d / Math.SQRT2);
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：两组平均数相差 ${fmt(d, 2)} 个标准差，分布重叠约 ${Math.round(ovl * 100)}%。` }, box);
+      let ar = `M${X(lo)},${base}`; for (let v = lo; v <= hi + 1e-9; v += (hi - lo) / 200) ar += ` L${X(v)},${Y(Math.min(f(v, 0), f(v, d)))}`; ar += ` L${X(hi)},${base} Z`;
+      el('path', { d: ar, class: 'fx-band1' }, svg);
+      el('path', { d: bell(X, Y, 0, 1, lo, hi), class: 'fx-ln fx-lb fx-curve' }, svg);
+      el('path', { d: bell(X, Y, d, 1, lo, hi), class: 'fx-ln fx-lr fx-curve' }, svg);
+      el('line', { x1: L, x2: W - R, y1: base, y2: base, class: 'lab-axis' }, svg);
+      text(svg, X(0) - 4, top - 8, '甲组', 'lab-tick fx-b', 'end'); text(svg, X(d) + 4, top - 8, '乙组', 'lab-tick fx-r');
+      text(svg, W - R, base + 16, '测验分数 →', 'lab-tick', 'end');
+      if (pairs) pairs.forEach(([a, b], i) => {
+        const y = base + 30 + (i % 2) * 10;
+        el('circle', { cx: X(Math.max(lo, Math.min(hi, a))), cy: y, r: 3.5, class: 'fx-node b' }, svg);
+        el('circle', { cx: X(Math.max(lo, Math.min(hi, b))), cy: y + 20, r: 3.5, class: 'fx-node r' }, svg);
+      });
+      const win = pairs ? pairs.filter(([a, b]) => a > b).length : 0;
+      out.innerHTML = `<ul class="lab-parts"><li><span>两个分布重叠的部分</span><b>${pctP(ovl)}</b></li><li><span>各随机抽一人，甲组的人分数更高的可能性</span><b>${pctP(1 - ps)}</b></li><li><span>乙组中高于甲组平均数的人</span><b>${pctP(nPhi(d))}</b></li>${pairs ? `<li><span>刚才随机抽取的 20 对中，甲组的人更高</span><b>${win} 对</b></li>` : ''}</ul>
+        <p>${d < 0.15 ? '两个分布几乎完全重叠，知道一个人属于哪一组，几乎不能告诉你他的分数。' : d < 0.6 ? '平均数确实不同，但两个分布的大部分是重叠的：两组中都有很多高分和低分的人。' : '这已经是心理学研究中较大的差异了，但两个分布仍有大量重叠，用组别去猜某一个人的分数，仍然经常会猜错。'}</p>
+        <p class="lab-note">图中阴影是两个分布重叠的部分。真实研究中，两组的分散程度也可能不同，这会改变两端的人数比例，但不会改变“平均数不能决定个人”的结论。</p>`;
+    };
+    const preset = () => { const p = OVP[o.size]; if (p) sd.input.value = p[1]; };
+    bindControls(host, o, () => { preset(); pairs = null; draw(); });
+    action(actions, '各随机抽取 20 人比较', () => { const d = Number(sd.input.value); pairs = Array.from({ length: 20 }, () => [rnorm(), d + rnorm()]); draw(); });
+    action(actions, '恢复默认设置', () => { o.size = 's2'; preset(); sync(); pairs = null; draw(); }, 'lab-clear');
+    preset(); draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap };
 })();
