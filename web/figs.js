@@ -2347,5 +2347,337 @@
     }, { dur: 1000, ctrls: { value: 'talk', items: Object.entries(EXP).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
   };
 
+
+  /* =====================================================================
+     Stage 12 · development. All figures here are static schematics (no
+     buttons); shapes illustrate a stated idea, never a study's raw data.
+     ===================================================================== */
+
+  /* ----- 12-01 · a false-belief task as four panels ----- */
+  const FB = [
+    ['小明把球放进篮子', 'in', 'basket', false],
+    ['小明离开房间', 'out', 'basket', false],
+    ['小红把球移到盒子里', 'out', 'box', true],
+    ['小明回来：他会先去哪里找球？', 'back', 'box', false],
+  ];
+  F.falsebelief = (fig) => figure(fig, (box, w) => {
+    const cols = w >= 600 ? 4 : 2, gap = 10, pw = (w - gap * (cols - 1)) / cols, sh = 120;
+    const caps = FB.map(([c]) => wrapZh(c, pw - 12, 12.5)), ch = Math.max(...caps.map((l) => l.length)) * 17 + 10;
+    const ph = sh + ch + 36, rows = Math.ceil(FB.length / cols), H = rows * ph + (rows - 1) * gap;
+    const s = svgIn(box, w, H, fig), gs = [];
+    const person = (g, x, y, name, cls) => {
+      el('circle', { cx: x, cy: y - 34, r: 8, class: 'fx-node ' + cls }, g);
+      el('line', { x1: x, y1: y - 26, x2: x, y2: y - 6, class: 'fx-ln' }, g);
+      el('line', { x1: x - 9, y1: y - 20, x2: x + 9, y2: y - 20, class: 'fx-ln' }, g);
+      el('line', { x1: x, y1: y - 6, x2: x - 7, y2: y + 6, class: 'fx-ln' }, g);
+      el('line', { x1: x, y1: y - 6, x2: x + 7, y2: y + 6, class: 'fx-ln' }, g);
+      tx(g, x, y + 22, name, 'fx-n', 'middle');
+    };
+    FB.forEach(([, who, ball, mover], i) => {
+      const c = i % cols, r = Math.floor(i / cols), x0 = c * (pw + gap), y0 = r * (ph + gap), g = el('g', {}, s); gs.push(g);
+      el('rect', { x: x0 + 0.5, y: y0 + 0.5, width: pw - 1, height: ph - 1, rx: 6, class: 'fx-box' }, g);
+      tx(g, x0 + 10, y0 + 18, String(i + 1), 'fx-h fx-r');
+      const fy = y0 + sh - 6, bx = x0 + pw * 0.56, kx = x0 + pw * 0.82;
+      el('line', { x1: x0 + 8, x2: x0 + pw - 8, y1: fy, y2: fy, class: 'fx-hair' }, g);
+      el('path', { d: `M${bx - 15},${fy - 22} H${bx + 15} L${bx + 11},${fy} H${bx - 11} Z`, class: 'fx-ln' }, g);
+      tx(g, bx, fy + 14, '篮子', 'fx-n', 'middle');
+      el('rect', { x: kx - 13, y: fy - 22, width: 26, height: 22, class: 'fx-ln' }, g);
+      tx(g, kx, fy + 14, '盒子', 'fx-n', 'middle');
+      el('circle', { cx: ball === 'basket' ? bx : kx, cy: fy - 28, r: 6, class: 'fx-node r' }, g);
+      const px = x0 + pw * 0.22;
+      if (mover) person(g, px, fy - 6, '小红', 'm');
+      else if (who !== 'out') person(g, px, fy - 6, '小明', 'b');
+      else { el('path', { d: `M${px - 14},${fy - 46} h28 v46 h-28 Z`, class: 'fx-hair fx-dash' }, g); tx(g, px, fy + 14, '（不在）', 'fx-n', 'middle'); }
+      if (who === 'back') {
+        const tbx = px + 24, tby = y0 + 30;
+        el('rect', { x: tbx - 4, y: tby - 16, width: 44, height: 26, rx: 13, class: 'fx-hair fx-dash' }, g);
+        el('path', { d: `M${tbx + 6},${tby - 6} H${tbx + 20} L${tbx + 18},${tby + 4} H${tbx + 8} Z`, class: 'fx-ln' }, g);
+        el('circle', { cx: tbx + 13, cy: tby - 9, r: 3.5, class: 'fx-node r' }, g);
+        tx(g, tbx + 46, tby + 2, '他以为', 'fx-n');
+      }
+      lines(g, x0 + pw / 2, y0 + sh + 32, caps[i], 'fx-s', 17, 'middle');
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.35)));
+  }, { dur: 1300 });
+
+  /* ----- 12-01 · Siegler's overlapping waves (schematic) ----- */
+  F.waves = (fig) => figure(fig, (box, w) => {
+    const H = 230, L = 10, R = 10, T = 26, B = 40, s = svgIn(box, w, H, fig);
+    const X = (u) => L + u * (w - L - R), Y = (v) => H - B - v * (H - T - B);
+    el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+    tx(s, w - R, H - 12, '年龄或经验 →', 'fx-n', 'end');
+    tx(s, L, 14, '使用这种方法的比例（示意）', 'fx-n');
+    const W = [[0.08, 0.2, 0.62], [0.34, 0.2, 0.55], [0.6, 0.2, 0.6], [0.88, 0.18, 0.7]], ds = [];
+    W.forEach(([m, sd, a], i) => {
+      const pts = []; for (let u = 0; u <= 1.0001; u += 0.01) pts.push([X(u), Y(a * Math.exp(-0.5 * ((u - m) / sd) ** 2))]);
+      const p = el('path', { d: pathOf(pts), class: 'fx-ln fx-curve ' + (i % 2 ? 'fx-lr' : 'fx-lb') }, s); ds.push(drawOn(p));
+      tx(s, X(Math.min(0.94, Math.max(0.06, m))), Y(a) - 8, `方法 ${i + 1}`, 'fx-s fx-halo ' + (i % 2 ? 'fx-r' : 'fx-b'), 'middle');
+    });
+    const ux = 0.47; el('line', { x1: X(ux), x2: X(ux), y1: T, y2: Y(0), class: 'fx-hair fx-dash' }, s);
+    tx(s, X(ux) + 6, T + 6, '同一时刻，几种方法并存', 'fx-n fx-halo');
+    return (t) => ds.forEach((d, i) => d(stage(t, i * 0.12, 0.6)));
+  }, { dur: 1300 });
+
+  /* ----- 12-01 · Piaget's stages beside selected modern findings ----- */
+  const PG = [
+    ['感知运动阶段', '约 0–2 岁', [['约 5 个月', '违背预期实验（吊桥）', '解释有争议', 'r'], ['约 8–12 个月', '“A 非 B”错误', '多种解释', 'r'], ['约 9 个月', '注视显示对动作目标敏感', '注视证据', 'b'], ['约 15 个月', '非言语错误信念实验', '重复不一致', 'r']]],
+    ['前运算阶段', '约 2–7 岁', [['约 2–4 岁', '从共同出现的模式中学习因果', '实验证据', 'b'], ['约 3–5 岁', '言语错误信念任务成绩明显提高', '稳健', 'b']]],
+    ['具体运算阶段', '约 7–11 岁', []],
+    ['形式运算阶段', '约 11 岁以后', []],
+  ];
+  F.piaget = (fig) => figure(fig, (box, w) => {
+    const wide = w >= 560, lw = wide ? 150 : w, rw = wide ? w - lw - 14 : w, rh = 40;
+    const rowsH = PG.map(([, , fs]) => Math.max(fs.length, 1) * (wide ? 46 : 46));
+    const H = 24 + PG.reduce((h, r, i) => h + (wide ? Math.max(rowsH[i], 52) : 48 + rowsH[i]) + 12, 0);
+    const s = svgIn(box, w, H, fig), gs = [];
+    tx(s, 0, 14, '皮亚杰的阶段', 'fx-n'); if (wide) tx(s, lw + 14, 14, '本讲讨论的部分现代研究', 'fx-n');
+    let y = 24;
+    PG.forEach(([st, age, fs], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const bh = wide ? Math.max(rowsH[i], 52) : 40;
+      el('rect', { x: 0, y, width: lw, height: bh, rx: 6, class: 'fx-latent' }, g);
+      tx(g, lw / 2, y + bh / 2 - 2, st, 'fx-h', 'middle'); tx(g, lw / 2, y + bh / 2 + 15, age, 'fx-n', 'middle');
+      let fy = wide ? y : y + bh + 8, fx = wide ? lw + 14 : 0;
+      if (!fs.length) tx(g, fx + 4, fy + 24, '（本讲没有讨论）', 'fx-n');
+      fs.forEach(([a, f, ev, c]) => {
+        el('line', { x1: fx, x2: fx, y1: fy + 4, y2: fy + 38, class: 'fx-ln ' + (c === 'r' ? 'fx-lr' : 'fx-lb') }, g);
+        tx(g, fx + 10, fy + 17, `${a}　${ev}`, 'fx-n ' + (c === 'r' ? 'fx-r' : 'fx-b'));
+        tx(g, fx + 10, fy + 35, wrapZh(f, rw - 14, 12.5)[0], 'fx-s');
+        fy += 46;
+      });
+      y += (wide ? bh : bh + 8 + rowsH[i]) + 12;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.15, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 12-02 · Strange Situation: eight episodes, who is in the room ----- */
+  const SSP = [
+    ['进入房间', '照婴', ''], ['照料者与婴儿', '照婴', ''], ['陌生人加入', '照婴陌', ''], ['第一次分离', '婴陌', 'sep'],
+    ['第一次重聚', '照婴', 're'], ['婴儿独处', '婴', 'sep'], ['陌生人回来', '婴陌', 'sep'], ['第二次重聚', '照婴', 're'],
+  ];
+  F.strange = (fig) => figure(fig, (box, w) => {
+    const cols = w >= 600 ? 4 : 2, gap = 10, cw = (w - gap * (cols - 1)) / cols, ch = 84, rows = Math.ceil(SSP.length / cols);
+    const leg = w >= 420 ? ['照 = 照料者　婴 = 婴儿　陌 = 陌生人　每段约 3 分钟'] : ['照 = 照料者　婴 = 婴儿　陌 = 陌生人', '每段约 3 分钟'];
+    const H = rows * ch + (rows - 1) * gap + 14 + leg.length * 16, s = svgIn(box, w, H, fig), gs = [];
+    SSP.forEach(([t, who, k], i) => {
+      const c = i % cols, r = Math.floor(i / cols), x = c * (cw + gap), y = r * (ch + gap), g = el('g', {}, s); gs.push(g);
+      el('rect', { x, y, width: cw, height: ch, rx: 6, class: 'fx-pill ' + (k === 're' ? 'r' : k === 'sep' ? 'm' : 'b') }, g);
+      tx(g, x + 10, y + 20, String(i + 1), 'fx-h ' + (k === 're' ? 'fx-r' : ''));
+      tx(g, x + 26, y + 20, t, 'fx-h');
+      [...who].forEach((p, j) => {
+        const cx = x + 22 + j * 30, cy = y + 52;
+        el('circle', { cx, cy, r: 12, class: 'fx-node ' + (p === '照' ? 'b' : p === '婴' ? 'r' : 'm') }, g);
+        tx(g, cx, cy + 4.5, p, 'fx-n ' + (p === '陌' ? '' : 'fx-inv'), 'middle');
+      });
+      if (k === 're') tx(g, x + cw - 8, y + ch - 10, '重点观察', 'fx-n fx-r', 'end');
+      if (k === 'sep') tx(g, x + cw - 8, y + ch - 10, '分离', 'fx-n', 'end');
+    });
+    const g = el('g', {}, s); gs.push(g);
+    lines(g, 0, rows * ch + (rows - 1) * gap + 22, leg, 'fx-n', 16);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.08, 0.3)));
+  }, { dur: 1200 });
+
+  /* ----- 12-02 · many influences on attachment (conceptual) ----- */
+  const ATI = ['照料者的敏感性与自身状况', '孩子的气质', '家庭压力与经济条件', '文化中的养育观念', '其他照料者与托育'];
+  F.attinfl = (fig) => figure(fig, (box, w) => {
+    const cols = w >= 600 ? 5 : w >= 420 ? 3 : 2, gap = 8, cw = (w - gap * (cols - 1)) / cols;
+    const fh = Math.max(...ATI.map((t) => cardH(cw, '', 0) + (wrapZh(t, cw - 16, 12.5).length - 1) * 17));
+    const rows = Math.ceil(ATI.length / cols), topH = rows * fh + (rows - 1) * gap;
+    const iw = Math.min(w, 420), ix = (w - iw) / 2, iy = topH + 46, ih = 62, oy = iy + ih + 40, oh = 56, H = oy + oh + 4;
+    const s = svgIn(box, w, H, fig), g0 = el('g', {}, s), g1 = el('g', {}, s), g2 = el('g', {}, s);
+    ATI.forEach((t, i) => {
+      const r = Math.floor(i / cols), inRow = Math.min(cols, ATI.length - r * cols), off = (w - (inRow * cw + (inRow - 1) * gap)) / 2;
+      const x = off + (i % cols) * (cw + gap), y = r * (fh + gap);
+      el('rect', { x, y, width: cw, height: fh, rx: 6, class: 'fx-pill b' }, g0);
+      lines(g0, x + cw / 2, y + 22, wrapZh(t, cw - 16, 12.5), 'fx-s', 17, 'middle');
+      arrow(g0, x + cw / 2, y + fh + 2, ix + iw / 2 + (x + cw / 2 - w / 2) * 0.25, iy - 2, 'fx-hair', 6);
+    });
+    el('rect', { x: ix, y: iy, width: iw, height: ih, rx: 8, class: 'fx-pill r' }, g1);
+    tx(g1, w / 2, iy + 26, '亲子之间反复的互动', 'fx-h', 'middle');
+    tx(g1, w / 2, iy + 46, '孩子与照料者相互影响', 'fx-s', 'middle');
+    arrow(g2, w / 2, iy + ih + 4, w / 2, oy - 4, '', 7);
+    el('rect', { x: ix, y: oy, width: iw, height: oh, rx: 8, class: 'fx-latent' }, g2);
+    tx(g2, w / 2, oy + 24, '依恋关系的质量', 'fx-h', 'middle');
+    tx(g2, w / 2, oy + 43, '会随环境的变化而改变', 'fx-s', 'middle');
+    return (t) => { show(g0, stage(t, 0, 0.4)); show(g1, stage(t, 0.3, 0.4)); show(g2, stage(t, 0.55, 0.4)); };
+  }, { dur: 1100 });
+
+  /* ----- 12-02 · two models of continuity (after Fraley, 2002; schematic) ----- */
+  F.continuity = (fig) => figure(fig, (box, w) => {
+    const H = 240, L = 40, R = 14, T = 26, B = 42, s = svgIn(box, w, H, fig);
+    const X = (t) => L + t / 20 * (w - L - R), Y = (r) => H - B - r / 0.6 * (H - T - B);
+    el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+    el('line', { x1: L, x2: L, y1: T - 6, y2: Y(0), class: 'fx-ln' }, s);
+    [0, 5, 10, 15, 20].forEach((t) => tx(s, X(t), Y(0) + 17, String(t), 'fx-n', 'middle'));
+    tx(s, w - R, H - 6, '两次测量相隔的年数', 'fx-n', 'end');
+    tx(s, 0, 14, '前后两次依恋安全性的相关（示意）', 'fx-n');
+    tx(s, L - 6, Y(0) + 4, '0', 'fx-n', 'end');
+    const rev = [], pro = [];
+    for (let t = 0; t <= 20.001; t += 0.25) { rev.push([X(t), Y(0.5 * Math.exp(-t / 4))]); pro.push([X(t), Y(0.22 + 0.28 * Math.exp(-t / 3))]); }
+    const pr = el('path', { d: pathOf(rev), class: 'fx-ln fx-lb fx-curve' }, s), pp = el('path', { d: pathOf(pro), class: 'fx-ln fx-lr fx-curve' }, s);
+    const g = el('g', {}, s);
+    tx(g, w - R, Y(0.22) - 8, '“原型”模型：保留一部分稳定性', 'fx-s fx-r fx-halo', 'end');
+    tx(g, w - R, Y(0.02) - 8, '“修正”模型：逐渐接近零', 'fx-s fx-b fx-halo', 'end');
+    const a = drawOn(pr), b = drawOn(pp);
+    return (t) => { a(stage(t, 0, 0.7)); b(stage(t, 0.15, 0.7)); show(g, stage(t, 0.6, 0.4)); };
+  }, { dur: 1300 });
+
+  /* ----- 12-03 · one association, three causal structures ----- */
+  F.causal3 = (fig) => figure(fig, (box, w) => {
+    const three = w >= 640, gap = 12, pw = three ? (w - 2 * gap) / 3 : w, ph = 196;
+    const H = three ? ph : 3 * ph + 2 * gap, s = svgIn(box, w, H, fig), gs = [];
+    const node = (g, x, y, bw, t, cls) => { const ls = wrapZh(t, bw - 14, 12.5), h = ls.length * 17 + 14; el('rect', { x: x - bw / 2, y: y - h / 2, width: bw, height: h, rx: 6, class: 'fx-pill ' + cls }, g); lines(g, x, y - h / 2 + 19, ls, 'fx-s', 17, 'middle'); return h; };
+    const P = [
+      ['观察到的关联', (g, x0, y0) => {
+        const c = x0 + pw / 2, bw = Math.min(150, pw - 30), ya = y0 + 62, yb = y0 + 150;
+        const ha = node(g, c, ya, bw, '童年逆境', 'b'), hb = node(g, c, yb, bw, '成年后的心理健康问题', 'b');
+        el('line', { x1: c, x2: c, y1: ya + ha / 2 + 4, y2: yb - hb / 2 - 4, class: 'fx-ln fx-dash' }, g);
+        tx(g, c + 8, (ya + yb) / 2 + 4, '相关（方向未知）', 'fx-n');
+      }],
+      ['混杂', (g, x0, y0) => {
+        const a = x0 + pw * 0.27, b = x0 + pw * 0.73, y = y0 + 150, bw = Math.min(110, pw * 0.42), c = x0 + pw / 2, cy = y0 + 66;
+        const ch = node(g, c, cy, Math.min(pw - 16, 220), '贫困、父母的困难、共同的遗传倾向', 'r');
+        node(g, a, y, bw, '童年逆境', 'b'); node(g, b, y, bw, '成年后的问题', 'b');
+        arrow(g, c - 20, cy + ch / 2 + 2, a + 6, y - 22, 'fx-r', 7); arrow(g, c + 20, cy + ch / 2 + 2, b - 6, y - 22, 'fx-r', 7);
+      }],
+      ['童年经历本身的作用', (g, x0, y0) => {
+        const y = y0 + 70, bw = Math.min(150, pw - 30), c = x0 + pw / 2;
+        node(g, c, y - 12, bw, '童年逆境', 'b');
+        node(g, c, y + 50, bw, '压力反应、人际信任等过程', 'm');
+        node(g, c, y + 112, bw, '成年后的问题', 'b');
+        arrow(g, c, y + 6, c, y + 33, '', 6); arrow(g, c, y + 68, c, y + 95, '', 6);
+      }],
+    ];
+    P.forEach(([t, draw], i) => {
+      const x0 = three ? i * (pw + gap) : 0, y0 = three ? 0 : i * (ph + gap), g = el('g', {}, s); gs.push(g);
+      el('rect', { x: x0 + 0.5, y: y0 + 0.5, width: pw - 1, height: ph - 1, rx: 6, class: 'fx-box' }, g);
+      tx(g, x0 + 12, y0 + 22, `${i + 1}　${t}`, 'fx-h');
+      draw(g, x0, y0);
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 12-03 · several developmental pathways after childhood adversity (schematic) ----- */
+  const PW = [
+    ['保持相对稳定', (u) => 0.72 - 0.06 * Math.sin(u * 3), 'b'],
+    ['先下降，后逐渐恢复', (u) => 0.66 - 0.36 * Math.exp(-(((u - 0.3) / 0.16) ** 2)) + 0.02 * u, 'b'],
+    ['较晚出现困难', (u) => 0.6 - 0.32 / (1 + Math.exp(-(u - 0.72) / 0.05)), 'r'],
+    ['长期困难', (u) => 0.3 - 0.04 * Math.sin(u * 4), 'r'],
+  ];
+  F.pathways = (fig) => figure(fig, (box, w) => {
+    const H = 260, L = 10, lab = w >= 520 ? 150 : 0, R = 10 + lab, T = 24, B = lab ? 40 : 110, s = svgIn(box, w, H + (lab ? 0 : 0), fig);
+    const X = (u) => L + u * (w - L - R), Y = (v) => H - B - v * (H - T - B) / 0.8;
+    el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+    tx(s, L, 14, '心理适应（示意）', 'fx-n');
+    tx(s, w - R, Y(0) + 17, '童年 → 成年', 'fx-n', 'end');
+    const ds = [], ends = [];
+    PW.forEach(([t, f, c]) => {
+      const pts = []; for (let u = 0; u <= 1.0001; u += 0.01) pts.push([X(u), Y(f(u))]);
+      ds.push(drawOn(el('path', { d: pathOf(pts), class: 'fx-ln fx-curve ' + (c === 'r' ? 'fx-lr' : 'fx-lb') }, s)));
+      ends.push([t, Y(f(1)), c]);
+    });
+    const g = el('g', {}, s);
+    if (lab) {
+      const ys = ends.map((e) => e[1]).sort((a, b) => a - b), order = [...ends].sort((a, b) => a[1] - b[1]);
+      let prev = -1e9; order.forEach(([t, y, c]) => { const yy = Math.max(y + 4, prev + 18); prev = yy; tx(g, w - R + 8, yy, t, 'fx-s ' + (c === 'r' ? 'fx-r' : 'fx-b')); });
+    } else {
+      ends.forEach(([t, , c], i) => { const yy = Y(0) + 34 + i * 18; el('line', { x1: L, x2: L + 18, y1: yy - 4, y2: yy - 4, class: 'fx-ln ' + (c === 'r' ? 'fx-lr' : 'fx-lb') }, g); tx(g, L + 26, yy, t, 'fx-s'); });
+    }
+    [[0.42, '稳定的照料者'], [0.62, '新的学校或关系']].forEach(([u, t], i) => { el('line', { x1: X(u), x2: X(u), y1: T, y2: Y(0), class: 'fx-hair fx-dash' }, g); tx(g, X(u) + 4, T + 8 + (lab ? 0 : i * 16), t, 'fx-n fx-halo'); });
+    return (t) => { ds.forEach((d, i) => d(stage(t, i * 0.1, 0.6))); show(g, stage(t, 0.55, 0.4)); };
+  }, { dur: 1300 });
+
+  /* ----- 12-04 · age, period and cohort on one chart (Lexis-style schematic) ----- */
+  F.apc = (fig) => figure(fig, (box, w) => {
+    const H = 270, L = 40, R = 14, T = 24, B = 56, s = svgIn(box, w, H, fig), y0 = 1960, y1 = 2020, a0 = 20, a1 = 80;
+    const X = (yr) => L + (yr - y0) / (y1 - y0) * (w - L - R), Y = (a) => H - B - (a - a0) / (a1 - a0) * (H - T - B);
+    el('line', { x1: L, x2: w - R, y1: Y(a0), y2: Y(a0), class: 'fx-ln' }, s);
+    el('line', { x1: L, x2: L, y1: T - 4, y2: Y(a0), class: 'fx-ln' }, s);
+    (w >= 480 ? [1960, 1980, 2000, 2020] : [1960, 1990, 2020]).forEach((yr) => tx(s, X(yr), Y(a0) + 16, String(yr), 'fx-n', 'middle'));
+    [20, 50, 80].forEach((a) => tx(s, L - 6, Y(a) + 4, String(a), 'fx-n', 'end'));
+    tx(s, w - R, Y(a0) + 32, '测量的年份', 'fx-n', 'end'); tx(s, 0, 14, '年龄', 'fx-n');
+    const gp = el('g', {}, s); el('rect', { x: X(1978), y: T - 4, width: X(1984) - X(1978), height: Y(a0) - T + 4, class: 'fx-band2' }, gp);
+    tx(gp, X(1981), Y(a0) - 6, '时期', 'fx-n', 'middle');
+    const gc = el('g', {}, s);
+    [1900, 1920, 1940, 1960, 1980].forEach((b) => {
+      const ya = Math.max(y0, b + a0), yb = Math.min(y1, b + a1); if (yb <= ya) return;
+      el('line', { x1: X(ya), y1: Y(ya - b), x2: X(yb), y2: Y(yb - b), class: 'fx-hair' }, gc);
+      tx(gc, X(yb) - 4, Y(yb - b) + (yb === y1 ? 14 : -6), `${b} 年出生`, 'fx-n fx-halo', 'end');
+    });
+    const gx = el('g', {}, s), cy = 2005;
+    [1940, 1960, 1980].forEach((b) => el('circle', { cx: X(cy), cy: Y(cy - b), r: 5, class: 'fx-node b' }, gx));
+    el('line', { x1: X(cy), x2: X(cy), y1: Y(a1), y2: Y(a0), class: 'fx-ln fx-lb fx-dash' }, gx);
+    const gl = el('g', {}, s);
+    [1970, 1980, 1990].forEach((yr) => el('circle', { cx: X(yr), cy: Y(yr - 1940), r: 5, class: 'fx-node r' }, gl));
+    el('line', { x1: X(1970), y1: Y(30), x2: X(1990), y2: Y(50), class: 'fx-ln fx-lr fx-thick' }, gl);
+    const lg = el('g', {}, s), ly = H - 10;
+    el('circle', { cx: L + 4, cy: ly - 4, r: 5, class: 'fx-node b' }, lg); tx(lg, L + 14, ly, '横断比较', 'fx-s');
+    el('circle', { cx: L + 98, cy: ly - 4, r: 5, class: 'fx-node r' }, lg); tx(lg, L + 108, ly, '纵向追踪', 'fx-s');
+    return (t) => { show(gc, stage(t, 0, 0.3)); show(gp, stage(t, 0.15, 0.3)); show(gx, stage(t, 0.35, 0.3)); show(gl, stage(t, 0.55, 0.3)); show(lg, stage(t, 0.7, 0.3)); };
+  }, { dur: 1300 });
+
+  /* ----- 12-04 · dual-systems curves (shape after Steinberg et al., 2018; schematic) ----- */
+  F.dualsys = (fig) => figure(fig, (box, w) => {
+    const H = 250, L = 10, R = 10, T = 26, B = 42, s = svgIn(box, w, H, fig);
+    const X = (a) => L + (a - 10) / 20 * (w - L - R), Y = (v) => H - B - v * (H - T - B);
+    const ss = (a) => 0.12 + 0.72 * Math.exp(-(((a - 19) / 6.5) ** 2)), sr = (a) => 0.12 + 0.72 / (1 + Math.exp(-(a - 17) / 2.6));
+    el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+    [10, 15, 20, 25, 30].forEach((a) => tx(s, X(a), Y(0) + 17, String(a), 'fx-n', 'middle'));
+    tx(s, w - R, H - 6, '年龄（岁）', 'fx-n', 'end'); tx(s, L, 14, '相对水平（示意）', 'fx-n');
+    let band = ''; const up = [], dn = [];
+    for (let a = 10; a <= 30.001; a += 0.1) if (ss(a) > sr(a)) { up.push([X(a), Y(ss(a))]); dn.unshift([X(a), Y(sr(a))]); }
+    if (up.length) band = pathOf(up.concat(dn)) + ' Z';
+    const gb = el('g', {}, s); el('path', { d: band, class: 'fx-band2' }, gb);
+    const pa = [], pb = []; for (let a = 10; a <= 30.001; a += 0.1) { pa.push([X(a), Y(ss(a))]); pb.push([X(a), Y(sr(a))]); }
+    const da = drawOn(el('path', { d: pathOf(pa), class: 'fx-ln fx-lr fx-curve' }, s)), db = drawOn(el('path', { d: pathOf(pb), class: 'fx-ln fx-lb fx-curve' }, s));
+    const g = el('g', {}, s);
+    tx(g, X(19), Y(ss(19)) - 8, '寻求刺激：约 19 岁最高', 'fx-s fx-r fx-halo', 'middle');
+    tx(g, w - R, Y(sr(30)) + 18, '自我调节：23–26 岁趋于平稳', 'fx-s fx-b fx-halo', 'end');
+    return (t) => { da(stage(t, 0, 0.6)); db(stage(t, 0.15, 0.6)); show(gb, stage(t, 0.55, 0.3)); show(g, stage(t, 0.6, 0.35)); };
+  }, { dur: 1300 });
+
+  /* ----- 12-04 · different abilities across adulthood (schematic) ----- */
+  const LC = [
+    ['加工速度', (a) => 0.86 - 0.0095 * (a - 20), 'r'],
+    ['工作记忆与情景记忆', (a) => 0.8 - 0.00013 * (a - 20) ** 2, 'r'],
+    ['词汇与知识', (a) => 0.36 + 0.42 * (1 - Math.exp(-(a - 20) / 18)) - 0.00025 * Math.max(0, a - 70) ** 2, 'b'],
+  ];
+  F.lifecurves = (fig) => figure(fig, (box, w) => {
+    const H = 250, L = 10, R = 10, T = 26, B = w >= 520 ? 42 : 96, s = svgIn(box, w, H, fig);
+    const X = (a) => L + (a - 20) / 65 * (w - L - R), Y = (v) => H - B - v * (H - T - B);
+    el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+    [20, 40, 60, 80].forEach((a) => tx(s, X(a), Y(0) + 17, String(a), 'fx-n', 'middle'));
+    tx(s, w - R, Y(0) + 32, '年龄（岁）', 'fx-n', 'end'); tx(s, L, 14, '平均成绩（示意）', 'fx-n');
+    const ds = [], g = el('g', {}, s);
+    LC.forEach(([t, f, c], i) => {
+      const pts = []; for (let a = 20; a <= 85.001; a += 0.5) pts.push([X(a), Y(f(a))]);
+      if (i === 1) { const pth = el('path', { d: pathOf(pts), class: 'fx-ln fx-lr fx-dash' }, s); ds.push((v) => show(pth, v)); }
+      else ds.push(drawOn(el('path', { d: pathOf(pts), class: 'fx-ln fx-curve ' + (c === 'r' ? 'fx-lr' : 'fx-lb') }, s)));
+      if (w >= 520) { const a = [74, 64, 52][i]; tx(g, X(a), Y(f(a)) + (i === 0 ? 22 : -10), t, 'fx-s fx-halo ' + (c === 'r' ? 'fx-r' : 'fx-b'), 'middle'); }
+      else { const yy = Y(0) + 46 + i * 18; el('line', { x1: L, x2: L + 20, y1: yy - 4, y2: yy - 4, class: 'fx-ln ' + (c === 'r' ? 'fx-lr' : 'fx-lb') + (i === 1 ? ' fx-dash' : '') }, g); tx(g, L + 28, yy, t, 'fx-s'); }
+    });
+    return (t) => { ds.forEach((d, i) => d(stage(t, i * 0.12, 0.6))); show(g, stage(t, 0.6, 0.4)); };
+  }, { dur: 1300 });
+
+  /* ----- 12-04 · average vs individual ageing trajectories (simulated, fixed seed) ----- */
+  F.agefan = (fig) => figure(fig, (box, w) => {
+    const H = 240, L = 34, R = 12, T = 24, B = 40, s = svgIn(box, w, H, fig), r = rng(47);
+    const people = Array.from({ length: 14 }, () => [0.25 + 0.5 * gauss(r), -0.045 + 0.025 * gauss(r), -0.0008 * Math.abs(gauss(r))]);
+    const val = ([b0, b1, b2], t) => b0 + b1 * t + b2 * t * t, all = people.flatMap((q) => [val(q, 0), val(q, 30)]);
+    const lo = Math.min(-2.4, ...all) - 0.1, hi = Math.max(1.6, ...all) + 0.1;
+    const X = (a) => L + (a - 60) / 30 * (w - L - R), Y = (v) => H - B - (v - lo) / (hi - lo) * (H - T - B);
+    el('line', { x1: L, x2: w - R, y1: Y(lo), y2: Y(lo), class: 'fx-ln' }, s);
+    el('line', { x1: L, x2: L, y1: T - 4, y2: Y(lo), class: 'fx-ln' }, s);
+    [60, 70, 80, 90].forEach((a) => tx(s, X(a), Y(lo) + 17, String(a), 'fx-n', 'middle'));
+    tx(s, w - R, H - 6, '年龄（岁）', 'fx-n', 'end'); tx(s, 0, 14, '某项认知能力（模拟，标准分）', 'fx-n');
+    const gi = el('g', {}, s);
+    people.forEach((q) => { const pts = []; for (let a = 60; a <= 90.001; a += 1) pts.push([X(a), Y(val(q, a - 60))]); el('path', { d: pathOf(pts), class: 'fx-ln fx-faint fx-curve' }, gi); });
+    const mp = []; for (let a = 60; a <= 90.001; a += 1) { const t = a - 60; mp.push([X(a), Y(0.25 - 0.045 * t - 0.00064 * t * t)]); }
+    const dm = drawOn(el('path', { d: pathOf(mp), class: 'fx-ln fx-lr fx-thick fx-curve' }, s));
+    const g = el('g', {}, s); tx(g, X(62), Y(0.25) - 12, '平均趋势', 'fx-s fx-r fx-halo');
+    return (t) => { show(gi, stage(t, 0, 0.4)); dm(stage(t, 0.3, 0.6)); show(g, stage(t, 0.7, 0.3)); };
+  }, { dur: 1200 });
+
+
   window.PPFig = F;
 })();

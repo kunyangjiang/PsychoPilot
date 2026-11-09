@@ -2326,5 +2326,149 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap };
+
+  /* =====================================================================
+     Stage 12 · development. Three model demos: the numbers come from stated
+     assumptions on screen, never from a study's data.
+     ===================================================================== */
+
+  /* 12-01 · lookinterp: one looking-time difference, several explanations.
+     Each explanation predicts which rotation (112° or 180°) is looked at longer,
+     with and without the box; the reader picks a hypothetical observation. */
+  const LKE = [
+    ['婴儿知道箱子仍在挡板后面', { box: 'x180', nobox: 'same' }],
+    ['婴儿只是更爱看运动更多的事件', { box: 'x180', nobox: 'x180' }],
+    ['婴儿只是更爱看与习惯化时不同的事件', { box: 'x112', nobox: 'x112' }],
+  ];
+  const LKO = { x180: '180° 看得更久', x112: '112° 看得更久', same: '两者差不多' };
+  function lookinterp(host) {
+    const o = { cond: 'box', obs: 'x180' };
+    const { fig, out } = shell(host, '同一个注视结果，能排除哪些解释',
+      '婴儿先多次看挡板转 180 度（习惯化），然后看两种测试事件：挡板转到 112 度停下（停在箱子的位置），或者照样转 180 度（好像穿过了箱子）。选择实验条件，再选择一种假设的观察结果，看看三种解释中哪些与它相符。',
+      [['cond', '实验条件', [['box', '挡板后有箱子'], ['nobox', '没有箱子（对照）']]], ['obs', '假设的观察结果', Object.entries(LKO)]],
+      '三种解释的预测和“观察结果”都是为了说明推理而设定的，条形长短只表示哪一种看得更久，不是真实的注视秒数。', MODEL);
+    const draw = () => {
+      const W = widthOf(fig), narrow = W < 600, rowH = narrow ? 74 : 46, lw = narrow ? W : Math.min(310, W * 0.5);
+      const bx = narrow ? 0 : lw + 12, bw = W - bx - 30, H = 30 + (LKE.length + 1) * rowH + 8;
+      fig.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：${o.cond === 'box' ? '有箱子' : '没有箱子'}的条件下，假设观察到${LKO[o.obs]}。` }, fig);
+      text(svg, bx, 14, '112°', 'lab-tick fx-b'); text(svg, bx + 40, 14, '180°', 'lab-tick fx-r'); text(svg, W, 14, '相符？', 'lab-tick', 'end');
+      const lens = (k) => k === 'x180' ? [0.55, 1] : k === 'x112' ? [1, 0.55] : [0.78, 0.78];
+      const ok = [];
+      [['假设的观察结果', o.obs, true]].concat(LKE.map(([t, p]) => [t, p[o.cond], false])).forEach(([t, k, isObs], i) => {
+        const y = 26 + i * rowH, by = narrow ? y + 26 : y + 8;
+        if (isObs) el('rect', { x: 0, y: y - 2, width: W, height: rowH - 4, class: 'fx-band2' }, svg);
+        text(svg, 0, narrow ? y + 16 : y + 22, (isObs ? '' : `解释 ${i}：`) + t, isObs ? 'lab-tick fx-strong' : 'lab-tick');
+        const [a, b] = lens(k);
+        el('rect', { x: bx, y: by, width: bw * a, height: 10, class: 'fx-node b' }, svg);
+        el('rect', { x: bx, y: by + 14, width: bw * b, height: 10, class: 'fx-node r' }, svg);
+        if (!isObs) { const m = k === o.obs; ok.push(m); text(svg, W, by + 19, m ? '✓' : '✗', 'lab-tick ' + (m ? 'fx-b' : 'fx-r'), 'end'); }
+      });
+      const names = LKE.map((_, i) => i + 1).filter((i) => ok[i - 1]);
+      const msg = !names.length ? '三种解释都不能说明这个结果，需要考虑别的解释。'
+        : names.length === 1 ? `只有解释 ${names[0]} 与这个结果相符：在这个条件下，几种解释的预测不同，所以这个结果能把它们区分开。`
+        : `解释 ${names.join(' 和 ')} 都与这个结果相符：只看这一个条件，无法判断哪一种是对的。${o.cond === 'box' ? '试试切换到“没有箱子”的对照条件。' : ''}`;
+      out.innerHTML = `<ul class="lab-parts"><li><span>实验条件</span><b>${o.cond === 'box' ? '有箱子' : '没有箱子'}</b></li><li><span>与观察相符的解释</span><b>${names.length ? names.map((n) => '解释 ' + n).join('、') : '没有'}</b></li></ul>
+        <p>${msg}</p>
+        <p class="lab-note">在有箱子的条件下，“180° 看得更久”同时符合解释 1 和解释 2；只有加上没有箱子的对照条件，才能看出婴儿的偏好是否与箱子有关。里韦拉等人做的正是这样的对照。</p>`;
+    };
+    bindControls(host, o, draw);
+    draw();
+    onResize(draw);
+  }
+
+  /* 12-03 · riskpred: why a risk factor that matters for groups predicts individuals poorly.
+     Risk without the factor p0, relative risk RR (risk with it = min(1, p0 × RR)),
+     share of people exposed e. Everything is per 1,000 hypothetical people. */
+  function riskpred(host) {
+    const { fig, out, actions } = shell(host, '群体风险与个人预测',
+      '设想一个 1000 人的人群和一个风险因素。调节没有这个因素的人出现某种健康问题的比例、有这个因素时风险是多少倍，以及有多少人有这个因素，看看两组各有多少人出现问题。',
+      [], '所有数字都是假设的，用来说明计算的道理，不是 ACE 研究或任何真实人群的数据。', MODEL);
+    const s0 = slider('没有风险因素时的风险：', 2, 30, 1, 10), s1 = slider('有风险因素时，风险是几倍：', 1, 6, 0.5, 3), s2 = slider('有风险因素的人所占比例：', 5, 50, 5, 15);
+    const box = document.createElement('div'); fig.append(s0.box, s1.box, s2.box, box);
+    const draw = () => {
+      const p0 = Number(s0.input.value) / 100, rr = Number(s1.input.value), ex = Number(s2.input.value) / 100, p1 = Math.min(1, p0 * rr);
+      s0.val.textContent = ` ${Math.round(p0 * 100)}%`; s1.val.textContent = ` ${fmt(rr, 1)} 倍`; s2.val.textContent = ` ${Math.round(ex * 100)}%`;
+      s0.input.setAttribute('aria-valuetext', `${Math.round(p0 * 100)}%`); s1.input.setAttribute('aria-valuetext', `${fmt(rr, 1)} 倍`); s2.input.setAttribute('aria-valuetext', `${Math.round(ex * 100)}%`);
+      const nE = 1000 * ex, nU = 1000 - nE, cE = nE * p1, cU = nU * p0, cases = cE + cU;
+      const W = widthOf(fig), two = W >= 460, gap = 24, aw = two ? Math.min(220, (W - gap) / 2) : Math.min(220, W), cell = aw / 10;
+      const gh = aw + 34, tl = W >= 460 ? 0 : 18, H = (two ? gh : 2 * gh + 12) + 66 + tl;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：有风险因素的人中 ${Math.round(p1 * 100)}% 出现问题，没有风险因素的人中 ${Math.round(p0 * 100)}% 出现问题。` }, box);
+      const grid = (x0, y0, k, title) => {
+        text(svg, x0, y0 + 13, title, 'lab-tick');
+        for (let i = 0; i < 100; i++) {
+          const c = i % 10, r = Math.floor(i / 10);
+          el('circle', { cx: x0 + c * cell + cell / 2, cy: y0 + 24 + r * cell + cell / 2, r: cell * 0.36, class: i < k ? 'fx-node r' : 'fx-node m' }, svg);
+        }
+      };
+      const ox = two ? (W - 2 * aw - gap) / 2 : (W - aw) / 2;
+      grid(ox, 0, Math.round(p1 * 100), '有风险因素的每 100 人');
+      grid(two ? ox + aw + gap : ox, two ? 0 : gh + 12, Math.round(p0 * 100), '没有风险因素的每 100 人');
+      const by = H - 40, fe = cases ? cE / cases : 0;
+      if (tl) { text(svg, 0, by - 26, '出现问题的人来自哪一组', 'lab-tick'); text(svg, 0, by - 8, `（每 1000 人中约 ${Math.round(cases)} 人）`, 'lab-tick'); }
+      else text(svg, 0, by - 8, `出现问题的人（每 1000 人中约 ${Math.round(cases)} 人）来自哪一组`, 'lab-tick');
+      el('rect', { x: 0, y: by, width: W * fe, height: 14, class: 'fx-node r' }, svg);
+      el('rect', { x: W * fe, y: by, width: W * (1 - fe), height: 14, class: 'fx-node b' }, svg);
+      text(svg, 0, by + 30, `有风险因素 ${Math.round(fe * 100)}%`, 'lab-tick fx-r'); text(svg, W, by + 30, `没有风险因素 ${Math.round((1 - fe) * 100)}%`, 'lab-tick fx-b', 'end');
+      out.innerHTML = `<ul class="lab-parts"><li><span>有风险因素的人中，没有出现问题的</span><b>${pctP(1 - p1)}</b></li><li><span>出现问题的人中，来自没有风险因素一组的</span><b>${pctP(cases ? cU / cases : 0)}</b></li><li><span>每 1000 人中：有因素且出现问题 / 无因素且出现问题</span><b>${Math.round(cE)} / ${Math.round(cU)}</b></li></ul>
+        <p>${p1 < 0.5 ? '风险虽然成倍增加，但有风险因素的人中，大多数仍然没有出现问题。' : '在这些设定下，有风险因素的人中多数会出现问题；但这需要很高的基础风险和很大的倍数。'}${cases && cU / cases > 0.5 ? '同时，大多数出现问题的人其实来自没有风险因素的一组，因为这一组的人数多得多。' : ''}</p>
+        <p class="lab-note">图中红点表示出现问题的人。这里假设风险的大小已知，而且没有测量误差；真实的问卷分数还会有回忆偏差和混杂因素，对个人的预测只会更困难。</p>`;
+    };
+    [s0, s1, s2].forEach((s) => s.input.addEventListener('input', draw));
+    action(actions, '恢复默认设置', () => { s0.input.value = 10; s1.input.value = 3; s2.input.value = 15; draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 12-04 · xsect: cross-sectional vs longitudinal estimates of age change.
+     Score = 100 + d × (age − 50)/10 + c × (birth year − 1940)/10, plus p on every
+     retest. Cross-section: six cohorts born 1940–1990, all tested in 2020.
+     Longitudinal: the 1940 cohort tested at 50, 60, 70 and 80. */
+  function xsect(host) {
+    const { fig, out, actions } = shell(host, '横断研究与纵向研究会得出不同的“年龄变化”',
+      '设定三个量：每个人自己每十年真正变化多少，晚出生的队列因为教育和营养等原因平均高出多少，以及反复参加同一测验带来多少熟悉效应。然后比较两种研究设计各自估计出的“随年龄的变化”。',
+      [], '这是一个假设的模型：分数由上面说明的规则算出，不是西雅图纵向研究或任何真实研究的数据。', MODEL);
+    const sd = slider('每个人每十年的真实变化：', -3, 3, 0.5, 0), sc = slider('每晚出生十年，队列平均高出：', 0, 6, 0.5, 4), sp = slider('重复测验的熟悉效应：', 0, 4, 0.5, 2);
+    const box = document.createElement('div'); fig.append(sd.box, sc.box, sp.box, box);
+    const draw = () => {
+      const d = Number(sd.input.value), c = Number(sc.input.value), p = Number(sp.input.value);
+      sd.val.textContent = ` ${d > 0 ? '+' : ''}${fmt(d, 1)} 分`; sc.val.textContent = ` ${fmt(c, 1)} 分`; sp.val.textContent = ` ${fmt(p, 1)} 分`;
+      [[sd, d], [sc, c], [sp, p]].forEach(([s, v]) => s.input.setAttribute('aria-valuetext', `${fmt(v, 1)} 分`));
+      const tr = (a) => 100 + d * (a - 50) / 10;
+      const xs = [30, 40, 50, 60, 70, 80].map((a) => [a, tr(a) + c * ((2020 - a) - 1940) / 10]);
+      const lg = [50, 60, 70, 80].map((a, k) => [a, tr(a) + (k ? p : 0)]);
+      const tl = [[30, tr(30)], [80, tr(80)]];
+      const all = xs.concat(lg, tl).map((q) => q[1]), lo = Math.floor(Math.min(...all) - 3), hi = Math.ceil(Math.max(...all) + 3);
+      const W = widthOf(fig), nw = W < 560, H = nw ? 290 : 250, L = 40, R = 12, T = nw ? 86 : 50, B = 40;
+      const X = (a) => L + (a - 30) / 50 * (W - L - R), Y = (v) => H - B - (v - lo) / (hi - lo) * (H - T - B);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：横断估计每十年 ${fmt(d - c, 1)} 分，纵向估计每十年 ${fmt(d + p / 3, 1)} 分，真实变化每十年 ${fmt(d, 1)} 分。` }, box);
+      el('line', { x1: L, x2: W - R, y1: Y(lo), y2: Y(lo), class: 'lab-axis' }, svg);
+      el('line', { x1: L, x2: L, y1: T - 6, y2: Y(lo), class: 'lab-axis' }, svg);
+      [30, 40, 50, 60, 70, 80].forEach((a) => text(svg, X(a), H - B + 17, String(a), 'lab-tick', 'middle'));
+      [Math.round((lo + hi) / 2), hi].forEach((v) => text(svg, L - 6, Y(v) + 4, String(v), 'lab-tick', 'end'));
+      text(svg, 0, 13, '测验分数（假设）', 'lab-tick'); text(svg, W - R, H - 4, '年龄（岁）', 'lab-tick', 'end');
+      line(svg, tl.map(([a, v]) => [X(a), Y(v)]), 'fx-ln fx-dash');
+      line(svg, xs.map(([a, v]) => [X(a), Y(v)]), 'fx-ln fx-lb');
+      line(svg, lg.map(([a, v]) => [X(a), Y(v)]), 'fx-ln fx-lr');
+      xs.forEach(([a, v]) => el('circle', { cx: X(a), cy: Y(v), r: 4, class: 'fx-node b' }, svg));
+      lg.forEach(([a, v]) => el('rect', { x: X(a) - 4, y: Y(v) - 4, width: 8, height: 8, class: 'fx-node r' }, svg));
+      const lx = nw ? 0 : W - R, la = nw ? 'start' : 'end', l0 = nw ? 33 : 13;
+      text(svg, lx, l0, '● 横断：2020 年测 6 个队列', 'lab-tick fx-b', la);
+      text(svg, lx, l0 + 16, '■ 纵向：追踪 1940 年出生的人', 'lab-tick fx-r', la);
+      text(svg, lx, l0 + 32, '虚线：真实变化', 'lab-tick', la);
+      const xe = d - c, le = d + p / 3, f = (v) => `${v > 0 ? '+' : v < 0 ? '−' : ''}${fmt(Math.abs(v), 1)} 分`;
+      out.innerHTML = `<ul class="lab-parts"><li><span>真实变化（虚线）</span><b>每十年 ${f(d)}</b></li><li><span>横断研究的估计</span><b>每十年 ${f(xe)}</b></li><li><span>纵向研究的估计</span><b>每十年 ${f(le)}</b></li></ul>
+        <p>${c ? `横断研究把队列之间的差异也算成了“年龄变化”，所以估计比真实变化低 ${fmt(c, 1)} 分。` : '没有队列差异时，横断研究的估计等于真实变化。'}${p ? '纵向研究中，第二次以后的测验多了熟悉效应，所以估计偏高。' : '没有熟悉效应时，纵向研究的估计等于真实变化。'}</p>
+        <p class="lab-note">为了简单，这里假设熟悉效应从第二次测验起固定存在，而且没有人中途退出。真实的纵向研究中，健康较差的人更容易退出，这也会让留下来的人看起来下降得更少。</p>`;
+    };
+    [sd, sc, sp].forEach((s) => s.input.addEventListener('input', draw));
+    action(actions, '恢复默认设置', () => { sd.input.value = 0; sc.input.value = 4; sp.input.value = 2; draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect };
 })();
