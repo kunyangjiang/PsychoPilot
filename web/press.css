@@ -607,6 +607,12 @@ button.lab-cellbtn:hover { border-color: var(--text); }
 .lab-recall[hidden], .lab-typed[hidden], .lab-pad[hidden], .lab-cues[hidden] { display: none; }
 .lab-recall textarea { box-sizing: border-box; width: 100%; padding: 8px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--text); font: 16px/1.6 var(--body); resize: vertical; }
 .lab-recall textarea:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.lab-recall input { box-sizing: border-box; width: 100%; max-width: 260px; padding: 8px 10px; border: 1.5px solid var(--rule); border-radius: 6px; background: var(--paper); color: var(--text); font: 16px/1.6 var(--mono); }
+.lab-recall input:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.lab-range .lab-k b { font-family: var(--mono); font-weight: 600; color: var(--text); }
+.lab-range[hidden] { display: none; }
+.lab-cal { margin-top: 18px; }
+.lab .lab-resp .lab-act.lab-long { flex: 1 1 100%; max-width: 560px; border-radius: 10px; text-align: left; font-weight: 500; line-height: 1.6; padding: 10px 14px; }
 .lab-typed { min-height: 1.4em; margin-top: 12px; text-align: center; font: 600 24px/1.4 var(--mono); letter-spacing: .06em; }
 .lab-pad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; max-width: 264px; margin: 10px auto 0; }
 .lab .lab-pad .choice { padding: 10px 0; font: 600 17px var(--mono); }

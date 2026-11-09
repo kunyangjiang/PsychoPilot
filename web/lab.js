@@ -1519,5 +1519,338 @@
     rec.hidden = true; status.textContent = '点“开始”，计时开始。';
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses };
+  /* =====================================================================
+     Stage 08 · judgment and decision-making. Three activities the reader does
+     in the browser and three illustrative models. Answers stay in the page;
+     none is a validated assessment, and each says so on screen.
+     ===================================================================== */
+  const num = (s) => { const x = Number(String(s).replace(/[,，\s]/g, '')); return Number.isFinite(x) && x > 0 ? x : null; };
+  const nf = (x) => (Math.abs(x) >= 100 ? Math.round(x).toLocaleString('zh-CN') : fmt(x, Math.abs(x) >= 10 ? 1 : 2).replace(/\.0+$/, ''));
+  const slider = (label, min, max, step, value) => {
+    const w = document.createElement('label'); w.className = 'lab-range';
+    w.innerHTML = `<span class="lab-k">${label}<b></b></span><input type="range" min="${min}" max="${max}" step="${step}" value="${value}">`;
+    return { box: w, input: w.querySelector('input'), val: w.querySelector('b') };
+  };
+
+  /* 08-01 · anchoring: is the answer higher or lower than this number? then your own estimate.
+     Two questions get a low comparison number and two a high one, at random. */
+  const ANCHORS = [
+    { q: '长江的全长大约是多少公里？', unit: '公里', truth: 6300, lo: 2000, hi: 12000, src: '长江全长约 6300 公里。' },
+    { q: '成年人体内通常有多少块骨头？', unit: '块', truth: 206, lo: 80, hi: 450, src: '成年人通常有 206 块骨头。' },
+    { q: '月球到地球的平均距离大约是多少万公里？', unit: '万公里', truth: 38.4, lo: 10, hi: 120, src: '月地平均距离约 38.4 万公里。' },
+    { q: '联合国目前有多少个会员国？', unit: '个', truth: 193, lo: 60, hi: 400, src: '联合国有 193 个会员国。' },
+  ];
+  function anchor(host) {
+    const { fig, out, actions } = shell(host, '先比较，再估计',
+      '下面有四个问题。每个问题先给你一个数字，请判断答案比它高还是低；然后写下你自己的估计。不知道也没关系，凭感觉估计就好。',
+      [], '这是一个教学演示，不是对理性程度的测量。每个问题给出的比较数字是程序随机安排的：两个问题用较低的数字，两个用较高的数字，它们与正确答案没有任何关系。只有四道题，一个人的结果受偶然因素影响很大；研究中的锚定效应，是比较大量参与者的平均结果得到的。你的回答只保存在这个页面里。', TASK);
+    host.querySelector('.lab-ctrls').remove();
+    const stage = document.createElement('div'); stage.className = 'lab-mis';
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(stage, ctl, status);
+    let items = [], k = 0, used = 0;
+    const begin = () => {
+      used++;
+      const hi = shuffle([true, true, false, false]);
+      items = shuffle(ANCHORS.map((a, i) => ({ ...a, high: hi[i], a: hi[i] ? a.hi : a.lo, dir: null, est: null })));
+      k = 0; out.innerHTML = ''; step1();
+    };
+    const head = () => `<p class="lab-k">问题 ${k + 1} / ${items.length}</p><p class="lab-q">${items[k].q}</p>`;
+    const step1 = () => {
+      const it = items[k];
+      stage.innerHTML = head() + `<p>答案比 <b>${nf(it.a)} ${it.unit}</b> 更高，还是更低？</p>`;
+      ctl.innerHTML = '';
+      [['更高', 'up'], ['更低', 'down']].forEach(([t, v]) => action(ctl, t, () => { it.dir = v; step2(); }));
+      status.textContent = used > 1 ? '你已经知道这个演示的设计了，这一轮的结果只适合看看流程。' : '';
+      ctl.querySelector('button').focus();
+    };
+    const step2 = () => {
+      const it = items[k];
+      stage.innerHTML = head() + `<label class="lab-recall"><span class="lab-k">你的估计（${it.unit}）</span><input type="text" inputmode="decimal" autocomplete="off" placeholder="写一个数字"></label>`;
+      const inp = stage.querySelector('input');
+      ctl.innerHTML = '';
+      const go = () => {
+        const v = num(inp.value);
+        if (v === null) { status.textContent = '请写一个大于 0 的数字。'; inp.focus(); return; }
+        it.est = v; k++;
+        if (k < items.length) step1(); else reveal();
+      };
+      action(ctl, k + 1 < items.length ? '下一题' : '看结果', go);
+      inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') go(); });
+      status.textContent = ''; inp.focus();
+    };
+    const reveal = () => {
+      const lr = (a) => a.reduce((s, it) => s + Math.log(it.est / it.truth), 0) / a.length;
+      const H = items.filter((it) => it.high), L = items.filter((it) => !it.high);
+      const rh = Math.exp(lr(H)), rl = Math.exp(lr(L));
+      stage.innerHTML = `<div class="l-table" role="region" tabindex="0" aria-label="逐题结果"><table><thead><tr><th>问题</th><th class="lab-nw">比较数字</th><th class="lab-nw">你的估计</th><th class="lab-nw">实际</th></tr></thead><tbody>${items.map((it) => `<tr><td>${it.q}<br><span class="lab-k">${it.high ? '较高的数字' : '较低的数字'}</span></td><td class="lab-nw">${nf(it.a)}</td><td class="lab-nw">${nf(it.est)}</td><td class="lab-nw">${nf(it.truth)}</td></tr>`).join('')}</tbody></table></div>
+        <p class="lab-note">${items.map((it) => it.src).join('')}</p>`;
+      ctl.innerHTML = ''; action(ctl, '重新开始', begin, 'lab-clear');
+      status.textContent = '';
+      out.innerHTML = `<ul class="lab-parts lab-flow"><li><span>看到较高数字的两道题：你的估计平均是实际值的</span><b>${fmt(rh, 2)} 倍</b></li><li><span>看到较低数字的两道题：你的估计平均是实际值的</span><b>${fmt(rl, 2)} 倍</b></li></ul>
+        <p>${rh > rl * 1.15 ? '在看到较高数字的题目上，你的估计相对于实际值偏得更高。这是锚定效应预测的方向：先考虑一个数字，会把后面的估计往它那边拉。' : rh * 1.15 < rl ? '这一次，你在看到较高数字的题目上，估计反而相对更低。只有四道题，题目本身的难易和你对它们的了解程度，都会让结果大幅波动。' : '这一次，两类题目上的估计相差不大，看不出明显的锚定方向。你可能对这些题目比较熟悉，熟悉的问题受锚定的影响通常较小。'}</p>
+        <p>这里的“平均”是按比例计算的（几何平均），所以不同单位的题目可以放在一起比较。研究中，锚定效应是比较两组人得到的：一组看到高的数字，另一组看到低的数字，比较两组估计的平均差别；一个人四道题的结果，不能说明你“容易”或“不容易”被锚定。</p>`;
+    };
+    action(actions, '开始', begin);
+    stage.innerHTML = '<p class="lab-q">点“开始”。一共四个问题，大约两分钟。</p>';
+  }
+
+  /* 08-02 · prospect theory curves: v(x) = x^α for gains, −λ(−x)^α for losses (Tversky & Kahneman's
+     functional form), and Prelec's probability weighting w(p) = exp(−(−ln p)^γ). Parameters are illustrative. */
+  function prospect(host) {
+    const o = { view: 'value' };
+    const { fig, out, actions } = shell(host, '价值函数与概率权重',
+      '拖动滑块，改变曲线的形状。横轴上的金额是假设的。你也可以切换到概率权重函数，看看人们对概率的感受怎样偏离实际的概率。',
+      [['view', '显示', [['value', '价值函数'], ['weight', '概率权重函数']]]],
+      '这是一个模型演示，曲线由公式计算出来，不是任何人的真实偏好。默认参数取自常被引用的估计（损失厌恶系数 2.25、曲率 0.88，概率权重参数 0.65），只用来作参照；真实研究中，这些参数因人、因任务而有很大差别。', MODEL);
+    const box = document.createElement('div');
+    const sL = slider('损失厌恶系数 λ：', 1, 3, 0.05, 2.25), sA = slider('曲率 α（1 表示直线）：', 0.5, 1, 0.02, 0.88), sG = slider('概率权重参数 γ（1 表示与实际概率相同）：', 0.3, 1, 0.01, 0.65);
+    fig.append(box, sL.box, sA.box, sG.box);
+    [sL, sA, sG].forEach((s) => s.input.addEventListener('input', () => draw()));
+    const v = (x, l, a) => (x >= 0 ? Math.pow(x, a) : -l * Math.pow(-x, a));
+    const wP = (p, g) => (p <= 0 ? 0 : p >= 1 ? 1 : Math.exp(-Math.pow(-Math.log(p), g)));
+    const draw = () => {
+      const l = Number(sL.input.value), a = Number(sA.input.value), g = Number(sG.input.value);
+      sL.val.textContent = ' ' + fmt(l, 2); sA.val.textContent = ' ' + fmt(a, 2); sG.val.textContent = ' ' + fmt(g, 2);
+      sL.input.setAttribute('aria-valuetext', fmt(l, 2)); sA.input.setAttribute('aria-valuetext', fmt(a, 2)); sG.input.setAttribute('aria-valuetext', fmt(g, 2));
+      const val = o.view === 'value';
+      sL.box.hidden = !val; sA.box.hidden = !val; sG.box.hidden = val;
+      const W = widthOf(fig), H = 300;
+      box.innerHTML = '';
+      if (val) {
+        const M = 100, top = v(M, l, a), yMax = Math.max(top, -v(-M, l, a)) * 1.05;
+        const L0 = 16, R0 = 16, T = 26, Bm = 30, cx = L0 + (W - L0 - R0) / 2, cy = T + (H - T - Bm) / 2;
+        const X = (x) => cx + (x / M) * ((W - L0 - R0) / 2), Y = (y) => cy - (y / yMax) * ((H - T - Bm) / 2);
+        const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `价值函数：得到 100 元的主观价值约为 ${fmt(top, 0)}，失去 100 元约为负 ${fmt(-v(-M, l, a), 0)}。` }, box);
+        el('line', { x1: L0, x2: W - R0, y1: cy, y2: cy, class: 'lab-axis' }, svg);
+        el('line', { x1: cx, x2: cx, y1: T - 8, y2: H - Bm + 4, class: 'lab-axis' }, svg);
+        const pts = []; for (let i = -100; i <= 100; i += 2) pts.push([X(i), Y(v(i, l, a))]);
+        line(svg, pts, 'fx-ln fx-lr fx-curve');
+        [[M, top], [-M, v(-M, l, a)]].forEach(([x, y]) => { el('line', { x1: X(x), x2: X(x), y1: cy, y2: Y(y), class: 'fx-hair fx-dash' }, svg); el('circle', { cx: X(x), cy: Y(y), r: 4.5, class: 'fx-node r' }, svg); });
+        text(svg, W - R0, cy - 8, '得到（元）', 'lab-tick', 'end'); text(svg, L0, cy + 18, '失去（元）', 'lab-tick');
+        text(svg, X(M), cy + 18, '+100', 'lab-tick', 'middle'); text(svg, X(-M), cy - 8, '−100', 'lab-tick', 'middle');
+        text(svg, cx + 6, T - 10, '主观价值', 'lab-tick'); text(svg, cx + 6, H - Bm + 18, '参照点', 'lab-tick');
+        const need = 100 * Math.pow(l, 1 / a);
+        out.innerHTML = `<ul class="lab-parts"><li><span>得到 100 元的主观价值</span><b>${fmt(top, 1)}</b></li><li><span>失去 100 元的主观价值</span><b>−${fmt(-v(-M, l, a), 1)}</b></li><li><span>一半机会赢 100、一半机会输 100 的赌局，在模型中的总价值</span><b>${fmt(0.5 * top + 0.5 * v(-M, l, a), 1)}</b></li><li><span>输 100 元的抛硬币游戏，赢多少才“值得”（模型推算）</span><b>${nf(need)} 元</b></li></ul>
+          <p>${l > 1.02 ? `失去一侧比得到一侧更陡，所以输赢相同的赌局在模型中总价值为负：按照这组参数，要赢大约 ${nf(need)} 元才抵得上输 100 元。` : '损失厌恶系数接近 1 时，失去和得到一样重，输赢相同的赌局在模型中大约不赚不赔。'}${a < 0.99 ? '曲率小于 1 时，两侧的曲线都越来越平：第一个 100 元最有感觉，之后增加的部分感受越来越弱。' : '曲率为 1 时，两侧都是直线，主观价值与金额成正比。'}</p>
+          <p>这里没有包含概率权重，所以赌局的价值只是两种结果价值的简单平均。这些数字只说明模型的含义，不能用来预测某个人的选择。</p>`;
+      } else {
+        const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `概率权重函数：1% 的概率被赋予约 ${fmt(wP(0.01, g) * 100, 1)}% 的权重，99% 的概率被赋予约 ${fmt(wP(0.99, g) * 100, 1)}% 的权重。` }, box);
+        const { X, Y } = lc(svg, W, H, { xMax: 100, yMax: 100, xTicks: [0, 25, 50, 75, 100], yTicks: [[0, '0'], [50, '50'], [100, '100']], xLab: '实际概率（%）', yLab: '决策权重（%）' });
+        el('line', { x1: X(0), y1: Y(0), x2: X(100), y2: Y(100), class: 'fx-hair fx-dash' }, svg);
+        const pts = []; for (let i = 0; i <= 200; i++) { const p = i / 200; pts.push([X(p * 100), Y(wP(p, g) * 100)]); }
+        line(svg, pts, 'fx-ln fx-lr fx-curve');
+        [0.01, 0.5, 0.99].forEach((p) => el('circle', { cx: X(p * 100), cy: Y(wP(p, g) * 100), r: 4.5, class: 'fx-node r' }, svg));
+        text(svg, X(100), Y(8), '虚线：决策权重 = 实际概率', 'lab-tick fx-halo', 'end');
+        out.innerHTML = `<ul class="lab-parts"><li><span>实际概率 1%，模型中的决策权重</span><b>${fmt(wP(0.01, g) * 100, 1)}%</b></li><li><span>实际概率 50%</span><b>${fmt(wP(0.5, g) * 100, 1)}%</b></li><li><span>实际概率 99%</span><b>${fmt(wP(0.99, g) * 100, 1)}%</b></li></ul>
+          <p>${g < 0.98 ? '曲线在左下方高于虚线、在右上方低于虚线：小概率被放大，大概率被缩小；从 99% 到 100% 的变化，在感受上比从 50% 到 51% 大得多。这可以解释同一个人为什么既买彩票又买保险。' : 'γ 接近 1 时，曲线几乎与虚线重合，决策权重就等于实际概率，这正是期望效用理论的假定。'}</p>
+          <p>这条曲线描述的是人们“根据描述作决策”时的平均模式；在根据亲身经验作决策时，罕见事件常常反而被低估。</p>`;
+      }
+    };
+    bindControls(host, o, draw);
+    action(actions, '恢复默认参数', () => { sL.input.value = 2.25; sA.input.value = 0.88; sG.input.value = 0.65; draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 08-02 · framing: two problems, each answered in one frame first and in the other frame afterwards */
+  const FRAMES = [
+    { k: 'disease', t: '一种罕见的疾病预计会导致 600 人死亡。有两种应对方案，你选择哪一种？',
+      g: ['方案 A：200 人会被救活。', '方案 B：有 1/3 的可能 600 人都被救活，2/3 的可能没有人被救活。'],
+      l: ['方案 C：400 人会死亡。', '方案 D：有 1/3 的可能没有人死亡，2/3 的可能 600 人都会死亡。'],
+      same: '方案 A 和方案 C 的结果相同：200 人活，400 人死；方案 B 和方案 D 的结果也相同。' },
+    { k: 'money', t: '',
+      tg: '假设你已经得到 1000 元。现在请在下面两者中选一个：', tl: '假设你已经得到 2000 元。现在请在下面两者中选一个：',
+      g: ['确定再得到 500 元。', '一半的可能再得到 1000 元，一半的可能什么也不再得到。'],
+      l: ['确定失去 500 元。', '一半的可能失去 1000 元，一半的可能什么也不失去。'],
+      same: '把开头给的钱算进去，两道题的最终结果完全相同：确定的选项最后都是 1500 元；冒险的选项最后都是一半可能 2000 元、一半可能 1000 元。' },
+  ];
+  function frame(host) {
+    const { fig, out, actions } = shell(host, '同样的选择，两种说法',
+      '先回答两道选择题。随后你会看到同样的两道题换了一种说法，请再按当时的直觉回答一次。没有对错之分。',
+      [], '这是一个教学演示，题目中的人数和金额都是假设的。研究中的框架效应，通常是比较两组分别只看到一种说法的人；一个人先后回答两种说法时，常常会注意到它们是同一个问题，效应因此会变小。你的回答只保存在这个页面里。', TASK);
+    host.querySelector('.lab-ctrls').remove();
+    const stage = document.createElement('div'); stage.className = 'lab-mis';
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    fig.append(stage, ctl);
+    let seq = [], k = 0, ans = {};
+    const begin = () => {
+      const f = Math.random() < 0.5 ? ['g', 'l'] : ['l', 'g'];
+      seq = [[0, f[0]], [1, f[1]], [0, f[1]], [1, f[0]]]; k = 0; ans = {}; out.innerHTML = ''; ask();
+    };
+    const ask = () => {
+      const [i, fr] = seq[k], P = FRAMES[i], opts = P[fr];
+      stage.innerHTML = `<p class="lab-k">第 ${k + 1} 题 / 共 4 题${k === 2 ? '（以下是换了说法的两道题）' : ''}</p><p class="lab-q">${P.t || (fr === 'g' ? P.tg : P.tl)}</p>`;
+      ctl.innerHTML = '';
+      opts.forEach((t, j) => { const b = action(ctl, t, () => { ans[`${i}${fr}`] = j; k++; if (k < seq.length) ask(); else reveal(); }); b.classList.add('lab-long'); });
+      ctl.querySelector('button').focus();
+    };
+    const pick = (i, fr) => (ans[`${i}${fr}`] === 0 ? '确定的选项' : '冒险的选项');
+    const reveal = () => {
+      stage.innerHTML = FRAMES.map((P, i) => `<div class="lab-item"><p><b>${i === 0 ? '疾病问题' : '金钱问题'}</b></p><ul class="lab-parts lab-flow"><li><span>用“得到／救活”来描述时，你选了</span><b>${pick(i, 'g')}</b></li><li><span>用“失去／死亡”来描述时，你选了</span><b>${pick(i, 'l')}</b></li></ul><p class="lab-note">${P.same}</p></div>`).join('');
+      ctl.innerHTML = ''; action(ctl, '重新开始', begin, 'lab-clear');
+      const typical = [0, 1].filter((i) => ans[`${i}g`] === 0 && ans[`${i}l`] === 1).length;
+      const flip = [0, 1].filter((i) => ans[`${i}g`] !== ans[`${i}l`]).length;
+      out.innerHTML = `<p>在两道题中，你有 <b>${flip}</b> 道在换了说法之后改变了选择${typical ? `，其中 <b>${typical}</b> 道是研究中最常见的方向：用“得到”描述时选确定的选项，用“失去”描述时选冒险的选项` : ''}。</p>
+        <p>${flip ? '两种说法的实际结果完全相同，变化的只是参照点：同样的结果，被说成“得到”还是“失去”，会让确定的选项显得更安全或更难以接受。' : '你在两种说法下作了同样的选择。这并不少见：当同一个人先后看到两种说法时，很容易发现它们是同一个问题，并有意识地保持一致。'}</p>
+        <p>经典研究中，看到“救活”说法的一组人，大多选择确定的方案；看到“死亡”说法的另一组人，大多选择冒险的方案。元分析发现，这类效应总体上是小到中等的，大小取决于题目和实验设计。</p>`;
+    };
+    action(actions, '开始', begin);
+    stage.innerHTML = '<p class="lab-q">点“开始”。一共四道选择题。</p>';
+  }
+
+  /* 08-03 · sunk cost: a hypothetical project. Continue if p × benefit − remaining cost > salvage value.
+     The money already spent is shown, but it is the same under both choices. */
+  function sunk(host) {
+    const { fig, out, actions } = shell(host, '继续，还是放弃？',
+      '一家公司在一个新产品项目上已经投入了一笔钱。现在需要决定：继续投入把它做完，还是停下来。拖动滑块改变各项数字（单位：万元），看看建议怎样变化。',
+      [], '这是一个简化的教学模型，所有数字都是假设的，只比较金钱上的期望值。真实的决定还要考虑风险、新的信息、团队学到的东西、名誉和其他机会；这个模型不能预测任何人或任何公司的实际选择。', MODEL);
+    host.querySelector('.lab-ctrls').remove();
+    const box = document.createElement('div');
+    const S = [slider('已经花掉的钱：', 0, 300, 10, 150), slider('做完还需要投入：', 10, 200, 10, 80), slider('做完后的收益：', 0, 400, 10, 160), slider('做完后获得这份收益的可能性：', 10, 100, 5, 60), slider('现在放弃时，设备等能卖回的钱：', 0, 60, 5, 10)];
+    const U = [' 万元', ' 万元', ' 万元', '%', ' 万元'];
+    fig.append(box, ...S.map((s) => s.box));
+    S.forEach((s) => s.input.addEventListener('input', () => draw()));
+    const draw = () => {
+      const [sk, rem, ben, p, sal] = S.map((s) => Number(s.input.value));
+      S.forEach((s, i) => { s.val.textContent = ' ' + s.input.value + U[i]; s.input.setAttribute('aria-valuetext', s.input.value + U[i]); });
+      const cont = (p / 100) * ben - rem, stop = sal, go = cont > stop;
+      const W = widthOf(fig), H = 206, L0 = 16, R0 = 56;
+      const lo = Math.min(-sk, cont, 0), hi = Math.max(cont, stop, 10), X = (x) => L0 + ((x - lo) / (hi - lo)) * (W - L0 - R0);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `继续的将来净收益 ${nf(cont)} 万元，放弃能收回 ${nf(stop)} 万元；已经花掉的 ${sk} 万元在两种选择下都一样。` }, box);
+      const rows = [['已经花掉：两种选择下都一样，拿不回来', -sk, 'fx-band2', 40], ['继续：将来的期望净收益', cont, go ? 'lab-bar b' : 'lab-bar', 118], ['放弃：现在能收回的钱', stop, go ? 'lab-bar' : 'lab-bar b', 176]];
+      el('line', { x1: X(0), x2: X(0), y1: 6, y2: H - 4, class: 'lab-axis' }, svg);
+      el('line', { x1: 0, x2: W, y1: 72, y2: 72, class: 'fx-hair fx-dash' }, svg);
+      rows.forEach(([t, v, cls, y]) => {
+        const x1 = X(Math.min(0, v)), x2 = X(Math.max(0, v));
+        text(svg, 0, y - 18, t, 'lab-tick');
+        el('rect', { x: x1, y: y - 10, width: Math.max(1, x2 - x1), height: 18, class: cls }, svg);
+        text(svg, x2 + 6, y + 4, (v > 0 ? '+' : v < 0 ? '−' : '') + nf(Math.abs(v)), 'lab-tick fx-halo');
+      });
+      out.innerHTML = `<p>按照这个模型，<b>${go ? '继续' : '放弃'}</b>更划算：继续下去，将来的期望净收益是 ${fmt(p / 100, 2)} × ${ben} − ${rem} = <b>${nf(cont)}</b> 万元；现在放弃，能收回 <b>${nf(stop)}</b> 万元。</p>
+        <p>拖动第一个滑块试试：不论已经花掉 0 万元还是 300 万元，建议都不会改变。已经花掉的钱，在继续和放弃两种选择下都已经花掉了；如果把它从两边同时减去，两者的差别仍然一样。“已经投了 ${sk} 万，现在放弃就全白费了”，说的是过去，而不是将来。</p>
+        <p>会改变建议的，是后面四个数字：还要投入多少、做完能得到什么、有多大把握，以及放弃时能收回什么。新的信息改变了这些数字时，继续或放弃的理由才真正改变。</p>
+        <p>这里的建议是一条规范性的规则：它说明“只看将来”时应该怎样比较，并不描述人们实际会怎样做。研究发现，真实的人常常会受到已经花掉的钱的影响。${go ? '在这组数字下，继续是合理的，理由是将来的收益大于放弃时能收回的钱，而不是已经花掉的钱。' : '如果将来的期望收益变得更大，继续就会成为合理的选择；那时的理由同样来自将来，而不是过去。'}</p>`;
+    };
+    action(actions, '恢复默认数字', () => { [150, 80, 160, 60, 10].forEach((v, i) => { S[i].input.value = v; }); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 08-03 · discounting: 100 now-ish versus a larger amount later, both pushed into the future by a front delay.
+     Exponential V = A·exp(−r·d); hyperbolic V = A / (1 + k·d); quasi-hyperbolic V = A for d = 0, else β·δ^d·A. */
+  const KH = 0.15, RE = 0.04, BETA = 0.7, DELTA = 0.99;
+  function discount(host) {
+    const o = { model: 'hyp' };
+    const { fig, out, actions } = shell(host, '现在的 100 元，还是以后的更多？',
+      '两个假设的选项：较小的 100 元，和晚一些才能拿到的较大金额。拖动“两个选项都推迟”的滑块，相当于从更远的地方看这个选择；比较不同的折扣模型怎样预测你的偏好。',
+      [['model', '折扣模型', [['exp', '指数折扣'], ['hyp', '双曲折扣'], ['qh', '现时偏差（准双曲）']]]],
+      `这是一个模型演示。三个模型的参数都是为了说明原理而设定的（指数：每月 ${RE * 100}%；双曲：k = ${KH}；准双曲：β = ${BETA}、δ = ${DELTA}），不代表任何人的真实偏好，也不能用来预测你的财务行为。`, MODEL);
+    const box = document.createElement('div');
+    const sB = slider('较大金额：', 110, 250, 5, 150), sG = slider('较大金额要多等：', 1, 12, 1, 6), sD = slider('两个选项都推迟：', 0, 24, 1, 0);
+    fig.append(box, sB.box, sG.box, sD.box);
+    [sB, sG, sD].forEach((s) => s.input.addEventListener('input', () => draw()));
+    const V = (A, d) => (o.model === 'exp' ? A * Math.exp(-RE * d) : o.model === 'hyp' ? A / (1 + KH * d) : d === 0 ? A : A * BETA * Math.pow(DELTA, d));
+    const draw = () => {
+      const big = Number(sB.input.value), gap = Number(sG.input.value), d0 = Number(sD.input.value);
+      sB.val.textContent = ` ${big} 元`; sG.val.textContent = ` ${gap} 个月`; sD.val.textContent = d0 ? ` ${d0} 个月` : ' 不推迟（较小的那份马上就能拿）';
+      sB.input.setAttribute('aria-valuetext', `${big} 元`); sG.input.setAttribute('aria-valuetext', `${gap} 个月`); sD.input.setAttribute('aria-valuetext', `${d0} 个月`);
+      const W = widthOf(fig), H = 270, M = 24;
+      box.innerHTML = '';
+      const ss = (d) => V(100, d), ll = (d) => V(big, d + gap);
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `推迟 ${d0} 个月时，100 元的现值约 ${fmt(ss(d0), 0)}，${big} 元的现值约 ${fmt(ll(d0), 0)}。` }, box);
+      const top = tidy(Math.max(ss(0), ll(0)) * 1.05, 25);
+      const { X, Y } = lc(svg, W, H, { xMax: M, yMax: top, xTicks: [0, 6, 12, 18, 24], yTicks: ticksTo(top, top > 100 ? 50 : 25).map((t) => [t, String(t)]), xLab: '两个选项都推迟（月）', yLab: '在此刻看来的价值（元）' });
+      const p1 = [], p2 = []; for (let d = 0; d <= M; d += 0.25) { p1.push([X(d), Y(ss(d))]); p2.push([X(d), Y(ll(d))]); }
+      if (o.model === 'qh') { p1.splice(1, 0, [X(0.0001), Y(ss(0.0001))]); }
+      line(svg, p1, 'fx-ln fx-lb fx-curve'); line(svg, p2, 'fx-ln fx-lr fx-curve');
+      el('line', { x1: X(d0), x2: X(d0), y1: 24, y2: Y(0), class: 'fx-hair fx-dash' }, svg);
+      el('circle', { cx: X(d0), cy: Y(ss(d0)), r: 4.5, class: 'fx-node b' }, svg); el('circle', { cx: X(d0), cy: Y(ll(d0)), r: 4.5, class: 'fx-node r' }, svg);
+      let cross = null; for (let d = 0; d <= M; d += 0.25) { if ((ss(d) > ll(d)) !== (ss(0) > ll(0))) { cross = d; break; } }
+      const now = ss(d0) > ll(d0);
+      out.innerHTML = `<p class="fx-keys"><span><i class="k" style="background:var(--blue)"></i>100 元</span><span><i class="k" style="background:var(--red)"></i>${big} 元（再多等 ${gap} 个月）</span></p>
+        <ul class="lab-parts"><li><span>此刻看来，100 元值</span><b>${fmt(ss(d0), 1)} 元</b></li><li><span>此刻看来，${big} 元值</span><b>${fmt(ll(d0), 1)} 元</b></li><li><span>模型预测的选择</span><b>${now ? '100 元' : `${big} 元`}</b></li></ul>
+        <p>${o.model === 'exp' ? '在指数模型中，两条曲线按同样的比例下降，永远不会交叉：无论从多远的地方看，偏好都一样。' : cross !== null ? `两条曲线在推迟约 ${fmt(cross, cross % 1 ? 1 : 0)} 个月处交叉：从远处看，模型更喜欢较大、较晚的回报；当较小的回报近在眼前时，偏好就反转了。${o.model === 'qh' ? '在现时偏差模型中，反转只发生在“现在”这一刻：只要两个选项都在将来，“现在”的额外折扣就不起作用。' : ''}` : '在这组数字下，两条曲线没有交叉，偏好不会反转。试着调整较大金额或等待时间。'}</p>
+        <p>这些曲线说明的是模型的性质，不是对你的预测。真实的选择还取决于你是否相信将来真能拿到钱、此刻是否急需用钱，以及回报是金钱还是需要付出努力的事情。</p>`;
+    };
+    bindControls(host, o, draw);
+    action(actions, '恢复默认设置', () => { o.model = 'hyp'; sB.input.value = 150; sG.input.value = 6; sD.input.value = 0; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o[b.dataset.k]))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 08-04 · calibration: ten two-choice questions, each with a confidence rating; then confidence against accuracy */
+  const CAL = [
+    ['哪座城市更靠北（纬度更高）？', '罗马', '北京', '罗马约在北纬 41.9°，北京约在北纬 39.9°。'],
+    ['哪个国家的国土面积更大？', '加拿大', '中国', '加拿大约 998 万平方公里，中国约 960 万平方公里。'],
+    ['哪件事发生得更早？', '郑和第一次下西洋', '哥伦布到达美洲', '郑和第一次下西洋在 1405 年，哥伦布到达美洲在 1492 年。'],
+    ['哪座山更高？', '乞力马扎罗山', '勃朗峰', '乞力马扎罗山约 5895 米，勃朗峰约 4806 米。'],
+    ['哪种元素的原子序数更大？', '铜', '铁', '铜是 29 号元素，铁是 26 号元素。'],
+    ['哪座城市更靠南？', '墨尔本', '开普敦', '墨尔本约在南纬 37.8°，开普敦约在南纬 33.9°。'],
+    ['哪个大洋的面积更大？', '大西洋', '印度洋', '大西洋是第二大洋，面积大于印度洋。'],
+    ['哪座城市更靠西？', '乌鲁木齐', '拉萨', '乌鲁木齐约在东经 87.6°，拉萨约在东经 91.1°。'],
+    ['哪件事发生得更早？', '唐朝建立', '伊斯兰历纪元开始', '唐朝建立于 618 年，伊斯兰历以 622 年为元年。'],
+    ['哪颗行星离太阳更近？', '金星', '火星', '金星是离太阳第二近的行星，火星是第四近。'],
+  ];
+  const CONFS = [50, 60, 70, 80, 90, 100];
+  function calib(host) {
+    const { fig, out, actions } = shell(host, '你的信心和你的准确率相符吗？',
+      '下面有十道二选一的常识题。每道题先选一个答案，再选择你有多大把握答对：50% 表示完全是猜的，100% 表示绝对确定。',
+      [], '这是一个教学练习，不是智力测验或人格测验。十道题太少，一个人的结果受偶然因素影响很大；题目是为演示挑选的，其中几道故意容易误导人，这本身就会让人显得过度自信。你的回答只保存在这个页面里。', TASK);
+    host.querySelector('.lab-ctrls').remove();
+    const stage = document.createElement('div'); stage.className = 'lab-mis';
+    const ctl = document.createElement('div'); ctl.className = 'lab-resp';
+    const status = document.createElement('p'); status.className = 'lab-status'; status.setAttribute('aria-live', 'polite');
+    fig.append(stage, ctl, status);
+    let qs = [], ans = [];
+    const begin = () => {
+      qs = shuffle(CAL.map(([q, a, b, why]) => { const sw = Math.random() < 0.5; return { q, o: sw ? [b, a] : [a, b], right: sw ? 1 : 0, why }; }));
+      ans = qs.map(() => ({})); out.innerHTML = '';
+      stage.innerHTML = qs.map((x, i) => `
+        <div class="lab-item" role="group" aria-label="第 ${i + 1} 题：${x.q}"><p>${i + 1}. ${x.q}</p>
+          <div class="lab-opts" data-i="${i}">${x.o.map((t, j) => `<button type="button" class="choice" data-a="${j}" aria-pressed="false">${t}</button>`).join('')}
+          <span class="lab-conf" role="group" aria-label="把握">${CONFS.map((c) => `<button type="button" class="choice" data-c="${c}" aria-pressed="false">${c}%</button>`).join('')}</span></div></div>`).join('');
+      stage.querySelectorAll('.lab-opts').forEach((g) => g.addEventListener('click', (e) => {
+        const b = e.target.closest('.choice'); if (!b) return;
+        const a = ans[Number(g.dataset.i)];
+        if (b.dataset.a !== undefined) { a.a = Number(b.dataset.a); g.querySelectorAll('[data-a]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }
+        else { a.c = Number(b.dataset.c); g.querySelectorAll('[data-c]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); }
+        const done = ans.filter((x) => x.a !== undefined && x.c !== undefined).length;
+        fin.disabled = done < qs.length; status.textContent = `已完成 ${done} / ${qs.length} 题。`;
+      }));
+      ctl.innerHTML = '';
+      const fin = action(ctl, '看结果', reveal); fin.disabled = true;
+      status.textContent = `已完成 0 / ${qs.length} 题。`;
+      stage.querySelector('.choice').focus();
+    };
+    const reveal = () => {
+      const ok = qs.map((x, i) => ans[i].a === x.right);
+      const nOk = ok.filter(Boolean).length, mc = ans.reduce((s, a) => s + a.c, 0) / qs.length, acc = (nOk / qs.length) * 100;
+      const bins = [[50, 60], [70, 80], [90, 100]].map(([a, b]) => { const ix = qs.map((_, i) => i).filter((i) => ans[i].c === a || ans[i].c === b); return { lab: `${a}%–${b}%`, n: ix.length, conf: ix.length ? ix.reduce((s, i) => s + ans[i].c, 0) / ix.length : 0, acc: ix.length ? (ix.filter((i) => ok[i]).length / ix.length) * 100 : 0 }; });
+      stage.innerHTML = `<div class="l-table" role="region" tabindex="0" aria-label="逐题结果"><table><thead><tr><th>题目</th><th class="lab-nw">你的答案</th><th class="lab-nw">把握</th></tr></thead><tbody>${qs.map((x, i) => `<tr><td>${x.q}<br><span class="lab-k">${x.why}</span></td><td class="lab-nw">${x.o[ans[i].a]}${ok[i] ? '' : ' <b class="lab-wrong">✕</b>'}</td><td class="lab-nw">${ans[i].c}%</td></tr>`).join('')}</tbody></table></div><div class="lab-cal"></div>`;
+      const box = stage.querySelector('.lab-cal');
+      const W = widthOf(fig), H = 260, svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `校准图：${bins.filter((b) => b.n).map((b) => `把握 ${b.lab} 的 ${b.n} 道题，答对 ${fmt(b.acc, 0)}%`).join('；')}。` }, box);
+      const L = 40, R = 30, T = 30, Bt = 40, X = (v) => L + ((v - 50) / 50) * (W - L - R), Y = (v) => H - Bt - (v / 100) * (H - T - Bt);
+      [50, 100].forEach((v) => el('line', { x1: L, x2: W - R, y1: Y(v), y2: Y(v), class: 'fx-hair fx-dash' }, svg));
+      el('line', { x1: L, x2: W - R, y1: Y(0), y2: Y(0), class: 'lab-axis' }, svg); el('line', { x1: L, x2: L, y1: T - 6, y2: Y(0), class: 'lab-axis' }, svg);
+      [50, 100].forEach((v) => text(svg, L - 6, Y(v) + 4, String(v), 'lab-tick', 'end'));
+      [50, 60, 70, 80, 90, 100].forEach((v) => text(svg, X(v), H - Bt + 17, String(v), 'lab-tick', 'middle'));
+      text(svg, 0, 13, '实际答对（%）', 'lab-tick'); text(svg, W - R, H - 4, '你的把握（%）', 'lab-tick', 'end');
+      el('line', { x1: X(50), y1: Y(50), x2: X(100), y2: Y(100), class: 'fx-hair fx-dash' }, svg);
+      text(svg, X(52), Y(56) - 4, '完全校准', 'lab-tick fx-halo');
+      bins.filter((b) => b.n).forEach((b) => { el('circle', { cx: X(b.conf), cy: Y(b.acc), r: 4 + b.n * 1.2, class: 'fx-node r' }, svg); text(svg, X(b.conf) + (b.conf > 85 ? -(10 + b.n) : 10 + b.n), b.acc < 20 ? Y(b.acc) - 8 : Y(b.acc) + 4, `${b.n} 题`, 'lab-tick fx-halo', b.conf > 85 ? 'end' : 'start'); });
+      ctl.innerHTML = ''; action(ctl, '重新开始', begin, 'lab-clear');
+      status.textContent = '';
+      const gap = mc - acc;
+      out.innerHTML = `<ul class="lab-parts"><li><span>你的平均把握</span><b>${fmt(mc, 0)}%</b></li><li><span>你实际答对的比例</span><b>${fmt(acc, 0)}%</b></li>${bins.filter((b) => b.n).map((b) => `<li><span>把握 ${b.lab} 的题目（${b.n} 道）实际答对</span><b>${fmt(b.acc, 0)}%</b></li>`).join('')}</ul>
+        <p>${gap > 10 ? `你的平均把握比实际正确率高出约 ${fmt(gap, 0)} 个百分点，方向上属于过度自信。` : gap < -10 ? `你的平均把握比实际正确率低约 ${fmt(-gap, 0)} 个百分点，方向上属于信心不足。` : '你的平均把握与实际正确率相差不到 10 个百分点，在这十道题上大致相符。'}图中每个圆点代表一组把握相近的题目：点落在虚线下方，说明这组题的实际正确率低于你的把握；落在上方，说明你比自己以为的答得更好。</p>
+        <p>这几道题中，有一些是常见的“陷阱”（比如很多人以为北京比罗马更靠北），研究者指出，这类特意挑选的题目会让人显得更过度自信。如果题目是从真实环境中随机抽取的，结果可能不同。要真正了解自己的校准程度，需要在大量判断上记录把握，并在事后核对结果，就像天气预报员做的那样。</p>`;
+    };
+    action(actions, '开始', begin);
+    stage.innerHTML = '<p class="lab-q">点“开始”。一共十道题，大约三分钟。</p>';
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib };
 })();

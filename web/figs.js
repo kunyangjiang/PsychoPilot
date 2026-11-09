@@ -1722,5 +1722,78 @@
     return (t) => { show(fan, stage(t, 0, 0.35)); show(dots, stage(t, 0.15, 0.3)); show(con, stage(t, 0.5, 0.3)); show(end, stage(t, 0.7, 0.3)); };
   }, { dur: 1800, replay: true });
 
+  /* ===== 08-01 · attribute substitution: each heuristic answers an easier question in place of a hard one ===== */
+  const SUBST = [
+    ['代表性', '这件事有多大可能？', '它有多像典型的例子？', '基础比率很不平均时'],
+    ['可得性', '这类事情有多常见？', '我能多容易地想起例子？', '容易想起的例子并不常见时'],
+    ['锚定', '这个数值是多少？', '从眼前的数字出发，调整多少？', '起点数字与答案无关时'],
+  ];
+  F.subst = (fig) => figure(fig, (box, w) => {
+    const wide = w >= 560, rows = [];
+    if (wide) {
+      const cw = (w - 60) / 3, xs = [0, cw + 30, 2 * cw + 60], top = 34, rh = 92, H = top + rh * SUBST.length;
+      const s = svgIn(box, w, H, fig);
+      ['困难的问题', '实际回答的容易问题', '什么时候会出错'].forEach((t, i) => tx(s, xs[i], 16, t, 'fx-n'));
+      SUBST.forEach(([name, a, b, c], r) => {
+        const g = el('g', {}, s), y = top + r * rh;
+        el('line', { x1: 0, x2: w, y1: y, y2: y, class: 'fx-hair' }, g);
+        tx(g, 0, y + 24, name, 'fx-h');
+        lines(g, 0, y + 48, wrapZh(a, cw - 4, 14), 'fx-t', 19);
+        arrow(g, xs[1] - 26, y + 43, xs[1] - 6, y + 43);
+        lines(g, xs[1], y + 48, wrapZh(b, cw - 4, 14), 'fx-t fx-r', 19);
+        arrow(g, xs[2] - 26, y + 43, xs[2] - 6, y + 43);
+        lines(g, xs[2], y + 48, wrapZh(c, cw - 4, 14), 'fx-s', 19);
+        rows.push(g);
+      });
+    } else {
+      const lay = SUBST.map(([, a, b, c]) => [wrapZh('问题：' + a, w - 4, 14), wrapZh('替换成：' + b, w - 4, 14), wrapZh('出错的条件：' + c, w - 4, 13)]);
+      const hOf = (L) => 34 + L.reduce((s, l) => s + l.length * 19 + 8, 0) + 8;
+      const H = lay.reduce((s, L) => s + hOf(L), 0);
+      const s = svgIn(box, w, H, fig);
+      let y = 0;
+      SUBST.forEach(([name], r) => {
+        const g = el('g', {}, s), L = lay[r];
+        el('line', { x1: 0, x2: w, y1: y, y2: y, class: 'fx-hair' }, g);
+        tx(g, 0, y + 24, name, 'fx-h');
+        let yy = y + 48;
+        L.forEach((ls, i) => { lines(g, 0, yy, ls, ['fx-t', 'fx-t fx-r', 'fx-s'][i], 19); yy += ls.length * 19 + 8; });
+        rows.push(g); y += hOf(L);
+      });
+    }
+    return (t) => rows.forEach((g, i) => show(g, stage(t, i * 0.3, 0.35)));
+  }, { dur: 2000, replay: true, replayLabel: '逐行显示' });
+
+  /* ===== 08-04 · when intuition can be trusted: regularity of the environment × quality of feedback ===== */
+  const INTUIT = {
+    hh: ['规律强 · 反馈好', '直觉可以学得可靠', '天气预报、国际象棋、有经验的消防指挥', '环境中有有效的线索，判断者又能长期练习、及时知道对错。在这样的条件下，经验能把规律“教”给直觉，熟练者的快速判断常常相当准确。即便如此，专长也可能只覆盖领域中的一部分任务。'],
+    hl: ['规律强 · 反馈差', '规律存在，却很难学到', '只能看到一部分结果的诊断和评估', '环境中有规律，但反馈来得太慢、太少，或者只能看到一部分结果（比如看不到被拒绝的人后来怎样）。经验可能教给人片面的“规律”，信心会增长，准确性却未必。这时更需要系统的记录和统计。'],
+    lh: ['规律弱 · 反馈快', '容易把运气当成本事', '短期的股票买卖', '反馈来得很快，但结果主要由偶然因素决定。一连串的好运会让人觉得自己的直觉很准；其实环境中没有多少可学的规律，经验的增加并不能带来判断的改进。'],
+    ll: ['规律弱 · 反馈差', '直觉很难可靠', '长期的政治和经济预测', '既缺少有效的线索，又很难从结果中学习。在这样的环境中，无论判断者多么有经验、多么自信，直觉判断通常都不比简单的统计规则更准确，应当特别谨慎。'],
+  };
+  F.intuit = (fig) => {
+    const S = { v: 'hh' };
+    const api = figure(fig, (box, w, api) => {
+      const nar = w < 520, hd = 26, rl = 20, cw = (w - 8) / 2, ch = nar ? 128 : 112, H = hd + 2 * (rl + ch) + 4;
+      const s = svgIn(box, w, H, fig);
+      tx(s, 0, 16, nar ? '反馈慢、少或有偏差' : '反馈：慢、少或有偏差', 'fx-n'); tx(s, w, 16, nar ? '反馈及时、清楚' : '反馈：及时、清楚', 'fx-n', 'end');
+      const cell = { hl: [0, 0], hh: [1, 0], ll: [0, 1], lh: [1, 1] };
+      const g = el('g', {}, s);
+      [0, 1].forEach((r) => tx(g, 0, hd + r * (rl + ch) + 14, r ? '环境：规律弱' : '环境：规律强', 'fx-n'));
+      Object.entries(cell).forEach(([k, [c, r]]) => {
+        const x = c * (cw + 8), y = hd + r * (rl + ch) + rl, on = k === S.v, [, title, ex] = INTUIT[k];
+        const cg = el('g', { style: 'cursor:pointer' }, g);
+        el('rect', { x: x + 1, y, width: cw - 2, height: ch - 4, rx: 4, class: on ? 'fx-pill r' : 'fx-pill b' }, cg);
+        const tl = wrapZh(title, cw - 24, 15);
+        lines(cg, x + 12, y + 24, tl, 'fx-h', 20);
+        lines(cg, x + 12, y + 30 + tl.length * 20, wrapZh('例：' + ex, cw - 24, 12.5), 'fx-s', 17);
+        cg.addEventListener('click', () => api.ctrl.querySelector(`[data-v="${k}"]`)?.click());
+      });
+      const [lab, , , txt] = INTUIT[S.v];
+      api.out.innerHTML = `<p><b>${lab}。</b>${txt}</p>`;
+      return (t) => show(g, ease(t));
+    }, { dur: 500, ctrls: { value: 'hh', items: Object.entries(INTUIT).map(([k, v]) => [k, v[0]]), onChange: (v) => { S.v = v; } } });
+    return api;
+  };
+
   window.PPFig = F;
 })();
