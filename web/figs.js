@@ -2679,5 +2679,44 @@
   }, { dur: 1200 });
 
 
+  /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
+  F.c1testimony = (fig) => figure(fig, (box, w) => {
+    const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;
+    const cols = [['周四夜', '首次陈述'], ['周五下午', '集体询问'], ['周六', '照片辨认'], ['之后', '补充询问']];
+    const rows = [['王姐', 'brrr'], ['老刘', 'orrr'], ['小郑', 'brrr'], ['阿杰', 'bbob'], ['孙伯', 'brrr'], ['何师傅', 'brrr'], ['方老师', 'b--b']];
+    const legend = [['b', '与第一次陈述一致'], ['r', '后来才出现的说法'], ['o', '没有提供相关内容'], ['-', '未参加这一环节']];
+    const per = narrow ? 2 : 4, legW = (w - 4) / per, legLines = Math.ceil(legend.length / per);
+    const y0 = legLines * 22 + 14 + 2 * 17 + 8, rowH = narrow ? 30 : 32, gap = 10;
+    const ry = (i) => y0 + i * rowH + (i === 6 ? gap : 0) + rowH / 2;
+    const h = ry(6) + rowH / 2 + 30, s = svgIn(box, w, h, fig);
+    const mark = (p, kind, x, y, r = 6.5) => kind === '-'
+      ? el('line', { x1: x - 7, y1: y, x2: x + 7, y2: y, class: 'fx-hair' }, p)
+      : el('circle', { cx: x, cy: y, r, class: 'fx-node ' + (kind === 'b' ? 'b' : kind === 'r' ? 'r' : 'm') }, p);
+    legend.forEach(([k, label], i) => {
+      const x = (i % per) * legW, y = 12 + Math.floor(i / per) * 22;
+      mark(s, k, x + 8, y - 4, 5.5); tx(s, x + 20, y, label, 'fx-s');
+    });
+    const cx = (j) => nameW + colW * (j + 0.5);
+    // the two moments outside information came in: the WeChat photo (before the group interview) and the "认得没错" feedback
+    const bands = [[1, '微信群'], [3, '确认反馈']].map(([j, label]) => {
+      const g = el('g', {}, s), bx = nameW + colW * j;
+      el('rect', { x: bx - 7, y: y0 - 6, width: 14, height: ry(6) + rowH / 2 - y0 + 12, class: 'fx-band2' }, g);
+      tx(g, bx, h - 8, label, 'fx-n', 'middle').setAttribute('fill', 'var(--red)');
+      return g;
+    });
+    const colG = cols.map((c, j) => {
+      const g = el('g', {}, s);
+      lines(g, cx(j), legLines * 22 + 16, c, 'fx-s', 17, 'middle');
+      rows.forEach(([, st], i) => mark(g, st[j], cx(j), ry(i)));
+      return g;
+    });
+    el('line', { x1: 0, y1: ry(6) - rowH / 2 - gap / 2, x2: w, y2: ry(6) - rowH / 2 - gap / 2, class: 'fx-hair fx-dash' }, s);
+    rows.forEach(([name], i) => tx(s, 0, ry(i) + 4.5, name, i === 6 ? 'fx-h' : 'fx-s'));
+    return (t) => {
+      colG.forEach((g, j) => show(g, stage(t, j * 0.24, 0.3)));
+      bands.forEach((g, k) => show(g, stage(t, (k ? 2 : 0) * 0.24 + 0.14, 0.3)));
+    };
+  }, { dur: 1600 });
+
   window.PPFig = F;
 })();

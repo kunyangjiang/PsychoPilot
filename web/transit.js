@@ -21,7 +21,7 @@
     if (url.origin !== location.origin) return null;
     const path = url.pathname.replace(/\.html$/, '');
     const q = url.searchParams;
-    if (/\/course$/.test(path)) return { kind: 'course', level: 2, id: q.get('id') || '01-01' };
+    if (/\/(course|case)$/.test(path)) return { kind: 'course', level: 2, id: q.get('id') || '01-01' };
     if (/\/part$/.test(path)) return { kind: 'part', level: 1, p: q.get('p'), topic: q.get('topic') };
     return { kind: 'home', level: 0 };
   };

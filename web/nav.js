@@ -20,7 +20,7 @@
   const put = (store, k, v) => { try { store.setItem(k, JSON.stringify(v)); } catch {} };
 
   /* ---------- lesson pages: the paragraph the reader had reached ---------- */
-  const lessonId = /\/course$/.test(location.pathname.replace(/\.html$/, '')) ? new URLSearchParams(location.search).get('id') : null;
+  const lessonId = /\/(course|case)$/.test(location.pathname.replace(/\.html$/, '')) ? new URLSearchParams(location.search).get('id') : null;
   const blocks = () => [...document.querySelectorAll('.l-text > :not(section), .l-text section > *')]; // paragraphs, figures, headings
   let ready = !lessonId; // lesson text loaded (other pages are ready at once)
   let settled = false; // the arrival jump is over, so scrolling now is the reader's own

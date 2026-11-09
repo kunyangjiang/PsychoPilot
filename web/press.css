@@ -152,6 +152,18 @@ button { font: inherit; color: inherit; }
 .links a { background: linear-gradient(var(--red), var(--red)) 0 92% / 0 .14em no-repeat; transition: background-size .45s var(--ease); }
 .links a:hover { background-size: 100% .14em; }
 .links .sep { color: var(--text-3); font-weight: 300; margin-inline: .3em; }
+/* workplace case studies: a ruled list on the home page */
+.case-list { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--text); }
+.case-list li { border-bottom: 1px solid var(--rule); }
+.case-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; padding: 18px 0; }
+.case-row .num { background: var(--blue); }
+.case-t b { display: block; font: 700 clamp(1.2rem, 2.2vw, 1.5rem)/1.35 var(--head); }
+.case-t small { display: block; margin-top: 2px; color: var(--text-2); font-size: .92rem; }
+a.case-row:hover b { color: var(--red); }
+a.case-row .case-s { color: var(--red); }
+.case-row.is-wait b { color: var(--text-2); }
+.case-row.is-wait .num { background: var(--mid); }
+@media (max-width: 520px) { .case-row { grid-template-columns: auto 1fr; } .case-s { grid-column: 2; } }
 .foot { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 20px; padding-block: 36px 52px; border-top: 2px solid var(--text); font-size: 13.5px; color: var(--text-3); }
 
 /* ==========================================================================

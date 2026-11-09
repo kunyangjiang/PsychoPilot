@@ -22,6 +22,7 @@
         <a href="#volumes">六卷</a>
         <a href="#experiment">一个实验</a>
         <a href="#interests">按兴趣</a>
+        <a href="#cases">案例</a>
       </nav>
     </header>
 
@@ -117,6 +118,17 @@
       </div>
       <p class="links" id="links"></p>
     </section>
+
+    <section class="section" id="cases" aria-labelledby="cases-title">
+      <div class="sh">
+        <div>
+          <p class="lab">Workplace cases · 8 novellas</p>
+          <h2 id="cases-title">八个职场故事，<br>每一个转折都有证据。</h2>
+        </div>
+        <p>司法心理学、精神医学、组织心理学、心理学史……八部虚构的小说，八种心理学工作。每部小说后面附有案例笔记：哪些是虚构，哪些来自真实研究。</p>
+      </div>
+      <ol class="case-list" id="case-list"></ol>
+    </section>
   </main>
 
   <footer class="wrap">
@@ -127,6 +139,20 @@
   </footer>
 
   <script src="curriculum.js"></script>
+  <script src="cases.js"></script>
+  <script>
+    (() => {
+      const list = document.getElementById('case-list');
+      const { cases, caseUrl } = window.PPCases;
+      list.innerHTML = cases.map((c) => `<li>
+          <${c.ready ? `a href="${caseUrl(c)}"` : 'div'} class="case-row${c.ready ? '' : ' is-wait'}">
+            <span class="num" aria-hidden="true">${c.no}</span>
+            <span class="case-t"><b>${c.title}</b><small>${c.genre}</small></span>
+            <span class="case-s lab">${c.ready ? 'Read →' : '制作中'}</span>
+          </${c.ready ? 'a' : 'div'}>
+        </li>`).join('');
+    })();
+  </script>
   <script src="ink.js"></script>
   <script src="press.js"></script>
   <script src="top.js"></script>
