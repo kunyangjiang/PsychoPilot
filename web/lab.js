@@ -2659,5 +2659,97 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar };
+  /* =====================================================================
+     Stage 15 · two model demos. The probabilities come from simple stated
+     rules, not from any experiment, and each demo says so on screen.
+     ===================================================================== */
+
+  /* 15-02 · hiddenprofile: the invented three-person hiring panel. Each member mentions each item
+     they know with probability p; an item known by k members is mentioned with 1 − (1 − p)^k
+     (the sampling advantage described by Stasser & Titus). In the structured round, each member
+     first lists their unique items, each with an assumed probability of 0.9. The panel picks 甲 only
+     if 甲's mentioned net points exceed 乙's; ties go to 乙, the option everyone preferred at first. */
+  function hiddenprofile(host) {
+    const ITEMS = [['乙：经验丰富', 3, 'B', 1], ['乙：表达流畅', 3, 'B', 1], ['乙：简历漂亮', 3, 'B', 1], ['甲：离职仓促（缺点）', 3, 'A', -1],
+      ['甲：带队完成难项目', 1, 'A', 1], ['甲：善于解决冲突', 1, 'A', 1], ['甲：前任上司评价极高', 1, 'A', 1], ['甲：客户满意度高', 1, 'A', 1], ['甲：具备所需资质', 1, 'A', 1], ['甲：熟悉行业法规', 1, 'A', 1]];
+    const o = { mode: 'free' };
+    const { fig, out, actions } = shell(host, '为什么大家都知道的信息总被说出来',
+      '回到开头的三位面试官。四条信息三个人都知道，甲的六条优点每人只知道两条。设定每位成员提起自己知道的某一条信息的概率，再选择讨论方式，看看哪些信息在讨论中出现，小组最后会选谁。',
+      [['mode', '讨论方式', [['free', '自由讨论'], ['round', '先轮流说出各自独有的信息']]]],
+      '这是一个简化的模型：提起信息的概率由你设定；“先轮流说出”时，假设每条独有信息被说出的概率是 90%。小组只按被说出的信息计分，平分时选乙。概率和结果都来自这些规则，不是任何实验的数据。', 'Model · 模型演示');
+    const sr = slider('每位成员提起自己知道的某条信息的概率：', 10, 90, 10, 40);
+    const box = document.createElement('div'); fig.append(sr.box, box);
+    let said = [];
+    const probs = () => { const p = Number(sr.input.value) / 100; return ITEMS.map(([, k]) => (o.mode === 'round' && k === 1 ? 0.9 : 1 - (1 - p) ** k)); };
+    const decide = (m) => { let a = 0, b = 0; ITEMS.forEach(([, , who, v], i) => { if (m[i]) { if (who === 'A') a += v; else b += v; } }); return [a, b, a > b ? '甲' : '乙']; };
+    const discuss = () => { const P = probs(); said = P.map((q) => Math.random() < q); };
+    const draw = () => {
+      const p = Number(sr.input.value) / 100, P = probs();
+      sr.val.textContent = ` ${Math.round(p * 100)}%`; sr.input.setAttribute('aria-valuetext', `${Math.round(p * 100)}%`);
+      let wins = 0; const R = 2000;
+      for (let r = 0; r < R; r++) if (decide(P.map((q) => Math.random() < q))[2] === '甲') wins++;
+      const [a, b, pick] = decide(said);
+      const W = widthOf(fig), rh = 24, lab = Math.min(170, W - 150), H = 22 + ITEMS.length * rh + 8;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：这次模拟讨论中说出了 ${said.filter(Boolean).length} 条信息，小组选择了${pick}。` }, box);
+      text(svg, lab + 16, 14, '是否说出 · 概率', 'lab-tick');
+      ITEMS.forEach(([t, k], i) => {
+        const y = 22 + i * rh;
+        if (i === 4) el('line', { x1: 0, x2: W, y1: y - 2, y2: y - 2, stroke: 'var(--rule)', 'stroke-width': 1 }, svg);
+        text(svg, lab, y + 16, t, 'lab-tick', 'end');
+        el('circle', { cx: lab + 22, cy: y + rh / 2, r: 7, fill: said[i] ? (k === 3 ? 'var(--blue)' : 'var(--red)') : 'var(--paper)', stroke: k === 3 ? 'var(--blue)' : 'var(--red)', 'stroke-width': 2 }, svg);
+        text(svg, lab + 38, y + 16, `${k === 3 ? '共享' : '独有'} · ${Math.round(P[i] * 100)}%`, 'lab-tick');
+      });
+      out.innerHTML = `<ul class="lab-parts"><li><span>这次讨论中被说出的信息：甲的得分（优点减缺点）</span><b>${a}</b></li><li><span>这次讨论中被说出的信息：乙的得分</span><b>${b}</b></li><li><span>这次讨论后小组的选择</span><b>${pick}</b></li><li><span>在 2000 次模拟讨论中，小组选出甲的比例</span><b>${Math.round(wins / R * 100)}%</b></li></ul>
+        <p>${o.mode === 'free' ? `自由讨论时，一条三人都知道的信息被说出的概率是 ${Math.round(P[0] * 100)}%，一条只有一人知道的信息是 ${Math.round(P[4] * 100)}%。${P[0] - P[4] > 0.15 ? '没有人隐瞒任何东西，共享信息仍然占了明显的优势。' : '当每个人都非常积极地说出自己知道的信息时，共享信息的优势就变小了；真实的讨论很少达到这种程度。'}试试把概率调高或调低，再切换到“先轮流说出各自独有的信息”。` : '当每个人先把只有自己知道的信息说出来，甲的优点大多进入了讨论，小组更常选出甲。程序不能保证结果，但它改变了信息进入讨论的机会。'}</p>
+        <p class="lab-note">真实研究中，对 65 项隐藏档案研究的元分析发现，群体提到共享信息明显多于独有信息，与每位成员都掌握全部信息的群体相比，找到正确答案的可能性约低八倍（卢等，2012）。这些是论文报告的结果，与上面的模型数字无关。</p>`;
+    };
+    sr.input.addEventListener('input', () => { discuss(); draw(); });
+    bindControls(host, o, () => { discuss(); draw(); });
+    action(actions, '再模拟一次讨论', () => { discuss(); draw(); });
+    action(actions, '恢复默认设置', () => { sr.input.value = 40; o.mode = 'free'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === 'free'))); discuss(); draw(); }, 'lab-clear');
+    discuss(); draw();
+    onResize(draw);
+  }
+
+  /* 15-04 · bystander: each of N bystanders intervenes with p(N) = p1 · N^(−k). p1 is lower when the
+     situation is ambiguous; k (diffusion) is smaller when the danger is high and larger when ambiguous.
+     The chance that at least one person intervenes is 1 − (1 − p(N))^N. All parameters are invented. */
+  function bystander(host) {
+    const o = { amb: 'clear', danger: 'low' };
+    const { fig, out, actions } = shell(host, '每个人更犹豫，是否等于没有人帮忙',
+      '在一个简单的模型中，在场的人越多，每个人感到的责任越少，每个人介入的可能性就越低。但对需要帮助的人来说，重要的是“至少有一个人”介入。改变在场人数、情况是否明确和危险程度，比较两条曲线。',
+      [['amb', '情况', [['clear', '明确'], ['amb', '模糊']]], ['danger', '危险程度', [['low', '较低'], ['high', '较高']]]],
+      '这是一个理论模型：曲线由一条简单的规则算出，参数是为了说明原理而设定的，不是实验数据，也不能用来预测任何真实情况中会不会有人帮忙。', 'Model · 模型演示');
+    const sr = slider('在场的人数：', 1, 10, 1, 5);
+    const box = document.createElement('div'); fig.append(sr.box, box);
+    const par = () => ({ p1: o.amb === 'clear' ? 0.85 : 0.45, k: (o.danger === 'high' ? 0.2 : 0.6) + (o.amb === 'amb' ? 0.2 : 0) });
+    const draw = () => {
+      const N = Number(sr.input.value), { p1, k } = par(), ind = (n) => p1 * n ** -k, grp = (n) => 1 - (1 - ind(n)) ** n;
+      sr.val.textContent = ` ${N} 人`; sr.input.setAttribute('aria-valuetext', `${N} 人`);
+      const W = widthOf(fig), L = 44, Rm = 12, T = 14, Hc = 190, H = T + Hc + 40, X = (n) => L + (n - 1) / 9 * (W - L - Rm), Y = (v) => T + (1 - v) * Hc;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：在场 ${N} 人时，每个人介入的概率约 ${Math.round(ind(N) * 100)}%，至少一人介入的概率约 ${Math.round(grp(N) * 100)}%。` }, box);
+      [0, 0.5, 1].forEach((v) => { el('line', { x1: L, x2: W - Rm, y1: Y(v), y2: Y(v), stroke: 'var(--rule)', 'stroke-width': 1 }, svg); text(svg, L - 6, Y(v) + 4, `${v * 100}%`, 'lab-tick', 'end'); });
+      el('line', { x1: L, x2: W - Rm, y1: Y(0), y2: Y(0), class: 'lab-axis' }, svg);
+      [1, 5, 10].forEach((n) => text(svg, X(n), Y(0) + 18, String(n), 'lab-tick', 'middle'));
+      text(svg, W - Rm, Y(0) + 36, '在场人数 →', 'lab-tick', 'end');
+      const path = (f) => Array.from({ length: 10 }, (_, i) => `${i ? 'L' : 'M'}${X(i + 1).toFixed(1)},${Y(f(i + 1)).toFixed(1)}`).join('');
+      el('path', { d: path(grp), fill: 'none', stroke: 'var(--red)', 'stroke-width': 2.5 }, svg);
+      el('path', { d: path(ind), fill: 'none', stroke: 'var(--blue)', 'stroke-width': 2.5 }, svg);
+      el('line', { x1: X(N), x2: X(N), y1: Y(1), y2: Y(0), stroke: 'var(--text-3)', 'stroke-width': 1, 'stroke-dasharray': '4 4' }, svg);
+      el('circle', { cx: X(N), cy: Y(grp(N)), r: 5.5, fill: 'var(--red)' }, svg);
+      el('circle', { cx: X(N), cy: Y(ind(N)), r: 5.5, fill: 'var(--blue)' }, svg);
+      out.innerHTML = `<ul class="lab-parts"><li><span><b style="color:var(--blue)">蓝线</b>　每个人介入的概率（模型）</span><b>${Math.round(ind(N) * 100)}%</b></li><li><span><b style="color:var(--red)">红线</b>　至少一个人介入的概率（模型）</span><b>${Math.round(grp(N) * 100)}%</b></li></ul>
+        <p>${N === 1 ? '只有一个人时，两条线重合：他就是唯一可能帮忙的人。把人数调高，看看两条线怎样分开。' : `从 1 人到 ${N} 人，每个人介入的概率从 ${Math.round(ind(1) * 100)}% 降到 ${Math.round(ind(N) * 100)}%，这就是旁观者效应；而至少一人介入的概率是 ${Math.round(grp(N) * 100)}%。`}${o.amb === 'amb' ? '情况模糊时，模型假设每个人一开始就不太确定是否需要帮忙，而且更容易看别人的反应，所以两条线都更低。' : ''}${o.danger === 'high' ? '危险较高时，模型假设责任分散较弱，这与元分析中危险情况下旁观者效应减弱的发现方向一致。' : ''}</p>
+        <p class="lab-note">真实研究：菲舍尔等人（2011）的元分析发现，其他旁观者的存在总体上降低了每个人的帮助，但在危险的紧急情况中这一效应减弱；菲尔波特等人（2020）分析了 219 起真实公共冲突的监控录像，约十起中有九起至少有一位旁观者介入，旁观者越多，有人介入的可能性越大。这些是论文报告的结果，与上面的模型数字无关。</p>`;
+    };
+    sr.input.addEventListener('input', draw);
+    bindControls(host, o, draw);
+    action(actions, '恢复默认设置', () => { sr.input.value = 5; o.amb = 'clear'; o.danger = 'low'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === o[b.dataset.k]))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander };
 })();

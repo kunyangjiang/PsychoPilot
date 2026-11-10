@@ -3247,6 +3247,288 @@
     ['想离开，也过得不好', '关系让人痛苦，也已不想继续', 'b'],
   ], '<p>红框一格最容易被误解：“他没有离开”常被当作“情况没那么糟”的证据，但承诺的高低不能说明一段关系是否健康。</p>');
 
+  /* =====================================================================
+     Stage 15 · groups, authority, prejudice and helping. Static two-ink
+     schematics; every invented number is labelled as such, and the two
+     charts of published values name their source in the caption.
+     ===================================================================== */
+
+  /* ----- 15-01 · three kinds of social influence ----- */
+  F.influence3 = (fig) => split13(fig, {
+    cols: [
+      ['规范性影响', '想被接纳，怕被排斥', 'b', [['典型情境', '答案明确，但群体一致反对'], ['常见结果', '公开跟随，私下未必改变']]],
+      ['信息性影响', '不确定，把他人的判断当作证据', 'b', [['典型情境', '答案模糊，自己缺乏知识'], ['常见结果', '公开和私下的看法都可能改变']]],
+      ['服从权威', '被视为合法的权威发出指令', 'r', [['典型情境', '有明确的角色和等级'], ['常见结果', '按指令行事，内心可能同意，也可能反对']]],
+    ],
+    note: '<p>三种影响在现实中常常同时出现：周岚在会上点头，可能既不想唱反调（规范性），又有一点怀疑自己（信息性），而提出方案的人恰好是她的上级（权威）。</p>',
+  });
+
+  /* ----- 15-01 · the Asch line-judgement set-up (schematic) ----- */
+  F.aschlines = (fig) => figure(fig, (box, w, api) => {
+    const gap = 20, cw = Math.min(220, (w - gap) / 2), L = Math.min(84, cw * 0.62), ch = L * 1.25 + 46;
+    const x0 = (w - 2 * cw - gap) / 2, sy = ch + 64, H = sy + 44, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    [0, 1].forEach((k) => el('rect', { x: x0 + k * (cw + gap), y: 0, width: cw, height: ch, rx: 4, class: 'fx-box' }, g0));
+    const base = ch - 26;
+    el('line', { x1: x0 + cw / 2, x2: x0 + cw / 2, y1: base, y2: base - L, class: 'fx-ln fx-thick' }, g0);
+    tx(g0, x0 + cw / 2, ch - 8, '标准线段', 'fx-n', 'middle');
+    [['A', 0.74], ['B', 1], ['C', 1.25]].forEach(([n, f], i) => {
+      const x = x0 + cw + gap + cw * (0.25 + i * 0.25);
+      el('line', { x1: x, x2: x, y1: base, y2: base - L * f, class: n === 'B' ? 'fx-ln fx-lb fx-thick' : 'fx-ln fx-thick' }, g0);
+      tx(g0, x, ch - 8, n, n === 'B' ? 'fx-n fx-strong' : 'fx-n', 'middle');
+    });
+    const sw = w / 7;
+    for (let i = 0; i < 7; i++) {
+      const g = el('g', {}, s); gs.push(g);
+      const x = sw * (i + 0.5), me = i === 5;
+      tx(g, x, sy - 22, me ? '？' : '“A”', me ? 'fx-h fx-r' : 'fx-s', 'middle');
+      el('circle', { cx: x, cy: sy, r: 10, class: me ? 'fx-node r' : 'fx-node m' }, g);
+      tx(g, x, sy + 30, me ? '参与者' : '助手', me ? 'fx-n fx-r' : 'fx-n', 'middle');
+    }
+    api.out.innerHTML = '<p>正确答案是 B（蓝色）。在关键试次中，助手们一个接一个地说“A”。轮到红色座位上的真正参与者时，他已经听到五个人给出同一个错误答案，后面还有一个人。</p>';
+    return (t) => gs.forEach((g, i) => show(g, i ? stage(t, 0.1 + (i - 1) * 0.11, 0.2) : 1));
+  }, { dur: 1600 });
+
+  /* ----- 15-01 · majority size and one dissenter; approximate values reported by Asch (1955, 1956) ----- */
+  F.aschdissent = (fig) => figure(fig, (box, w, api) => {
+    const R = [['单独作答（对照）', 0.8, '不到 1%', 'm'], ['多数 2 人', 13.6, '13.6%', 'r'], ['多数 3 人', 31.8, '31.8%', 'r'], ['一致的多数', 36.8, '36.8%', 'r'], ['多数中有 1 位极端的异议者', 9, '9%', 'b'], ['多数中有 1 位正确的同伴', 36.8 / 4, '约为一致多数的 1/4', 'b']];
+    const wide = w >= 520, lab = wide ? 176 : 0, rowH = wide ? 34 : 50, top = 6, ax = lab + (wide ? 4 : 14), aw = w - ax - 64, X = (v) => ax + (v / 40) * aw;
+    const H = top + R.length * rowH + 30, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    [0, 10, 20, 30, 40].forEach((v) => {
+      el('line', { x1: X(v), x2: X(v), y1: top, y2: top + R.length * rowH, class: 'fx-hair fx-dash' }, g0);
+      tx(g0, X(v), H - 8, v + '%', 'fx-n', 'middle');
+    });
+    R.forEach(([t, v, lbl, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const y = top + i * rowH, by = wide ? y + 8 : y + 24;
+      tx(g, wide ? lab : ax, wide ? y + 21 : y + 15, t, 'fx-s', wide ? 'end' : 'start');
+      const r = el('rect', { x: ax, y: by, width: Math.max(2, X(v) - ax), height: 18, class: c === 'b' ? 'fx-bar b' : 'fx-bar' }, g);
+      if (c === 'm') r.style.fill = 'var(--text-3)';
+      tx(g, X(v) + 6, by + 14, lbl, 'fx-n');
+    });
+    api.out.innerHTML = '<p>单位是关键试次中的回答：“36.8%”是指这一比例的回答跟随了错误的多数，而不是 36.8% 的人。多数只有 1 人时参与者几乎都答对，原文没有给出具体比例，因此没有画出；超过 3 人后影响不再明显增加。一位始终给出正确答案的同伴，使错误频率降到一致多数时的约四分之一；即使异议者的答案比多数人更离谱，错误回答也降到约 9%。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.1, 0.35)));
+  }, { dur: 1200 });
+
+  /* ----- 15-01 · the three roles in Milgram's procedure ----- */
+  F.milgramroles = (fig) => figure(fig, (box, w, api) => {
+    const E = ['实验者', '穿灰色实验服；老师犹豫时，按顺序说出四句催促语'], T = ['老师（真正的参与者）', '面前的电击器：15 伏到 450 伏，共 30 档'], Lr = ['学生（实验助手）', '没有真的受到电击；按事先录制的反应抗议、喊叫，后来沉默'];
+    const wide = w >= 560, gs = [];
+    let s;
+    if (wide) {
+      const bw = Math.min(250, (w - 70) / 2), ew = Math.min(300, w * 0.5), eh = bx13H(ew, ...E, 56), bh = Math.max(bx13H(bw, ...T, 70), bx13H(bw, ...Lr, 70));
+      const y1 = eh + 64, H = y1 + bh + 34; s = svgIn(box, w, H, fig);
+      const xe = (w - ew) / 2, xt = 0, xl = w - bw, wx = w / 2 - 6;
+      const g1 = el('g', {}, s); gs.push(g1); bx13(g1, xe, 0, ew, ...E, 'm', eh);
+      const g2 = el('g', {}, s); gs.push(g2); bx13(g2, xt, y1, bw, ...T, 'r', bh);
+      arrow(g2, xe + 40, eh + 4, xt + bw / 2, y1 - 4, '', 6); tx(g2, xe + 28, eh + 32, '“请继续”', 'fx-n fx-halo', 'end');
+      const g3 = el('g', {}, s); gs.push(g3);
+      el('rect', { x: wx, y: y1 - 18, width: 12, height: bh + 36, class: 'fx-wall' }, g3); tx(g3, w / 2, y1 + bh + 30, '墙', 'fx-n', 'middle');
+      bx13(g3, xl, y1, bw, ...Lr, 'b', bh);
+      arrow(g3, xt + bw + 4, y1 + bh * 0.35, xl - 4, y1 + bh * 0.35, 'r', 6); tx(g3, w / 2, y1 + bh * 0.35 - 8, '“电击”', 'fx-n fx-r fx-halo', 'middle');
+      const a = arrow(g3, xl - 4, y1 + bh * 0.7, xt + bw + 4, y1 + bh * 0.7, '', 6); a.querySelector('line').setAttribute('stroke-dasharray', '4 4');
+      tx(g3, w / 2, y1 + bh * 0.7 + 18, '抗议', 'fx-n fx-halo', 'middle');
+    } else {
+      const bh = [E, T, Lr].map((b) => bx13H(w, ...b, 56)), vg = 46, H = bh[0] + bh[1] + bh[2] + 2 * vg + 14; s = svgIn(box, w, H, fig);
+      const y1 = bh[0] + vg, y2 = y1 + bh[1] + vg + 14;
+      const g1 = el('g', {}, s); gs.push(g1); bx13(g1, 0, 0, w, ...E, 'm', bh[0]);
+      const g2 = el('g', {}, s); gs.push(g2); bx13(g2, 0, y1, w, ...T, 'r', bh[1]);
+      arrow(g2, w / 2, bh[0] + 4, w / 2, y1 - 4, '', 6); tx(g2, w / 2 + 10, bh[0] + vg / 2 + 4, '“请继续”', 'fx-n');
+      const g3 = el('g', {}, s); gs.push(g3);
+      el('rect', { x: 0, y: y1 + bh[1] + vg / 2 - 2, width: w, height: 10, class: 'fx-wall' }, g3);
+      tx(g3, w - 4, y1 + bh[1] + vg / 2 - 7, '墙', 'fx-n', 'end');
+      arrow(g3, w * 0.35, y1 + bh[1] + 4, w * 0.35, y2 - 4, 'r', 6); tx(g3, w * 0.35 - 8, y1 + bh[1] + 22, '“电击”', 'fx-n fx-r', 'end');
+      const a = arrow(g3, w * 0.65, y2 - 4, w * 0.65, y1 + bh[1] + 4, '', 6); a.querySelector('line').setAttribute('stroke-dasharray', '4 4');
+      tx(g3, w * 0.65 + 8, y1 + bh[1] + 22, '抗议', 'fx-n');
+      bx13(g3, 0, y2, w, ...Lr, 'b', bh[2]);
+    }
+    api.out.innerHTML = '<p>参与者相信电击是真的，实际上没有任何电击。抽签是事先安排好的，真正的参与者总是当“老师”。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 15-02 · group polarisation: five invented members before and after discussion ----- */
+  F.polarize = (fig) => figure(fig, (box, w, api) => {
+    const B = [-0.5, 0.4, 0.8, 1.1, 1.5], A = [0.6, 1.2, 1.6, 1.9, 2.3], mean = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    const pad = 12, X = (v) => pad + ((v + 3) / 6) * (w - 2 * pad), y1 = 46, y2 = 146, H = 196, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    [[y1, '讨论前'], [y2, '讨论后']].forEach(([y, t]) => {
+      el('line', { x1: X(-3), x2: X(3), y1: y, y2: y, class: 'fx-ln' }, g0);
+      [-3, 0, 3].forEach((v) => el('line', { x1: X(v), x2: X(v), y1: y - 5, y2: y + 5, class: 'fx-ln' }, g0));
+      tx(g0, X(-3), y - 24, t, 'fx-n');
+    });
+    [['强烈反对', -3, 'start'], ['中立', 0, 'middle'], ['强烈支持', 3, 'end']].forEach(([t, v, a]) => tx(g0, X(v), H - 6, t, 'fx-n', a));
+    const g1 = el('g', {}, s); gs.push(g1);
+    B.forEach((v) => el('circle', { cx: X(v), cy: y1, r: 6, class: 'fx-node b' }, g1));
+    const m1 = mean(B); el('line', { x1: X(m1), x2: X(m1), y1: y1 - 14, y2: y1 + 14, class: 'fx-ln fx-lr fx-thick' }, g1); tx(g1, X(m1), y1 + 30, '平均', 'fx-n fx-r fx-halo', 'middle');
+    const g2 = el('g', {}, s); gs.push(g2);
+    B.forEach((v, i) => el('line', { x1: X(v), y1: y1 + 8, x2: X(A[i]), y2: y2 - 8, class: 'fx-hair fx-dash' }, g2));
+    const g3 = el('g', {}, s); gs.push(g3);
+    A.forEach((v) => el('circle', { cx: X(v), cy: y2, r: 6, class: 'fx-node b' }, g3));
+    const m2 = mean(A); el('line', { x1: X(m2), x2: X(m2), y1: y2 - 14, y2: y2 + 14, class: 'fx-ln fx-lr fx-thick' }, g3); tx(g3, X(m2), y2 + 30, '平均', 'fx-n fx-r fx-halo', 'middle');
+    api.out.innerHTML = '<p>蓝点是五位虚构的成员。讨论前，大家大体偏向支持，但程度不同；讨论后，每个人都向同一方向移动，红线标出的平均立场更靠近“强烈支持”。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.35)));
+  }, { dur: 1300 });
+
+  /* ----- 15-02 · a hidden-profile information matrix (the invented hiring panel) ----- */
+  F.hpmatrix = (fig) => figure(fig, (box, w, api) => {
+    const M = ['林', '何', '宋'], rows = [['乙：经验丰富', [1, 1, 1]], ['乙：表达流畅', [1, 1, 1]], ['乙：简历漂亮', [1, 1, 1]], ['甲：离职仓促（缺点）', [1, 1, 1]], ['甲：带队完成难项目', [1, 0, 0]], ['甲：善于解决冲突', [1, 0, 0]], ['甲：前任上司评价极高', [0, 1, 0]], ['甲：客户满意度高', [0, 1, 0]], ['甲：具备所需资质', [0, 0, 1]], ['甲：熟悉行业法规', [0, 0, 1]]];
+    const wide = w >= 600, lab = 150, cell = 38, gw = lab + 3 * cell, rh = 26, top = 24, mh = top + rows.length * rh + 6;
+    const sw = wide ? w - gw - 24 : w, S = [['每个人眼中', '甲：两条优点、一条缺点；乙：三条优点。所以三个人都倾向乙。', 'b'], ['汇总全部信息', '甲：六条优点、一条缺点；乙：三条优点。甲其实更好。', 'r']];
+    const sh = S.map(([a, b]) => bx13H(sw, a, b, 56)), H = wide ? Math.max(mh, sh[0] + sh[1] + 14) : mh + 18 + sh[0] + sh[1] + 12;
+    const s = svgIn(box, w, H, fig), gs = [], x0 = wide ? 0 : Math.max(0, (w - gw) / 2);
+    const g0 = el('g', {}, s); gs.push(g0);
+    M.forEach((m, j) => tx(g0, x0 + lab + j * cell + cell / 2, 14, m, 'fx-n', 'middle'));
+    el('rect', { x: x0, y: top, width: gw, height: 4 * rh, class: 'fx-c' }, g0);
+    rows.forEach(([t, k], i) => {
+      const y = top + i * rh;
+      tx(g0, x0 + lab - 8, y + 17, t, 'fx-s', 'end');
+      k.forEach((v, j) => el('circle', { cx: x0 + lab + j * cell + cell / 2, cy: y + rh / 2, r: v ? 6 : 2, class: v ? (i < 4 ? 'fx-node b' : 'fx-node r') : 'fx-node m' }, g0));
+    });
+    S.forEach(([a, b, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = wide ? gw + 24 : 0, y = wide ? i * (sh[0] + 14) : mh + 18 + i * (sh[0] + 12);
+      bx13(g, x, y, sw, a, b, c, sh[i]);
+    });
+    api.out.innerHTML = '<p>灰底的四行是共享信息，三个人都知道（蓝点）；下面六行是甲的优点，每人只知道两条（红点）。信息和人物都是虚构的。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 15-02 · evidence timeline for the Stanford Prison Experiment ----- */
+  F.spetimeline = (fig) => figure(fig, (box, w, api) => {
+    const I = [['1971', '实验进行', '事件 · 24 名男大学生，原计划两周，第六天提前结束'], ['1973', '原始报告', '原始报告 · 哈尼、班克斯和津巴多强调情境和角色的力量'], ['1975', '需求特征', '方法批评 · 巴努阿齐兹和莫瓦赫迪：学生能猜出研究者期望的结果'], ['2001 / 2006', '英国广播公司监狱研究', '新的实验 · 研究者不指导看守，看守没有自然变得残暴'], ['2007', '参与者的自我选择', '新的实验 · 报名“监狱生活研究”的人在攻击性等特质上得分更高'], ['2019', '档案与录音', '档案研究 · 看守收到了指示和鼓励，并不知道自己也是研究对象']];
+    const yc = 78, bw = w - yc - 18, gap = 12, hs = I.map(([, t, sub]) => bx13H(bw, t, sub, 50)), H = hs.reduce((a, b) => a + b + gap, 0) - gap, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: yc, x2: yc, y1: 6, y2: H - 6, class: 'fx-ln' }, g0);
+    let y = 0;
+    I.forEach(([yr, t, sub], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const h = hs[i], cy = y + h / 2;
+      el('circle', { cx: yc, cy, r: 5, class: i < 2 ? 'fx-node' : 'fx-node r' }, g);
+      lines(g, yc - 10, cy - (yr.length > 5 ? 4 : -4), yr.length > 5 ? yr.split(' / ').map((p, k) => (k ? '/ ' : '') + p) : [yr], 'fx-n', 14, 'end');
+      bx13(g, yc + 18, y, bw, t, sub, i < 2 ? 'b' : 'm', h);
+      y += h + gap;
+    });
+    api.out.innerHTML = '<p>黑点是实验本身和原始报告，红点是后来的批评、新实验和档案研究。它们回答的问题不同：方法批评问“结果能否成立”，新实验问“换一种设计会怎样”，档案研究问“当时实际发生了什么”。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.1, 0.3)));
+  }, { dur: 1300 });
+
+  /* ----- 15-03 · stereotype, prejudice, discrimination ----- */
+  F.spd = (fig) => flow14(fig, [
+    ['刻板印象', '关于群体的信念（认知）', 'b', '例：“某个群体的人擅长数学”。可能部分符合平均情况，也可能完全错误'],
+    ['偏见', '对群体的评价或情感（态度）', 'b', '例：厌恶、不信任，或居高临下的同情'],
+    ['歧视', '因群体身份而区别对待（行为）', 'r', '可以发生在个人之间，也可以写进制度和规则'],
+  ], '<p>箭头表示三者常常相关，但不是必然的因果链：知道一种刻板印象不等于认同它；心存偏见的人可能因规范而不表现出歧视；看似中立的规则也可能在没有个人偏见的情况下造成歧视。</p>');
+
+  /* ----- 15-03 · a Tajfel-style allocation matrix (values illustrative, after the 1971 format) ----- */
+  F.tajfelmatrix = (fig) => figure(fig, (box, w, api) => {
+    const all = Array.from({ length: 13 }, (_, i) => [7 + i, 1 + 2 * i]), narrow = w < 520, C = narrow ? all.filter((_, i) => i % 2 === 0) : all;
+    const lab = narrow ? 64 : 92, cw = (w - lab) / C.length, rh = 30, top = 4, H = top + 2 * rh + 96, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, lab - 8, top + 20, '本组成员', 'fx-n', 'end'); tx(g0, lab - 8, top + rh + 20, '外组成员', 'fx-n', 'end');
+    C.forEach(([a, b], j) => {
+      const x = lab + j * cw;
+      el('rect', { x: x + 1, y: top, width: cw - 2, height: 2 * rh, class: 'fx-box' }, g0).style.strokeWidth = 0.6;
+      tx(g0, x + cw / 2, top + 20, String(a), 'fx-n fx-strong', 'middle'); tx(g0, x + cw / 2, top + rh + 20, String(b), 'fx-n', 'middle');
+    });
+    const mark = [[0, 'fx-ln fx-lr fx-thick', '最大差异：本组 7，外组 1'], [C.findIndex(([a]) => a === 13), 'fx-ln fx-dash', '平均分配：各得 13'], [C.length - 1, 'fx-ln fx-lb fx-thick', '共同收益最大：本组 19，外组 25']];
+    mark.forEach(([j, cls, t], k) => {
+      const g = el('g', {}, s); gs.push(g);
+      el('rect', { x: lab + j * cw + 1, y: top - 2, width: cw - 2, height: 2 * rh + 4, class: cls, rx: 3 }, g);
+      const ly = top + 2 * rh + 24 + k * 22, lx = lab + j * cw + cw / 2;
+      el('line', { x1: lx, x2: lx, y1: top + 2 * rh + 2, y2: ly - 5, class: 'fx-hair' }, g);
+      const anchor = j === 0 ? 'start' : j === C.length - 1 ? 'end' : 'middle';
+      tx(g, anchor === 'start' ? lx - 4 : anchor === 'end' ? lx + 4 : lx, ly + 6, t, 'fx-n fx-halo', anchor);
+    });
+    api.out.innerHTML = `<p>每一列是一种分法，参与者从中选一列。越往左，本组成员“赢过”外组成员越多，但本组成员自己得到的越少。${narrow ? '窄屏只显示一半的列。' : ''}数值为示意。</p>`;
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.35)));
+  }, { dur: 1100 });
+
+  /* ----- 15-03 · the same eight people, grouped differently by context ----- */
+  F.socialctx = (fig) => figure(fig, (box, w, api) => {
+    const P = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ n, city: n <= 4 ? 'b' : 'r', firm: [1, 2, 5, 6].includes(n) }));
+    const wide = w >= 560, pw = wide ? (w - 24) / 2 : w, ph = 168, H = wide ? ph : 2 * ph + 20, s = svgIn(box, w, H, fig), gs = [];
+    const panels = [['情境一：城市之间的比赛', (p) => p.city === 'b', 'A 城', 'B 城'], ['情境二：两家公司的谈判', (p) => p.firm, '甲公司', '乙公司']];
+    panels.forEach(([title, inA, la, lb], k) => {
+      const g = el('g', {}, s); gs.push(g);
+      const ox = wide ? k * (pw + 24) : 0, oy = wide ? 0 : k * (ph + 20);
+      tx(g, ox, oy + 14, title, 'fx-n');
+      const cw = (pw - 16) / 2;
+      [[P.filter(inA), la, 0], [P.filter((p) => !inA(p)), lb, 1]].forEach(([ps, l, j]) => {
+        const cx = ox + j * (cw + 16), cy = oy + 30;
+        el('rect', { x: cx, y: cy, width: cw, height: ph - 34, rx: 10, class: 'fx-pill m' }, g);
+        tx(g, cx + cw / 2, cy + 20, l, 'fx-s', 'middle');
+        ps.forEach((p, i) => {
+          const x = cx + cw * (i % 2 ? 0.68 : 0.32), y = cy + 52 + Math.floor(i / 2) * 50, col = p.city === 'b' ? 'var(--blue)' : 'var(--red)';
+          el('circle', { cx: x, cy: y, r: 11, fill: p.firm ? col : 'var(--paper)', stroke: col, 'stroke-width': 2.2 }, g);
+          tx(g, x, y + 27, String(p.n), 'fx-n', 'middle');
+        });
+      });
+    });
+    api.out.innerHTML = '<p>颜色表示来自哪座城市（蓝：A 城，红：B 城），实心或空心表示在哪家公司（实心：甲公司，空心：乙公司）。1 号和 3 号在第一种情境中是“自己人”，在第二种情境中却分属两边。人物是虚构的。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.35, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 15-03 · intergroup contact, conceptual model ----- */
+  F.contactmodel = (fig) => split13(fig, {
+    top: ['群体之间的接触', '例如同学、同事、邻居之间的日常交往'],
+    cols: [
+      ['有利的条件', '奥尔波特（1954）', 'b', [['地位平等', ''], ['共同目标', ''], ['相互合作', ''], ['制度和规范的支持', '']]],
+      ['可能的作用过程', '研究者提出的中介', 'b', [['减少焦虑', '与对方相处时不那么紧张'], ['增加共情和换位思考', ''], ['增加了解', '看到对方群体内部的多样性']]],
+    ],
+    bottom: ['偏见降低', '平均效应中等偏小，随群体和研究设计而变化；随机实验和长期追踪的证据仍然有限', 'r'],
+    note: '<p>左栏的条件让接触更有效，但佩蒂格鲁和特罗普（2006）的元分析显示，它们不是必要条件。图中的箭头表示理论上的方向；大多数研究是相关研究，偏见较少的人也可能更愿意接触其他群体。</p>',
+  });
+
+  /* ----- 15-03 · group averages and individuals: two invented, heavily overlapping distributions ----- */
+  F.groupavg = (fig) => figure(fig, (box, w, api) => {
+    const d = 0.4, lo = -3.2, hi = 3.6, pad = 10, X = (v) => pad + ((v - lo) / (hi - lo)) * (w - 2 * pad), base = 150, amp = 120;
+    const pdf = (x, m) => Math.exp(-((x - m) ** 2) / 2), H = base + 100, s = svgIn(box, w, H, fig), gs = [];
+    const curve = (m) => { let p = ''; for (let v = lo; v <= hi + 1e-9; v += 0.05) p += (p ? 'L' : 'M') + X(v).toFixed(1) + ',' + (base - amp * pdf(v, m)).toFixed(1); return p; };
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: X(lo), x2: X(hi), y1: base, y2: base, class: 'fx-ln' }, g0);
+    tx(g0, X(hi), base + 16, '某个特征 →', 'fx-n', 'end');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('path', { d: curve(0), class: 'fx-ln fx-lb fx-curve' }, g1); el('path', { d: curve(d), class: 'fx-ln fx-lr fx-curve' }, g1);
+    el('line', { x1: X(0), x2: X(0), y1: base - amp - 6, y2: base, class: 'fx-ln fx-lb fx-dash' }, g1);
+    el('line', { x1: X(d), x2: X(d), y1: base - amp - 6, y2: base, class: 'fx-ln fx-lr fx-dash' }, g1);
+    tx(g1, X(0) - 6, base - amp - 10, '甲的平均', 'fx-n fx-halo', 'end'); tx(g1, X(d) + 6, base - amp - 10, '乙的平均', 'fx-n fx-r fx-halo');
+    const g2 = el('g', {}, s); gs.push(g2);
+    const PA = [-1.9, -1.1, -0.6, -0.2, 0.3, 0.7, 1.3, 2.1], PB = [-1.5, -0.7, -0.1, 0.3, 0.6, 1.0, 1.6, 2.4];
+    tx(g2, X(lo), base + 40, '甲', 'fx-n'); tx(g2, X(lo), base + 70, '乙', 'fx-n fx-r');
+    PA.forEach((v) => el('circle', { cx: X(v), cy: base + 36, r: 5.5, class: 'fx-node b' }, g2));
+    PB.forEach((v) => el('circle', { cx: X(v), cy: base + 66, r: 5.5, class: 'fx-node r' }, g2));
+    api.out.innerHTML = '<p>两条曲线是两个虚构群体的分布，平均值相差 0.4 个标准差。下面的点是从每个群体中各选出的 8 个人：许多乙群体的人低于许多甲群体的人。知道一个人属于哪个群体，几乎无法知道他在这个特征上的位置。数据是虚构的。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 15-04 · the five-step bystander decision model (after Latané & Darley, 1970) ----- */
+  F.fivesteps = (fig) => flow14(fig, [
+    ['注意到', '发生了某件事', 'b', '障碍：匆忙、分心、人多嘈杂'],
+    ['判断', '这是紧急情况', 'b', '障碍：情况模糊；看到别人都很平静'],
+    ['承担', '认为自己有责任', 'b', '障碍：别人也在场，以为会有人处理'],
+    ['知道', '该怎样帮助', 'b', '障碍：缺乏知识或技能'],
+    ['行动', '决定介入', 'r', '障碍：危险、代价、怕尴尬或帮倒忙'],
+  ], '<p>每一步都可能让人停下来，所以“没有帮助”不一定意味着冷漠。这是一个理论框架，现实中这些判断常常同时、很快地发生。</p>');
+
+  /* ----- 15-04 · ambiguity × danger ----- */
+  F.ambigdanger = (fig) => quad14(fig, ['情况模糊', '情况明确'], ['危险较低', '危险较高'], [
+    ['旁观者效应最明显', '例：有人坐在路边一动不动。人们会看别人的反应', 'r'],
+    ['多数人会帮忙', '例：有人摔倒并大声呼痛。旁观者的影响较小', 'b'],
+    ['可能犹豫，也可能结伴', '例：远处传来争吵和推搡声', 'm'],
+    ['旁观者效应减弱', '例：有人正在被攻击。其他旁观者还可以成为支持', 'b'],
+  ], '<p>这是对研究发现的概括（克拉克和沃德，1972；菲舍尔等，2011），不是对任何具体情况的预测。危险的情况通常更清楚，旁观者也可以互相支持，所以旁观者效应反而较弱；但自身安全同样重要。</p>');
+
+  /* ----- 15-04 · multiple pathways to aggression (after the general aggression model) ----- */
+  F.aggpaths = (fig) => split13(fig, {
+    cols: [
+      ['情境因素', '', 'b', [['被挑衅、疼痛、不适', ''], ['炎热、拥挤、酒精', ''], ['环境中的攻击线索、群体规范', '']]],
+      ['个人因素', '', 'b', [['人格特质、自我控制', ''], ['把他人意图看作敌意的倾向', ''], ['学到的应对方式', ''], ['生物因素', '如睾酮：与攻击的关联很弱']]],
+    ],
+    bottom: ['当下的状态 → 评估与解释 → 行为', '想法、情绪、唤醒；“这是故意的吗？我有其他选择吗？”；结果可能是攻击，也可能是克制、回避或沟通', 'r'],
+    note: '<p>依安德森和布什曼（2002）一般攻击模型的思路绘制。没有任何一个方框能单独决定攻击是否发生；每个因素的作用都取决于其他因素和当时的情境。</p>',
+  });
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;
