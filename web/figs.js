@@ -3529,6 +3529,294 @@
     note: '<p>依安德森和布什曼（2002）一般攻击模型的思路绘制。没有任何一个方框能单独决定攻击是否发生；每个因素的作用都取决于其他因素和当时的情境。</p>',
   });
 
+  /* =====================================================================
+     Stage 16 · psychological disorders. Static two-ink concept diagrams;
+     none of them scores, screens or assesses anyone. Invented positions
+     and curves are labelled as schematic; the one set of published
+     proportions (trauma trajectories) names its source in the caption.
+     ===================================================================== */
+
+  /* ----- 16-01 · the several things weighed when judging abnormality ----- */
+  F.abndims = (fig) => fan13(fig, '这是不是心理障碍？', '没有哪一条标准可以单独决定', '需要同时考虑的几个方面', [
+    ['统计上少见', '少见的未必有问题；许多障碍其实相当常见', 'm', 0],
+    ['主观痛苦', '正常的悲伤也会痛苦；有些障碍并不总伴随痛苦', 'b', 0],
+    ['内部功能失调', '某种心理机制没有按通常的方式运作，但常难以直接观察', 'r', 0],
+    ['功能损害', '学习、工作、自我照顾或人际关系受到妨碍', 'r', 0],
+    ['偏离文化规范', '偏离规范本身不是障碍，需要结合背景理解', 'm', 0],
+    ['持续时间与背景', '短暂、可以理解的反应，与长期持续的模式不同', 'b', 0],
+  ], '<p>灰色的两项单独使用时最容易误判；红色的两项更接近今天诊断定义的核心，但“功能失调”常常只能间接推断。实际的判断由专业人员综合各方面信息做出。</p>');
+
+  /* a deterministic scatter so the schematic looks the same on every load */
+  const seeded16 = (n, seed) => { let x = seed; return Array.from({ length: n }, () => { x = (x * 1103515245 + 12345) % 2147483648; return x / 2147483648; }); };
+
+  /* ----- 16-01 · categorical vs dimensional models (schematic, no data) ----- */
+  F.catdim = (fig) => figure(fig, (box, w, api) => {
+    const gs = [], half = (w - 12) / 2, bh = Math.max(bx13H(half, '不符合诊断', '', 44), bx13H(half, '符合诊断', '', 44));
+    const ay = 22 + bh + 46 + 92, H = ay + 64, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, 0, 14, '类别模型', 'fx-h');
+    bx13(g0, 0, 22, half, '不符合诊断', '', 'm', bh);
+    bx13(g0, half + 12, 22, half, '符合诊断', '', 'r', bh);
+    const g1 = el('g', {}, s); gs.push(g1);
+    const top = 22 + bh + 34, x0 = 6, x1 = w - 6, X = (v) => x0 + v * (x1 - x0), thr = 0.7;
+    tx(g1, 0, top, '维度模型', 'fx-h');
+    el('line', { x1: x0, x2: x1, y1: ay, y2: ay, class: 'fx-ln fx-thick' }, g1);
+    tx(g1, x0, ay + 18, '很轻', 'fx-n'); tx(g1, x1, ay + 18, '很重', 'fx-n', 'end');
+    const u = seeded16(64, 7), v = seeded16(64, 11);
+    u.forEach((r, i) => { const p = r ** 1.7; if (Math.abs(p - thr) < 0.035) return; el('circle', { cx: X(p), cy: ay - 10 - v[i] * 54, r: 3.6, class: p > thr ? 'fx-node r' : 'fx-node m' }, g1); });
+    const g2 = el('g', {}, s); gs.push(g2);
+    el('line', { x1: X(thr), x2: X(thr), y1: top + 10, y2: ay + 4, class: 'fx-ln fx-dash' }, g2);
+    lines(g2, X(thr) - 6, top + 22, wrapZh('诊断阈值：根据实用目的划定', Math.min(150, X(thr) - 20), 12), 'fx-n fx-halo', 15, 'end');
+    [[thr - 0.025, '甲', 'b'], [thr + 0.025, '乙', 'r']].forEach(([p, t, c]) => { el('circle', { cx: X(p), cy: ay - 8, r: 5.5, class: `fx-node ${c}` }, g2); tx(g2, X(p), ay + 36, t, c === 'r' ? 'fx-n fx-r' : 'fx-n', 'middle'); });
+    tx(g2, x1, ay + 52, '圆点位置是示意，不是数据', 'fx-n', 'end');
+    api.out.innerHTML = '<p>甲和乙在维度上几乎处于同一位置，类别模型却把他们分到“不符合”和“符合”两边。阈值附近的分类，对这种微小差别非常敏感。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 16-01 · reliability vs validity ----- */
+  F.relval = (fig) => quad14(fig, ['信度高', '信度低'], ['效度高', '效度低'], [
+    ['理想的情况', '不同医生判断一致，而且这个类别能帮助预测病程或治疗反应', 'b'],
+    ['很难出现', '判断不一致时，类别能告诉我们的东西也会受到限制', 'm'],
+    ['一致，但意义有限', '大家一致地贴上同一个标签，但这个标签对应的区分意义不大', 'r'],
+    ['两方面都不足', '判断不一致，类别本身也缺乏意义', 'm'],
+  ], '<p>信度是效度的前提：判断不一致，类别就很难有意义。但信度高并不保证效度高，左下角的情况提醒我们，“大家都这样诊断”不等于“这个诊断很有意义”。</p>');
+
+  /* ----- 16-01 · biopsychosocial model ----- */
+  F.bps = (fig) => split13(fig, {
+    cols: [
+      ['生物因素', '', 'b', [['遗传易感性', '大量作用很小的基因'], ['神经发育', ''], ['大脑环路与神经化学', ''], ['躯体疾病与物质', '']]],
+      ['心理因素', '', 'b', [['思维方式与信念', ''], ['情绪调节', ''], ['学习经历', ''], ['应对方式', '']]],
+      ['社会因素', '', 'b', [['人际关系与支持', ''], ['贫困与生活压力', ''], ['歧视与创伤', ''], ['文化与可获得的帮助', '']]],
+    ],
+    bottom: ['相互作用', '影响风险、症状表现与病程；各因素的作用大小因人、因障碍而异', 'r'],
+    note: '<p>这个模型是一份“需要考虑什么”的清单，而不是一个完整的因果理论：它没有告诉我们，在某种具体的障碍中哪些因素最重要，以及它们具体怎样相互作用。</p>',
+  });
+
+  /* ----- 16-02 · temporary emotional states vs persistent clinical symptoms ----- */
+  F.sadvsdep = (fig) => split13(fig, {
+    cols: [
+      ['暂时的情绪状态', '例如考试失利后的难过', 'b', [['持续时间', '数小时到数天，随处境起伏'], ['范围', '主要是情绪本身'], ['对好消息的反应', '通常能被安慰或转移注意'], ['对生活的影响', '难受，但大体能照常生活']]],
+      ['持续的临床症状', '例如抑郁发作', 'r', [['持续时间', '几乎每天，持续至少两周', 'r'], ['范围', '情绪、兴趣、睡眠、精力、思维等多个方面', 'r'], ['对好消息的反应', '常常难以被改变', 'r'], ['对生活的影响', '学习、工作、自我照顾或人际关系明显受损', 'r']]],
+    ],
+    bottom: ['两者之间没有截然的界线', '这是概念上的对比，判断需要专业评估', 'm'],
+    note: '<p>区别不在于“难不难受”，而在于持续多久、涉及多少方面、是否随处境改变，以及是否明显妨碍了生活。</p>',
+  });
+
+  /* ----- 16-02 · threat appraisal, arousal and avoidance ----- */
+  F.anxcycle = (fig) => cycle14(fig, [
+    ['对威胁的评估', '“这很危险”“我应付不了”', 'r'],
+    ['身体唤醒', '心跳加快、出汗、呼吸急促', 'b'],
+    ['回避或安全行为', '离开现场、拒绝参加、反复确认', 'r'],
+    ['短期的缓解', '焦虑暂时下降，但失去了检验“其实没那么危险”的机会', 'b'],
+  ], ['回避：短期缓解，', '长期维持'], '<p>每一次回避都让焦虑很快下降，这种缓解让回避更可能重复；同时，对威胁的评估没有机会被修正，下一次遇到类似情境时，循环再次开始。</p>');
+
+  /* ----- 16-02 · panic attack vs panic disorder ----- */
+  F.panic = (fig) => split13(fig, {
+    cols: [
+      ['惊恐发作', '一种症状事件', 'b', [['是什么', '突然的强烈恐惧，几分钟内达到高峰'], ['伴随', '心悸、出汗、呼吸困难、头晕等身体症状'], ['可能出现在', '多种焦虑障碍、抑郁障碍中，也可能出现在没有障碍的人身上']]],
+      ['惊恐障碍', '一种诊断类别', 'r', [['核心', '反复出现的意外惊恐发作', 'r'], ['还需要', '至少一个月持续担心再次发作，或因此明显改变行为', 'r'], ['判断', '需要专业评估，排除躯体疾病和物质等原因', 'r']]],
+    ],
+    note: '<p>出现过一次惊恐发作，并不意味着有惊恐障碍。惊恐障碍的关键，是对发作本身的持续担忧和由此带来的生活改变。</p>',
+  });
+
+  /* ----- 16-02 · depressive, manic and hypomanic episodes (schematic curves, not data) ----- */
+  F.moodepisodes = (fig) => figure(fig, (box, w, api) => {
+    const wide = w >= 520, lw = wide ? 66 : 62, bandH = wide ? 86 : 78, rowGap = 40, gs = [];
+    const B = [0, 1, 2.5, 3.3, 4], NAMES = ['抑郁', '正常波动', '轻躁狂', '躁狂'];
+    const R = [
+      ['重性抑郁障碍', [2.2, 2.1, 1.6, 0.7, 0.55, 1.2, 2.0, 2.2, 2.1, 2.3, 2.0, 1.3, 0.6, 0.75, 1.6, 2.1, 2.2]],
+      ['双相 I 型障碍', [2.1, 2.3, 3.2, 3.75, 3.6, 2.6, 2.0, 1.5, 0.7, 0.55, 1.4, 2.0, 2.2, 2.1, 2.0, 2.1, 2.2]],
+      ['双相 II 型障碍', [2.1, 2.0, 1.1, 0.6, 0.7, 1.5, 2.1, 2.8, 2.95, 2.5, 2.1, 2.0, 1.4, 0.65, 0.8, 1.6, 2.1]],
+    ];
+    const rowH = 22 + bandH, H = R.length * rowH + (R.length - 1) * rowGap + 30, s = svgIn(box, w, H, fig);
+    const x0 = lw, x1 = w - 4;
+    R.forEach(([name, pts], r) => {
+      const g = el('g', {}, s); gs.push(g);
+      const y0 = r * (rowH + rowGap), top = y0 + 22, Y = (v) => top + bandH * (1 - v / 4);
+      tx(g, 0, y0 + 14, name, 'fx-h');
+      B.forEach((b) => el('line', { x1: x0, x2: x1, y1: Y(b), y2: Y(b), class: b === 0 || b === 4 ? 'fx-hair' : 'fx-hair fx-dash' }, g));
+      NAMES.forEach((n, i) => tx(g, x0 - 6, (Y(B[i]) + Y(B[i + 1])) / 2 + 4, n, i === 3 || i === 0 ? 'fx-n fx-r' : 'fx-n', 'end'));
+      const N = 120, X = (t) => x0 + t * (x1 - x0), f = (t) => { const p = t * (pts.length - 1), i = Math.min(pts.length - 2, Math.floor(p)), k = (1 - Math.cos((p - i) * Math.PI)) / 2; return pts[i] * (1 - k) + pts[i + 1] * k; };
+      const d = Array.from({ length: N + 1 }, (_, i) => `${i ? 'L' : 'M'}${X(i / N).toFixed(1)},${Y(f(i / N)).toFixed(1)}`).join('');
+      el('path', { d, class: 'fx-ln fx-lb fx-thick', fill: 'none' }, g);
+    });
+    const g = el('g', {}, s); gs.push(g);
+    tx(g, x1, H - 8, '时间（数月到数年）→　曲线是示意，不是数据', 'fx-n', 'end');
+    api.out.innerHTML = '<p>重性抑郁障碍的曲线只会降入“抑郁”区域；双相 I 型至少有一次进入“躁狂”；双相 II 型有进入“轻躁狂”的时期和抑郁发作，但从不进入“躁狂”。区域之间的界线由症状的严重程度、持续时间和功能影响决定，不是单纯的“心情好坏”。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.18, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 16-03 · the obsession–compulsion maintenance cycle ----- */
+  F.ocdcycle = (fig) => cycle14(fig, [
+    ['侵入性想法', '例如“门可能没锁”', 'b'],
+    ['解释为威胁或责任', '“如果出事，就是我的错”', 'r'],
+    ['焦虑和不适迅速上升', '', 'r'],
+    ['强迫行为或中和', '例如反复检查；焦虑暂时下降', 'b'],
+  ], ['暂时的缓解是一种负强化：', '行为更可能重复，', '“想法很危险”的信念', '得不到检验'], '<p>循环的关键不在第一步：几乎人人都有侵入性想法。真正让循环转起来的，是对想法的威胁性解释，以及用强迫行为换来的短暂缓解。</p>');
+
+  /* ----- 16-03 · four trajectories after potential trauma; curves schematic, proportions from Galatzer-Levy et al. (2018) ----- */
+  F.trajectories = (fig) => figure(fig, (box, w, api) => {
+    const L = 8, Rm = 6, T = 26, Hc = 170, X = (t) => L + t * (w - L - Rm), Y = (v) => T + (1 - v) * Hc, gs = [];
+    const C = [
+      ['韧性', '症状一直较轻', '约 65.7%', 'fx-ln fx-lb fx-thick', [0.18, 0.15, 0.13, 0.12, 0.12]],
+      ['恢复', '早期较重，随后逐渐减轻', '约 20.8%', 'fx-ln fx-lb fx-thick fx-dash', [0.78, 0.6, 0.38, 0.24, 0.2]],
+      ['慢性', '症状持续较重', '约 10.6%', 'fx-ln fx-lr fx-thick', [0.82, 0.8, 0.78, 0.77, 0.76]],
+      ['延迟出现', '早期较轻，后来加重', '约 8.9%', 'fx-ln fx-lr fx-thick fx-dash', [0.3, 0.32, 0.45, 0.62, 0.7]],
+    ];
+    const legY = T + Hc + 46, rowH = w >= 520 ? 26 : 40, H = legY + C.length * rowH + 4, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, L, 14, '症状严重程度（示意）', 'fx-n');
+    el('line', { x1: L, x2: w - Rm, y1: Y(0), y2: Y(0), class: 'fx-ln' }, g0);
+    el('line', { x1: L, x2: L, y1: T, y2: Y(0), class: 'fx-ln' }, g0);
+    tx(g0, L, Y(0) + 18, '事件发生', 'fx-n'); tx(g0, w - Rm, Y(0) + 18, '约两年后 →', 'fx-n', 'end');
+    C.forEach(([n, d, p, cls, pts], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const N = 60, f = (t) => { const q = t * (pts.length - 1), j = Math.min(pts.length - 2, Math.floor(q)), k = (1 - Math.cos((q - j) * Math.PI)) / 2; return pts[j] * (1 - k) + pts[j + 1] * k; };
+      el('path', { d: Array.from({ length: N + 1 }, (_, k) => `${k ? 'L' : 'M'}${X(k / N).toFixed(1)},${Y(f(k / N)).toFixed(1)}`).join(''), class: cls, fill: 'none' }, g);
+      const y = legY + i * rowH;
+      el('line', { x1: L, x2: L + 34, y1: y - 4, y2: y - 4, class: cls }, g);
+      tx(g, L + 44, y, `${n}　${p}`, 'fx-s fx-strong');
+      if (w >= 520) tx(g, L + 170, y, d, 'fx-n'); else tx(g, L + 44, y + 17, d, 'fx-n');
+    });
+    api.out.innerHTML = '<p>四条曲线的形状是示意，不是真实数据；百分比是 54 项研究的跨研究平均值，由于各研究分别计算，相加不等于 100%。比例因事件类型和人群而有很大差异，一个人属于哪种轨迹，只有事后回顾才能看清。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.15, 0.35)));
+  }, { dur: 1300 });
+
+  /* ----- 16-04 · illusion, hallucination and delusion ----- */
+  F.hallillu = (fig) => split13(fig, {
+    cols: [
+      ['错觉', '知觉层面', 'b', [['有真实的外部刺激', '但被错误地知觉'], ['例子', '把昏暗中的外套看成人'], ['常见程度', '日常生活中很常见']]],
+      ['幻觉', '知觉层面', 'r', [['没有相应的外部刺激', '却出现类似知觉的体验', 'r'], ['例子', '听到不存在的说话声', 'r'], ['常见程度', '可以出现在多种情况中，并不都意味着障碍', 'r']]],
+      ['妄想', '信念层面', 'r', [['固定的信念', '即使面对相反的证据也难以改变', 'r'], ['例子', '坚信自己被监视', 'r'], ['判断时考虑', '确定程度、文化背景、对生活的影响', 'r']]],
+    ],
+    bottom: ['三者是不同的现象', '可以同时出现，也可以单独出现', 'm'],
+    note: '<p>错觉和幻觉都发生在知觉层面，区别在于有没有真实的刺激；妄想发生在信念层面。一个人可能因为幻觉而形成妄想，但两者不是同一种症状。</p>',
+  });
+
+  /* ----- 16-04 · symptom dimensions of schizophrenia ----- */
+  F.sympdims = (fig) => fan13(fig, '精神分裂症', '同一诊断下的多个症状维度', '症状维度（圆点只表示“因人而异”，不是评分）', [
+    ['阳性症状', '幻觉、妄想', 'r', 3],
+    ['阴性症状', '情感表达减少、意志缺乏、言语贫乏、社交退缩', 'b', 2],
+    ['紊乱', '思维和言语紊乱、行为紊乱', 'r', 1],
+    ['认知症状', '注意、工作记忆、处理速度和执行功能的困难', 'b', 2],
+    ['情绪症状', '抑郁、焦虑', 'm', 1],
+  ], '<p>不同的人在各个维度上的严重程度差别很大。阳性症状最引人注目，但阴性症状和认知症状往往对学习、工作和人际关系等长期功能影响更大。</p>');
+
+  /* ----- 16-04 · psychosis in different diagnostic contexts (DSM-5-TR, simplified) ----- */
+  F.psychctx = (fig) => fan13(fig, '同样出现幻觉或妄想', '症状本身不能决定诊断', '可能的诊断背景（依据 DSM-5-TR，经过简化）', [
+    ['精神分裂症', '持续征象至少六个月，伴有功能下降', 'r', 0],
+    ['精神分裂症样障碍', '总持续时间一个月到六个月', 'r', 0],
+    ['短暂精神病性障碍', '至少一天、不到一个月，随后完全恢复', 'b', 0],
+    ['分裂情感性障碍', '与重性心境发作同时出现；无心境发作时也有至少两周的精神病性症状', 'r', 0],
+    ['伴精神病性特征的心境障碍', '精神病性症状只在抑郁或躁狂发作期间出现', 'b', 0],
+    ['物质或躯体疾病所致', '症状是物质或躯体疾病的直接生理后果', 'm', 0],
+  ], '<p>区分这些诊断，关键在于症状持续了多久、与心境发作的时间关系，以及是否有物质或躯体疾病可以解释。在首次发作时，医生往往还无法确定以后的病程。</p>');
+
+  /* ----- 16-04 · a simplified, non-reductive model of psychotic symptoms ----- */
+  F.psybps = (fig) => flow14(fig, [
+    ['易感性', '遗传风险与早期神经发育', 'b', '大量作用很小的基因；孕期和出生时的风险'],
+    ['发展中的应激与环境', '逆境、社会排斥、使用大麻等', 'b', '这些是风险因素，不是必然的原因'],
+    ['纹状体多巴胺调节异常', '（假说）', 'r', '被认为是多种风险的“最终共同通路”之一'],
+    ['异常显著性与个人解释', '无关的事物显得重要', 'r', '个人的经历和文化塑造了幻觉和妄想的内容'],
+  ], '<p>箭头表示理论上的影响方向，不表示必然的因果链条；每个环节都有不确定性，大多数具有这些风险因素的人不会出现精神病性障碍。</p>');
+
+  /* ----- 16-05 · neurodevelopmental conditions across age (overview) ----- */
+  F.ndprofile = (fig) => flow14(fig, [
+    ['婴幼儿期', '', 'b', '社交沟通的早期差异可能显现；语言和运动发育的差异'],
+    ['学龄期', '', 'b', '在课堂和集体中，注意、活动水平和社交方面的困难更容易被注意到；学习障碍常在这时被发现'],
+    ['青春期', '', 'b', '社会要求变复杂，一些较隐蔽的困难这时才被识别；多动常减轻，注意困难常持续'],
+    ['成年期', '', 'b', '许多特点持续存在，影响学习、工作和人际关系；部分人直到成年才首次获得评估'],
+  ], '<p>这是概括性的示意：每个人出现差异和被识别的时间都不同，环境和支持也会改变这些特点对生活的影响。</p>');
+
+  /* ----- 16-05 · one category, very different people (two invented people, positions schematic) ----- */
+  F.heteroprofile = (fig) => figure(fig, (box, w, api) => {
+    const wide = w >= 520, lab = wide ? 150 : 0, rowH = wide ? 40 : 54, top = 52, x0 = lab + (wide ? 16 : 10), x1 = w - 12, X = (v) => x0 + v * (x1 - x0), gs = [];
+    const D = [['口头语言', 0.15, 0.9], ['社交沟通的困难', 0.8, 0.7], ['感觉敏感', 0.5, 0.85], ['对固定程序的需要', 0.85, 0.45], ['日常生活所需的支持', 0.9, 0.25], ['突出的兴趣或能力', 0.55, 0.75]];
+    const H = top + D.length * rowH + 22, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('circle', { cx: 8, cy: 10, r: 6, class: 'fx-node r' }, g0); tx(g0, 20, 15, '甲（虚构）', 'fx-n');
+    el('rect', { x: 106, y: 4, width: 12, height: 12, fill: 'var(--paper)', stroke: 'var(--blue)', 'stroke-width': 2 }, g0); tx(g0, 124, 15, '乙（虚构）', 'fx-n');
+    tx(g0, x0, top - 12, '较少', 'fx-n'); tx(g0, x1, top - 12, '较多', 'fx-n', 'end');
+    D.forEach(([t, a, b], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const y = top + i * rowH, ly = wide ? y + 20 : y + 34;
+      tx(g, wide ? lab : 0, wide ? y + 25 : y + 14, t, 'fx-s', wide ? 'end' : 'start');
+      el('line', { x1: x0, x2: x1, y1: ly, y2: ly, class: 'fx-hair' }, g);
+      el('circle', { cx: X(a), cy: ly, r: 6.5, class: 'fx-node r' }, g);
+      el('rect', { x: X(b) - 6.5, y: ly - 6.5, width: 13, height: 13, fill: 'var(--paper)', stroke: 'var(--blue)', 'stroke-width': 2 }, g);
+    });
+    tx(g0, x1, H - 4, '点的位置是示意，不是测量结果', 'fx-n', 'end');
+    api.out.innerHTML = '<p>甲和乙可能得到同一个诊断：甲几乎没有口头语言，日常生活需要大量支持；乙语言流利，需要的日常支持较少，但对声音和光线非常敏感，社交沟通同样吃力。一个诊断名称，无法告诉我们一个人需要什么。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.1, 0.35)));
+  }, { dur: 1100 });
+
+  /* ----- 16-05 · categorical personality-disorder types vs severity + trait domains ----- */
+  F.ptrait = (fig) => figure(fig, (box, w, api) => {
+    const wide = w >= 520, gs = [], gap = 10;
+    const G = [['A 组：奇特或古怪', '偏执型、分裂样、分裂型'], ['B 组：戏剧化或不稳定', '反社会型、边缘型、表演型、自恋型'], ['C 组：焦虑或恐惧', '回避型、依赖型、强迫型']];
+    const cw = wide ? (w - 2 * gap) / 3 : w, gh = Math.max(...G.map(([t, sub]) => bx13H(cw, t, sub, 52)));
+    const catH = wide ? gh : 3 * gh + 2 * gap, y1 = 22 + catH + 40;
+    const T = [['负性情感', 0.7], ['疏离', 0.3], ['社交紊乱', 0.15], ['去抑制', 0.55], ['强迫性', 0.2]];
+    const lab = wide ? 90 : 76, x0 = lab + 10, x1 = w - 10, X = (v) => x0 + v * (x1 - x0), sevY = y1 + 34, trY = sevY + 50, H = trY + T.length * 30 + 26;
+    const s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, 0, 14, '类别模型（DSM-5-TR 第二部分）', 'fx-h');
+    G.forEach(([t, sub], i) => bx13(g0, wide ? i * (cw + gap) : 0, 22 + (wide ? 0 : i * (gh + gap)), cw, t, sub, 'm', gh));
+    const g1 = el('g', {}, s); gs.push(g1);
+    tx(g1, 0, y1, '维度模型（类似 ICD-11 的思路）', 'fx-h');
+    tx(g1, 0, sevY + 4, '严重程度', 'fx-s');
+    el('line', { x1: x0, x2: x1, y1: sevY, y2: sevY, class: 'fx-ln fx-thick' }, g1);
+    [['无', 0], ['轻度', 0.33], ['中度', 0.66], ['重度', 1]].forEach(([t, v]) => { el('line', { x1: X(v), x2: X(v), y1: sevY - 5, y2: sevY + 5, class: 'fx-ln' }, g1); tx(g1, X(v), sevY + 20, t, 'fx-n', v === 0 ? 'start' : v === 1 ? 'end' : 'middle'); });
+    el('circle', { cx: X(0.42), cy: sevY, r: 6.5, class: 'fx-node r' }, g1);
+    const g2 = el('g', {}, s); gs.push(g2);
+    T.forEach(([t, v], i) => { const y = trY + i * 30; tx(g2, 0, y + 4, t, 'fx-s'); el('line', { x1: x0, x2: x1, y1: y, y2: y, class: 'fx-hair' }, g2); el('rect', { x: x0, y: y - 4, width: X(v) - x0, height: 8, class: 'fx-bar b' }, g2); });
+    tx(g2, x1, H - 4, '红点和横条是一个虚构的例子，不是评估', 'fx-n', 'end');
+    api.out.innerHTML = '<p>类别模型问的是“属于哪一型”；维度模型分开回答两个问题：困难有多严重，以及具体表现在哪些特质领域。ICD-11 另外保留了一个“边缘模式”的标注。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 16-05 · a transdiagnostic maintenance cycle for eating disorders (after Fairburn et al., 2003) ----- */
+  F.edmodel = (fig) => cycle14(fig, [
+    ['过度用体形和体重评价自己', '', 'r'],
+    ['严格的饮食规则', '限制进食', 'b'],
+    ['饥饿与对食物的过度关注', '规则被打破时出现失控的暴食', 'r'],
+    ['羞耻、恐慌与补偿行为', '随后更严格地限制', 'b'],
+  ], ['情绪、生物易感性和', '社会压力从多个方向', '影响这个循环'], '<p>不同进食障碍的循环形式不同：神经性厌食可能以严格限制为主，暴食障碍则通常没有规律的补偿行为。这个模型描述症状怎样相互维持，不能单独解释为什么某个人会出现进食障碍。</p>');
+
+  /* ----- 16-06 · the four groups of DSM-5-TR substance-use-disorder criteria ----- */
+  F.sud11 = (fig) => fan13(fig, '物质使用障碍', '一个从轻到重的维度：12 个月内至少两项', 'DSM-5-TR 的 11 项标准，分为四组（简化）', [
+    ['控制受损', '用得比预想多；想减少却做不到；花大量时间；渴求', 'r', 0],
+    ['社会功能受损', '无法履行重要责任；人际问题；放弃重要活动', 'b', 0],
+    ['危险的使用', '在危险情境中使用；明知有害仍继续', 'b', 0],
+    ['药理学指标', '耐受；戒断。按医嘱用药时出现的不计入', 'm', 0],
+  ], '<p>2 到 3 项为轻度，4 到 5 项为中度，6 项及以上为重度。这里说明的是诊断的结构，不是自评工具；是否符合诊断需要专业评估。</p>', 2);
+
+  /* ----- 16-06 · cue, craving, use and reinforcement ----- */
+  F.addcycle = (fig) => cycle14(fig, [
+    ['线索', '熟悉的地点、朋友、情绪或时间', 'b'],
+    ['渴求', '强烈的使用欲望', 'r'],
+    ['使用', '', 'r'],
+    ['短期的效果', '愉快感（正强化）；痛苦或戒断不适减轻（负强化）', 'b'],
+  ], ['重复之后：', '“想要”可能越来越强，', '“喜欢”不一定增加'], '<p>线索与使用的联系随着重复变得更强。同样的循环在不同人身上的强度差异很大，大多数接触物质的人并不会形成严重的循环。</p>');
+
+  /* ----- 16-06 · intensive gaming vs ICD-11 gaming disorder ----- */
+  F.gaming = (fig) => split13(fig, {
+    cols: [
+      ['投入地玩游戏', '不是障碍', 'b', [['时间', '可能很多，尤其在假期'], ['控制', '想停的时候能停下来'], ['优先程度', '学业、工作、睡眠和人际关系大体得到照顾'], ['后果', '没有持续的明显损害，出现问题后会调整']]],
+      ['游戏障碍（ICD-11）', '一种诊断', 'r', [['控制', '反复无法控制开始、频率、时长和结束', 'r'], ['优先程度', '游戏优先于其他兴趣和日常活动', 'r'], ['后果', '尽管有明显的负面后果，仍继续或增加', 'r'], ['损害与时间', '在重要领域造成明显损害，通常持续至少 12 个月', 'r']]],
+    ],
+    bottom: ['游戏时间长不等于游戏障碍', '判断需要专业评估', 'm'],
+    note: '<p>两栏的区别不在“玩了多久”，而在控制、优先程度、持续的负面后果和明显的功能损害。</p>',
+  });
+
+  /* ----- 16-06 · exposure, repeated engagement, impaired control and harm ----- */
+  F.harmmodel = (fig) => flow14(fig, [
+    ['接触', '尝试某种物质或活动', 'b', '大多数人停留在这里，或者偶尔使用'],
+    ['反复参与', '规律地使用或经常进行', 'b', '可以是享受、社交或放松，本身不是障碍'],
+    ['控制受损', '想减少却做不到；渴求；优先程度提高', 'r', '这是成瘾的核心特征之一'],
+    ['功能损害与持续', '尽管带来明显伤害仍然继续', 'r', '诊断还要考虑持续时间和严重程度，并由专业人员评估'],
+  ], '<p>这不是一条必然的道路：人们可以停留在任何阶段，也可以向回移动。区分这四个阶段，比只看“用了多少”或“玩了多久”更有意义。</p>');
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;
