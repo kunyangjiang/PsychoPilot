@@ -4143,6 +4143,340 @@
     note: '<p>“与心理健康相关”和“作为临床推荐的治疗”是两回事。把“多运动就好了”当作建议，可能让当事人感到自己的痛苦被归咎于不够努力。</p>',
   });
 
+  /* =====================================================================
+     Stage 18 · consumer behaviour, money decisions, persuasion and well-being.
+     Static two-ink concept diagrams. Every price, option, brand, share and
+     curve drawn here is invented or schematic and says so on the figure;
+     none of it is data from a real study or advice on what to buy.
+     ===================================================================== */
+
+  /* ----- 18-01 · a common framework for a purchase decision, with its shortcuts ----- */
+  F.buyflow = (fig) => figure(fig, (box, w, api) => {
+    const N = ['意识到需要', '搜索信息', '比较选项', '购买', '使用与评价'], wide = w >= 600, gs = [];
+    const legend = [
+      ['fx-ln fx-lr fx-dash', '评价会影响下一次的需要和搜索'],
+      ['fx-ln fx-lb fx-dash', '习惯性购买：从需要直接到购买'],
+      ['fx-ln', '冲动购买：看到商品就买，跳过搜索和比较'],
+    ];
+    const lg = legend.map(([, t]) => wrapZh(t, w - 44, 12.5)), lgH = lg.reduce((a, l) => a + l.length * 17 + 8, 0);
+    const legendAt = (s, y) => {
+      const g = el('g', {}, s); gs.push(g); let yy = y;
+      legend.forEach(([c], i) => { el('line', { x1: 0, x2: 30, y1: yy - 4, y2: yy - 4, class: c + ' fx-thick' }, g); lines(g, 40, yy, lg[i], 'fx-s', 17); yy += lg[i].length * 17 + 8; });
+    };
+    const cue = (g, x, y, cw) => { el('rect', { x, y, width: cw, height: 28, rx: 14, class: 'fx-pill m' }, g); tx(g, x + cw / 2, y + 19, '看到商品', 'fx-s fx-strong', 'middle'); };
+    if (wide) {
+      const gap = 22, bw = (w - gap * 4) / 5, bh = 52, top = 58, cx = (i) => i * (bw + gap) + bw / 2, yb = top + bh, ly = yb + 92;
+      const s = svgIn(box, w, ly + lgH, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      N.forEach((t, i) => { bx13(g0, i * (bw + gap), top, bw, t, '', i === 3 ? 'r' : 'b', bh); if (i) arrow(g0, i * (bw + gap) - gap + 3, top + bh / 2, i * (bw + gap) - 3, top + bh / 2, '', 6); });
+      const g1 = el('g', {}, s); gs.push(g1);
+      el('path', { d: `M${cx(4)},${yb + 3} L${cx(4)},${yb + 56} L${cx(0) - 12},${yb + 56}`, class: 'fx-ln fx-lr fx-dash' }, g1);
+      arrow(g1, cx(0) - 12, yb + 56, cx(0) - 12, yb + 3, 'r', 6);
+      el('path', { d: `M${cx(0) + 12},${yb + 3} L${cx(0) + 12},${yb + 28} L${cx(3) - 12},${yb + 28}`, class: 'fx-ln fx-lb fx-dash' }, g1);
+      arrow(g1, cx(3) - 12, yb + 28, cx(3) - 12, yb + 3, '', 6);
+      const cw = 92; cue(g1, cx(2) - cw / 2, 4, cw);
+      el('line', { x1: cx(2) + cw / 2, x2: cx(3), y1: 18, y2: 18, class: 'fx-ln' }, g1);
+      arrow(g1, cx(3), 18, cx(3), top - 3, '', 6);
+      legendAt(s, ly);
+    } else {
+      const lane = 46, bw = w - lane, bh = 42, vg = 48, top = 0, y = (i) => top + i * (bh + vg), cy = (i) => y(i) + bh / 2;
+      const ly = y(4) + bh + 34, s = svgIn(box, w, ly + lgH, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      N.forEach((t, i) => { bx13(g0, 0, y(i), bw, t, '', i === 3 ? 'r' : 'b', bh); if (i) arrow(g0, bw / 2, y(i) - vg + 3, bw / 2, y(i) - 3, '', 6); });
+      const g1 = el('g', {}, s); gs.push(g1);
+      const l1 = bw + 16, l2 = bw + 36;
+      el('path', { d: `M${bw + 3},${cy(0) + 8} L${l1},${cy(0) + 8} L${l1},${cy(3)}`, class: 'fx-ln fx-lb fx-dash' }, g1);
+      arrow(g1, l1, cy(3), bw + 3, cy(3), '', 6);
+      el('path', { d: `M${bw + 3},${cy(4)} L${l2},${cy(4)} L${l2},${cy(0) - 8}`, class: 'fx-ln fx-lr fx-dash' }, g1);
+      arrow(g1, l2, cy(0) - 8, bw + 3, cy(0) - 8, 'r', 6);
+      const cw = 82, py = y(3) - vg + 10; cue(g1, 0, py, cw);
+      arrow(g1, cw + 2, py + 14, bw / 2 - 16, y(3) - 3, '', 6);
+      legendAt(s, ly);
+    }
+    api.out.innerHTML = '<p>这是一个概念框架，不是每次购物都要经历的固定顺序：熟悉的东西可能直接买，冲动购买会跳过比较，用过之后的评价又会影响下一次。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 18-01 · one price, two reference points (invented numbers) ----- */
+  F.refprice = (fig) => figure(fig, (box, w, api) => {
+    const x0 = 12, x1 = w - 12, X = (v) => x0 + v / 1400 * (x1 - x0), price = 599, gs = [];
+    const R = [['参考点：标签上的“原价”', 1299, '差距很大：看起来很划算', 'r'], ['参考点：自己印象中的正常价格', 650, '差距很小：看起来只是一般', 'b']];
+    const rowH = 96, ax = R.length * rowH + 10, foot = wrapZh('实际售价相同，比较的对象不同，感受到的“划算程度”就不同。数字是虚构的示意。', w - 4, 12);
+    const H = ax + 50 + foot.length * 15, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: x0, x2: x1, y1: ax, y2: ax, class: 'fx-ln' }, g0);
+    [0, 500, 1000].forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: ax, y2: ax + 5, class: 'fx-ln' }, g0); tx(g0, X(v), ax + 20, `${v}`, 'fx-n', 'middle'); });
+    tx(g0, x1, ax + 20, '元', 'fx-n', 'end');
+    el('line', { x1: X(price), x2: X(price), y1: 6, y2: ax, class: 'fx-hair fx-dash' }, g0);
+    tx(g0, Math.min(x1 - 50, X(price) + 6), ax + 38, '实际售价 599', 'fx-n fx-r');
+    R.forEach(([lab, ref, gap, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const y = i * rowH + 18, ly = y + 34;
+      tx(g, 0, y, lab, 'fx-s fx-strong');
+      el('line', { x1: X(price), x2: X(ref), y1: ly, y2: ly, class: `fx-ln ${c === 'r' ? 'fx-lr' : 'fx-lb'} fx-thick` }, g);
+      el('circle', { cx: X(ref), cy: ly, r: 7, fill: 'var(--paper)', stroke: 'var(--text)', 'stroke-width': 2 }, g);
+      el('circle', { cx: X(price), cy: ly, r: 5, class: 'fx-node r' }, g);
+      tx(g, X(ref), ly - 13, `${ref}`, 'fx-n fx-halo', 'middle');
+      const gx = Math.min(x1, Math.max(x0, (X(price) + X(ref)) / 2));
+      tx(g, Math.min(x1 - 4, Math.max(x0 + 4, gx)), ly + 26, gap, c === 'r' ? 'fx-n fx-r fx-halo' : 'fx-n fx-halo', gx > w * 0.6 ? 'end' : gx < w * 0.3 ? 'start' : 'middle');
+    });
+    const g1 = el('g', {}, s); gs.push(g1);
+    lines(g1, 0, ax + 62, foot, 'fx-n', 15);
+    api.out.innerHTML = '<p>价格本身没有变，变的是拿来比较的参考点。标签上的“原价”是否真实、是否曾经按这个价格卖过，决定了这种比较是否给了消费者有用的信息。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 18-01 · the attraction (decoy) effect in attribute space (invented options) ----- */
+  F.decoy = (fig) => figure(fig, (box, w, api) => {
+    const D = Math.min(w, 470), ox = (w - D) / 2, L = ox + 28, R = ox + D - 8, T = 22, B = T + 250, gs = [];
+    const X = (v) => L + v * (R - L), Y = (v) => B - v * (B - T), A = [0.8, 0.3], Bo = [0.36, 0.76], Dd = [0.26, 0.64];
+    const H = B + 62, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    arrow(g0, L, B, R, B, '', 6); arrow(g0, L, B, L, T - 12, '', 6);
+    tx(g0, R, B + 18, '价格：越往右越便宜 →', 'fx-n', 'end');
+    tx(g0, L + 8, T - 6, '质量：越往上越好', 'fx-n');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('rect', { x: L + 1, y: Y(Bo[1]), width: X(Bo[0]) - L - 1, height: Y(A[1]) - Y(Bo[1]), class: 'fx-band2' }, g1);
+    el('line', { x1: L, x2: X(Bo[0]), y1: Y(Bo[1]), y2: Y(Bo[1]), class: 'fx-hair fx-dash' }, g1);
+    el('line', { x1: X(Bo[0]), x2: X(Bo[0]), y1: Y(Bo[1]), y2: B, class: 'fx-hair fx-dash' }, g1);
+    el('line', { x1: L, x2: X(A[0]), y1: Y(A[1]), y2: Y(A[1]), class: 'fx-hair fx-dash' }, g1);
+    const rw = X(Bo[0]) - L - 8, rl = wrapZh('被 B 占优、但不被 A 占优的区域', rw, 11.5);
+    rl.forEach((l, i) => tx(g1, L + 5, Y(A[1]) - 8 - (rl.length - 1 - i) * 14, l, 'fx-n'));
+    const g2 = el('g', {}, s); gs.push(g2);
+    [[A, 'A', '便宜，质量一般', 'b'], [Bo, 'B', '较贵，质量较好', 'b']].forEach(([[x, y], n, d, c]) => {
+      el('circle', { cx: X(x), cy: Y(y), r: 7, class: 'fx-node ' + c }, g2);
+      tx(g2, X(x) + 12, Y(y) - 4, n, 'fx-h');
+      if (X(x) + 110 > R) tx(g2, R, Y(y) + 26, d, 'fx-n fx-halo', 'end');
+      else tx(g2, X(x) + 12, Y(y) + 13, d, 'fx-n fx-halo');
+    });
+    const g3 = el('g', {}, s); gs.push(g3);
+    el('circle', { cx: X(Dd[0]), cy: Y(Dd[1]), r: 7, class: 'fx-node r' }, g3);
+    tx(g3, X(Dd[0]) + 12, Y(Dd[1]) + 2, 'D 诱饵', 'fx-h fx-r fx-halo');
+    tx(g3, X(Dd[0]) + 12, Y(Dd[1]) + 19, '比 B 稍贵，也稍差', 'fx-n fx-halo');
+    tx(g3, R, H - 4, '选项和位置是虚构的示意', 'fx-n', 'end');
+    api.out.innerHTML = '<p>D 在价格和质量上都不如 B，所以很少有人选它；但它和 A 相比各有优劣。在许多实验中，加入这样的 D 会让选择 B 的人变多。这种效应需要特定的条件，下一节会讨论它的边界。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 18-01 · deliberate vs habitual purchases ----- */
+  F.habitbuy = (fig) => split13(fig, {
+    cols: [
+      ['深思熟虑的购买', '例如第一次买笔记本电脑', 'b', [['常见于', '不常买、价格较高或风险较大的商品'], ['过程', '主动比较多个选项'], ['价格、评价和新信息', '作用较大']]],
+      ['习惯性购买', '例如每天早上买同一种咖啡', 'r', [['常见于', '经常购买、价格较低的商品', 'r'], ['过程', '由熟悉的情境自动触发', 'r'], ['价格、评价和新信息', '作用较小', 'r']]],
+    ],
+    bottom: ['两者之间没有截然的界限', '同一个人对不同商品可能采用不同的方式；情境改变（例如搬家）时，习惯可能被打破', 'm'],
+    note: '<p>这不是把消费者分成“理性的人”和“冲动的人”两类，而是同一个人在不同商品、不同情境中的两种方式。</p>',
+  });
+
+  /* ----- 18-02 · mental accounting: where money comes from shapes where it goes (invented) ----- */
+  F.mentalacct = (fig) => figure(fig, (box, w, api) => {
+    const wide = w >= 560, gap = wide ? 46 : 34, cols = wide ? 3 : 2, cw = (w - gap * (cols - 1)) / cols, gs = [];
+    const S = ['工资', '年终奖', '红包', '退款'], A = [['日常开销', 'b'], ['储蓄', 'b'], ['“额外的钱”', 'r']], E = [[0, 0], [0, 1], [1, 2], [2, 2], [3, 2]];
+    const top = 28, sh = 40, sg = 14, colH = S.length * sh + (S.length - 1) * sg, ah = 52, ag = (colH - A.length * ah) / (A.length - 1);
+    const sy = (i) => top + i * (sh + sg), ay = (i) => top + i * (ah + ag), ax = cw + gap;
+    const notes = [['经济学上', '每一元都一样，可以互相替代', 'b'], ['心理上', '放进“额外的钱”的钱，更容易被花掉', 'r']];
+    const nw = wide ? cw : (w - 12) / 2, nh = Math.max(...notes.map(([t, d]) => bx13H(nw, t, d, 60)));
+    const nTop = wide ? top + (colH - 2 * nh - 14) / 2 : top + colH + 30, H = (wide ? top + colH : nTop + nh) + 30, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, cw / 2, 14, '钱的来源', 'fx-n', 'middle'); tx(g0, ax + cw / 2, 14, '心理账户', 'fx-n', 'middle');
+    S.forEach((t, i) => bx13(g0, 0, sy(i), cw, t, '', 'b', sh));
+    const g1 = el('g', {}, s); gs.push(g1);
+    E.forEach(([a, b]) => arrow(g1, cw + 3, sy(a) + sh / 2, ax - 3, ay(b) + ah / 2 + (a === 0 ? 0 : (a - 2) * 9), b === 2 ? 'r' : '', 6));
+    A.forEach(([t, c], i) => bx13(g1, ax, ay(i), cw, t, '', c, ah));
+    const g2 = el('g', {}, s); gs.push(g2);
+    notes.forEach(([t, d, c], i) => bx13(g2, wide ? 2 * (cw + gap) : i * (nw + 12), wide ? nTop + i * (nh + 14) : nTop, nw, t, d, c, nh));
+    tx(g2, w, H - 4, '账户和箭头是虚构的示意', 'fx-n', 'end');
+    api.out.innerHTML = '<p>工资常被放进日常开销和储蓄，奖金、红包和退款更容易被当作“额外的钱”。在账面上，这些钱没有任何区别；在心理上，它们被分开记账，花起来也不一样。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 18-02 · payment coupling: how a payment method might shape later spending ----- */
+  F.paycouple = (fig) => flow14(fig, [
+    ['做出购买决定', '', 'b'],
+    ['付款的方式', '现金：数出钱，看着钱减少；扫码或刷卡：一个动作', 'b'],
+    ['付款被感受到的程度', '现金较强，电子支付较弱', 'r'],
+    ['对已花金额的记忆和感受', '', 'b'],
+    ['之后的花费决定', '', 'b'],
+  ], '<p>这是研究者提出的一种可能机制。效应大小因人、因情境而不同，并不是每个使用信用卡或电子支付的人都会花得更多。</p>');
+
+  /* ----- 18-03 · reservation prices and the zone of possible agreement (invented numbers) ----- */
+  F.zopa = (fig) => figure(fig, (box, w, api) => {
+    const x0 = 14, x1 = w - 14, X = (v) => x0 + (v - 7) / 4 * (x1 - x0), gs = [];
+    const yS = 58, yB = 124, ax = 172, foot = wrapZh('双方通常看不到对方的保留价。数字是虚构的示意。', w - 4, 12), H = ax + 82 + foot.length * 15, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: x0, x2: x1, y1: ax, y2: ax, class: 'fx-ln' }, g0);
+    [7, 8, 9, 10, 11].forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: ax, y2: ax + 5, class: 'fx-ln' }, g0); tx(g0, X(v), ax + 20, `${v}`, 'fx-n', 'middle'); });
+    tx(g0, x1, ax - 8, '万元', 'fx-n', 'end');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('rect', { x: X(8), y: 22, width: X(10) - X(8), height: ax - 22, class: 'fx-band2' }, g1);
+    tx(g1, X(9), 16, '可能达成协议的区间', 'fx-n fx-strong', 'middle');
+    const g2 = el('g', {}, s); gs.push(g2);
+    el('line', { x1: X(8), x2: x1, y1: yS, y2: yS, class: 'fx-ln fx-lr fx-thick' }, g2);
+    el('circle', { cx: X(8), cy: yS, r: 6, class: 'fx-node r' }, g2);
+    tx(g2, X(8) + 4, yS - 12, '卖方保留价 8', 'fx-n fx-r fx-halo');
+    tx(g2, x1, yS + 22, '卖方能接受的价格 →', 'fx-n fx-halo', 'end');
+    el('line', { x1: x0, x2: X(10), y1: yB, y2: yB, class: 'fx-ln fx-lb fx-thick' }, g2);
+    el('circle', { cx: X(10), cy: yB, r: 6, class: 'fx-node b' }, g2);
+    tx(g2, X(10) - 4, yB - 12, '买方保留价 10', 'fx-n fx-halo', 'end');
+    tx(g2, x0, yB + 22, '← 买方能接受的价格', 'fx-n fx-halo');
+    const g3 = el('g', {}, s); gs.push(g3);
+    const tri = (x, c) => el('path', { d: `M${x},${ax - 2} L${x - 6},${ax - 13} L${x + 6},${ax - 13} Z`, class: 'fx-node ' + c }, g3);
+    tri(X(10.5), 'r'); tri(X(7.5), 'b');
+    tx(g3, Math.min(x1, X(10.5) + 8), ax + 42, '卖方首次报价 10.5', 'fx-n fx-r', 'end');
+    tx(g3, Math.max(x0, X(7.5) - 8), ax + 60, '买方首次报价 7.5', 'fx-n');
+    lines(g3, 0, ax + 84, foot, 'fx-n', 15);
+    api.out.innerHTML = '<p>只要买方愿意付的最高价高于卖方能接受的最低价，就存在一个可能达成协议的区间。首次报价常常落在区间之外，最终价格落在区间内的哪一点，受到报价、信息和谈判过程的影响。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 18-03 · from exposure to purchase: each step can break ----- */
+  F.adfunnel = (fig) => flow14(fig, [
+    ['曝光', '广告被展示出来', 'm', '出现了，不等于被看到'],
+    ['注意', '真正看到了它', 'b', '看到了，不等于记住'],
+    ['记忆与熟悉', '记得这个品牌', 'b', '认识，不等于喜欢'],
+    ['好感与偏好', '喜欢这个品牌', 'b', '喜欢，不等于会买'],
+    ['购买', '真的买了', 'r', ''],
+  ], '<p>这是概念示意，不同环节之间没有固定的比例。广告可能在某一个环节起作用，而在下一个环节失去作用；只看曝光或点击，不能说明它带来了购买。</p>');
+
+  /* ----- 18-03 · a brand association network around an invented coffee brand ----- */
+  F.brandnet = (fig) => figure(fig, (box, w, api) => {
+    const A = [['提神', 3], ['早晨', 3], ['办公室', 2], ['价格适中', 2], ['绿色杯子', 1], ['朋友推荐', 1], ['排队太久', 2, 1]];
+    const wide = w >= 520, rx = Math.min(w / 2 - 46, 230), ry = wide ? 112 : 128, cx = w / 2, cy = ry + 22, gs = [];
+    const ly = cy + ry + 48, H = ly + (wide ? 24 : 70), s = svgIn(box, w, H, fig);
+    const P = A.map((_, i) => { const a = -Math.PI / 2 + i * 2 * Math.PI / A.length; return [cx + rx * Math.cos(a), cy + ry * Math.sin(a)]; });
+    const g0 = el('g', {}, s); gs.push(g0);
+    A.forEach(([, k, neg], i) => { const l = el('line', { x1: cx, y1: cy, x2: P[i][0], y2: P[i][1], class: neg ? 'fx-ln fx-lr fx-dash' : 'fx-ln fx-lb' }, g0); l.style.strokeWidth = [0, 1.2, 2.6, 4.4][k]; });
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('rect', { x: cx - 56, y: cy - 22, width: 112, height: 44, rx: 22, fill: 'var(--paper)' }, g1);
+    el('rect', { x: cx - 56, y: cy - 22, width: 112, height: 44, rx: 22, class: 'fx-pill r' }, g1);
+    tx(g1, cx, cy + 5, '晨光咖啡', 'fx-h', 'middle');
+    const g2 = el('g', {}, s); gs.push(g2);
+    A.forEach(([t, , neg], i) => {
+      const tw = t.length * 14 + 22;
+      el('rect', { x: P[i][0] - tw / 2, y: P[i][1] - 15, width: tw, height: 30, rx: 15, fill: 'var(--paper)' }, g2);
+      el('rect', { x: P[i][0] - tw / 2, y: P[i][1] - 15, width: tw, height: 30, rx: 15, class: 'fx-pill ' + (neg ? 'r' : 'b') }, g2);
+      tx(g2, P[i][0], P[i][1] + 5, t, neg ? 'fx-s fx-strong fx-r' : 'fx-s fx-strong', 'middle');
+    });
+    const g3 = el('g', {}, s); gs.push(g3);
+    const L = [['fx-ln fx-lb', 4.4, '强联想'], ['fx-ln fx-lb', 1.2, '弱联想'], ['fx-ln fx-lr fx-dash', 2.6, '负面联想']];
+    L.forEach(([c, sw, t], i) => {
+      const x = wide ? i * 120 : 0, y = wide ? ly : ly + i * 20;
+      const l = el('line', { x1: x, x2: x + 30, y1: y - 4, y2: y - 4, class: c }, g3); l.style.strokeWidth = sw;
+      tx(g3, x + 38, y, t, 'fx-n');
+    });
+    tx(g3, w, wide ? ly : ly + 40, '品牌和联想都是虚构的', 'fx-n', 'end');
+    api.out.innerHTML = '<p>品牌在记忆中不是一个孤立的名字，而是和许多想法、场景和感受连在一起。连线越粗，联想越容易被想起。每个人记忆中的网络都不同，其中也可能包含负面的联想。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 18-03 · observational comparison vs randomised experiment (invented rates) ----- */
+  F.adlift = (fig) => figure(fig, (box, w, api) => {
+    const P = [
+      ['观察性比较', '看到广告的人 vs 没看到的人', [6.0, 2.0], '差别很大，但大部分来自“看到广告的人本来就更想买”', 'fx-n'],
+      ['随机实验', '随机决定谁能看到广告', [2.6, 2.2], '差别小得多：这才是广告真正带来的增量', 'fx-n fx-r'],
+    ];
+    const wide = w >= 520, gap = 30, pw = wide ? (w - gap) / 2 : w, ch = 140, gs = [];
+    const nl = P.map(([, , , n]) => wrapZh(n, pw - 4, 12.5)), panelH = 44 + 20 + ch + 24 + Math.max(...nl.map((l) => l.length)) * 17 + 8;
+    const H = (wide ? panelH : panelH * 2 + 26) + 20, s = svgIn(box, w, H, fig), Y = (v) => v / 7 * ch;
+    P.forEach(([t, sub, v, , nc], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = wide ? i * (pw + gap) : 0, y = wide ? 0 : i * (panelH + 26), base = y + 64 + ch;
+      tx(g, x, y + 16, t, 'fx-h'); tx(g, x, y + 36, sub, 'fx-s');
+      el('line', { x1: x, x2: x + pw, y1: base, y2: base, class: 'fx-ln' }, g);
+      [['看到广告', 'fx-bar'], ['没看到', 'fx-bar b']].forEach(([lab, c], j) => {
+        const bx = x + pw * (j ? 0.62 : 0.2), bw = Math.min(64, pw * 0.22), h = Y(v[j]);
+        el('rect', { x: bx, y: base - h, width: bw, height: h, class: c }, g);
+        tx(g, bx + bw / 2, base - h - 7, `${v[j].toFixed(1)}%`, 'fx-n fx-strong', 'middle');
+        tx(g, bx + bw / 2, base + 18, lab, 'fx-n', 'middle');
+      });
+      lines(g, x, base + 42, nl[i], nc, 17);
+    });
+    const g = el('g', {}, s); gs.push(g);
+    tx(g, w, H - 4, '购买率是虚构的示意', 'fx-n', 'end');
+    api.out.innerHTML = '<p>广告常被投放给本来就更可能购买的人，所以“看过的人买得更多”会高估广告的作用。随机决定谁能看到广告，两组在其他方面平均相同，差别才可以归因于广告。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 18-03 · behavioural metrics vs well-being ----- */
+  F.welfare = (fig) => split13(fig, {
+    cols: [
+      ['常用的行为指标', '容易测量', 'b', [['点击率'], ['购买或订阅的人数'], ['参加率'], ['短期内的服从']]],
+      ['更全面的福祉指标', '更难测量', 'r', [['是否符合当事人自己的目标和偏好', '', 'r'], ['长期的结果和满意度', '', 'r'], ['是否有人因此受损', '', 'r'], ['当事人知情后是否认可', '', 'r']]],
+    ],
+    bottom: ['行为指标上升，不等于福祉提高', '评价一个干预，需要同时看两者，并留意意外的后果', 'm'],
+    note: '<p>一个让取消订阅变得更难的设计，可能让“留存率”上升，却让许多用户为不想要的服务付钱。行为改变了，不说明人们因此过得更好。</p>',
+  });
+
+  /* ----- 18-04 · income and well-being by happiness level (schematic, after the 2023 adversarial collaboration) ----- */
+  F.incomecurve = (fig) => figure(fig, (box, w, api) => {
+    const wide = w >= 540, L = 12, Rm = wide ? 150 : 10, T = 24, Hc = 210, X = (t) => L + t * (w - L - Rm), Y = (v) => T + (1 - v) * Hc, gs = [];
+    const C = [
+      ['较快乐的人群', (t) => 0.62 + 0.16 * t + 0.16 * t * t, 'fx-ln fx-lb fx-thick', 'fx-n'],
+      ['中等人群', (t) => 0.44 + 0.36 * t, 'fx-ln fx-lb', 'fx-n'],
+      ['平均', (t) => 0.34 + 0.36 * t, 'fx-ln fx-dash', 'fx-n'],
+      ['较不快乐的人群：在较高收入处趋于平缓', (t) => 0.06 + 0.3 * (1 - (1 - Math.min(1, t / 0.62)) ** 2), 'fx-ln fx-lr fx-thick', 'fx-n fx-r'],
+    ];
+    const foot = wrapZh('示意：根据 2023 年一项对抗性合作研究的结论绘制，曲线的形状和数值都不是真实数据。', w - 4, 12);
+    const lg = wide ? 0 : C.length * 20 + 6, ax = T + Hc, H = ax + 42 + lg + foot.length * 15 + 8, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    arrow(g0, L, ax, w - Rm, ax, '', 6); arrow(g0, L, ax, L, T - 16, '', 6);
+    for (let k = 1; k <= 5; k++) el('line', { x1: X(k / 6), x2: X(k / 6), y1: ax, y2: ax + 5, class: 'fx-ln' }, g0);
+    tx(g0, w - Rm, ax + 22, '收入 →（每一格，收入翻一番）', 'fx-n', 'end');
+    tx(g0, L + 8, T - 8, '幸福感', 'fx-n');
+    C.forEach(([n, f, c, lc], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      el('path', { d: curve17(X, Y, f), class: c, fill: 'none' }, g);
+      if (wide) lines(g, X(1) + 10, Y(f(1)) + 4, wrapZh(n, Rm - 14, 12), lc, 15);
+      else { const yy = ax + 46 + i * 20; el('line', { x1: 0, x2: 30, y1: yy - 4, y2: yy - 4, class: c }, g); tx(g, 40, yy, n, lc); }
+    });
+    const g = el('g', {}, s); gs.push(g);
+    lines(g, 0, ax + 46 + lg + 4, foot, 'fx-n', 15);
+    api.out.innerHTML = '<p>对多数人来说，幸福感随着收入的对数稳定上升：收入每翻一番，幸福感上升的幅度大致相同，无论起点是低收入还是高收入。只有在最不快乐的一部分人中，高收入处的上升趋于平缓。这些都是相关研究，不能直接说明多挣钱会让人更幸福。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.16, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 18-04 · kinds of evidence on money and well-being, weaker to stronger causal inference ----- */
+  F.causeladder = (fig) => figure(fig, (box, w, api) => {
+    const R = [
+      ['横断面比较', '比较同一时间收入不同的人。只能说明相关', 'm'],
+      ['追踪研究', '观察同一个人收入变化前后。能排除一部分个人差异，但收入变化可能伴随其他变化', 'b'],
+      ['彩票研究', '中奖金额由随机决定，更接近自然实验；但只研究买彩票的人', 'b'],
+      ['随机现金转移实验', '随机决定谁得到钱，因果推断最强；但多数在低收入地区进行，金额和时间有限', 'r'],
+    ];
+    const lane = 30, bw = w - lane, vg = 30, hs = R.map(([t, d]) => bx13H(bw, t, d, 56)), gs = [];
+    const ys = hs.reduce((a, h, i) => (a.push(i ? a[i - 1] + hs[i - 1] + vg : 24), a), []);
+    const H = ys[3] + hs[3] + 10, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, 0, 14, '因果推断的力度 ↓ 越往下越强', 'fx-n');
+    R.forEach(([t, d, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      bx13(g, lane, ys[i], bw, t, d, c, hs[i]);
+      for (let k = 0; k < 4; k++) el('circle', { cx: 10, cy: ys[i] + hs[i] / 2 - 15 + k * 10, r: 3.4, class: k < i + 1 ? 'fx-node r' : 'fx-node m' }, g);
+      if (i) arrow(g, lane + bw / 2, ys[i] - vg + 4, lane + bw / 2, ys[i] - 4, '', 6);
+    });
+    api.out.innerHTML = '<p>越往下，研究设计越接近因果检验，但每一类研究都有自己的适用范围：彩票中奖者不同于一般人，低收入国家的现金转移结果也不能直接推广到高收入人群。几类证据方向一致时，结论才更可靠。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.38)));
+  }, { dur: 1200 });
+
+  /* ----- 18-04 · survivorship bias: the told stories and the untold ones (invented counts) ----- */
+  F.survivor = (fig) => figure(fig, (box, w, api) => {
+    const cols = w >= 520 ? 30 : 16, rows = 8, sp = (w - 12) / cols, r = Math.min(4.2, sp * 0.26), top = 64, gs = [];
+    const win = [[0.1, 1], [0.58, 3], [0.86, 6], [0.3, 6]].map(([f, rr]) => [Math.round(f * (cols - 1)), rr]);
+    const isWin = (c, rr) => win.some(([a, b]) => a === c && b === rr);
+    const P = (c, rr) => [6 + c * sp + sp / 2, top + rr * sp + sp / 2], base = top + rows * sp;
+    const foot = wrapZh('其余的人同样采用了这种方法，但没有成功，很少被讲述。圆点的数量是虚构的示意。', w - 4, 12);
+    const H = base + 26 + foot.length * 15, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    for (let rr = 0; rr < rows; rr++) for (let c = 0; c < cols; c++) if (!isWin(c, rr)) { const d = el('circle', { cx: P(c, rr)[0], cy: P(c, rr)[1], r, class: 'fx-node m' }, g0); d.style.opacity = 0.4; }
+    lines(g0, 0, base + 22, foot, 'fx-n', 15);
+    const g1 = el('g', {}, s); gs.push(g1);
+    tx(g1, w / 2, 14, '被讲述的成功故事', 'fx-h fx-r', 'middle');
+    win.forEach(([c, rr]) => { const [x, y] = P(c, rr); el('line', { x1: w / 2, y1: 24, x2: x, y2: y - r * 3.2, class: 'fx-hair' }, g1); });
+    win.forEach(([c, rr]) => { const [x, y] = P(c, rr); el('circle', { cx: x, cy: y, r: r * 2.8, class: 'fx-ln fx-lr' }, g1); el('circle', { cx: x, cy: y, r: r * 1.6, class: 'fx-node r' }, g1); });
+    api.out.innerHTML = '<p>如果只看被讲述的成功者，会以为这种方法的成功率很高。要判断一种做法是否有效，需要同时看到用了它却没有成功的人，以及没有用它也成功了的人。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;

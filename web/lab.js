@@ -2751,5 +2751,126 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander };
+  /* =====================================================================
+     Stage 18 · consumer and money decisions. Both demos are models: the
+     people are generated in the browser and the size of every effect is a
+     setting chosen to show a principle, not an estimate from a study.
+     ===================================================================== */
+  const gaussFrom18 = (r) => () => { let u = 0, v = 0; while (!u) u = r(); while (!v) v = r(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+
+  /* 18-01 · decoy: 400 invented shoppers trade quality against cheapness (weights vary from person to
+     person). A decoy that is clearly worse than one option gives that option a small extra appeal in the
+     model when attributes are shown as comparable numbers, and a much smaller one when the products are
+     experienced or shown as pictures (the boundary reported by Frederick et al., 2014). Both are settings. */
+  function decoy(host) {
+    const o = { d: 'none', show: 'num' };
+    const { fig, out, actions } = shell(host, '多一个“没人会选”的选项',
+      '一群虚构的购物者在 A（便宜、质量一般）和 B（较贵、质量较好）之间选择。加入一个诱饵：它明显不如其中一个选项，却不全面不如另一个。比较加入诱饵前后两种主要商品的选择比例。',
+      [['d', '诱饵', [['none', '不加诱饵'], ['A', '靠近 A'], ['B', '靠近 B']]], ['show', '信息怎样呈现', [['num', '逐项的数字评分'], ['exp', '亲身体验或图片']]]],
+      '购物者和他们的偏好都由程序随机生成；“诱饵让占优的选项更有吸引力”的大小是模型的设定，不是从真实研究中估计出来的。', 'Model · 模型演示');
+    const OPT = { A: [0.8, 0.3], B: [0.36, 0.76], dA: [0.68, 0.22], dB: [0.24, 0.62] }; // [cheapness, quality]
+    let seed = 18, people = [];
+    const gen = () => { const g = gaussFrom18(seeded(seed)); people = Array.from({ length: 400 }, () => ({ wq: Math.min(0.95, Math.max(0.05, 0.5 + 0.17 * g())), e: [g(), g(), g()].map((x) => x * 0.05) })); };
+    const choose = (d, show) => {
+      const bonus = d === 'none' ? 0 : show === 'num' ? 0.05 : 0.008, n = { A: 0, B: 0, D: 0 };
+      people.forEach(({ wq, e }) => {
+        const u = ([c, q]) => wq * q + (1 - wq) * c;
+        const s = { A: u(OPT.A) + e[0] + (d === 'A' ? bonus : 0), B: u(OPT.B) + e[1] + (d === 'B' ? bonus : 0) };
+        if (d !== 'none') s.D = u(OPT['d' + d]) + e[2];
+        n[Object.keys(s).reduce((a, b) => (s[a] >= s[b] ? a : b))]++;
+      });
+      return { A: n.A / people.length, B: n.B / people.length, D: n.D / people.length };
+    };
+    const box = document.createElement('div'); fig.append(box);
+    const pc = (x) => `${Math.round(x * 100)}%`;
+    const draw = () => {
+      const now = choose(o.d, o.show), base = choose('none', o.show), W = widthOf(fig), wide = W >= 520;
+      const pw = wide ? Math.round(W * 0.42) : W, ph = 200, bx0 = wide ? pw + 30 : 0, bw = W - bx0, by0 = wide ? 0 : ph + 46;
+      const rows = o.d === 'none' ? ['A', 'B'] : ['A', 'B', 'D'], H = Math.max(wide ? ph + 40 : 0, by0 + 30 + rows.length * 52);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：选 A 的比例 ${pc(now.A)}，选 B 的比例 ${pc(now.B)}${o.d === 'none' ? '' : `，选诱饵的比例 ${pc(now.D)}`}。不加诱饵时分别是 ${pc(base.A)} 和 ${pc(base.B)}。` }, box);
+      const L = 22, R = pw - 8, T = 16, B = T + ph - 24, X = (v) => L + v * (R - L), Y = (v) => B - v * (B - T);
+      el('line', { x1: L, x2: R, y1: B, y2: B, class: 'lab-axis' }, svg); el('line', { x1: L, x2: L, y1: T - 6, y2: B, class: 'lab-axis' }, svg);
+      text(svg, R, B + 18, '越往右越便宜 →', 'lab-tick', 'end'); text(svg, L + 6, T, '质量 ↑', 'lab-tick');
+      const pt = ([c, q], fill, lab) => { el('circle', { cx: X(c), cy: Y(q), r: 7, fill }, svg); text(svg, X(c) + 11, Y(q) + 4, lab, 'lab-tick'); };
+      pt(OPT.A, 'var(--blue)', 'A'); pt(OPT.B, 'var(--blue)', 'B');
+      if (o.d !== 'none') pt(OPT['d' + o.d], 'var(--red)', '诱饵');
+      text(svg, bx0, by0 + 14, `400 名虚构购物者的选择（${o.show === 'num' ? '逐项数字评分' : '亲身体验或图片'}）`, 'lab-tick');
+      const bL = bx0 + 44, bR = bx0 + bw - 46, BX = (v) => bL + v * (bR - bL);
+      rows.forEach((k, i) => {
+        const y = by0 + 30 + i * 52, v = now[k];
+        text(svg, bx0, y + 18, k === 'D' ? '诱饵' : k, 'lab-tick');
+        el('rect', { x: bL, y: y + 4, width: Math.max(1, BX(v) - bL), height: 20, fill: k === 'D' ? 'var(--red)' : 'var(--blue)' }, svg);
+        text(svg, BX(v) + 6, y + 19, pc(v), 'lab-tick');
+        if (o.d !== 'none' && k !== 'D') { el('line', { x1: BX(base[k]), x2: BX(base[k]), y1: y, y2: y + 30, stroke: 'var(--text)', 'stroke-width': 1.5, 'stroke-dasharray': '3 3' }, svg); text(svg, BX(base[k]), y + 42, `无诱饵 ${pc(base[k])}`, 'lab-tick', 'middle'); }
+      });
+      const tgt = o.d === 'none' ? null : o.d, dv = tgt ? Math.round((now[tgt] - base[tgt]) * 100) : 0;
+      out.innerHTML = `<ul class="lab-parts"><li><span>选 A 的比例（模型）</span><b>${pc(now.A)}</b></li><li><span>选 B 的比例（模型）</span><b>${pc(now.B)}</b></li>${tgt ? `<li><span>选诱饵的比例（模型）</span><b>${pc(now.D)}</b></li>` : ''}</ul>
+        <p>${!tgt ? '没有诱饵时，偏重质量的人选 B，偏重价格的人选 A。试着加入一个诱饵。' : `诱饵明显不如 ${tgt}，所以很少有人选它；但在这个模型中，它让 ${tgt} 的选择比例${dv > 0 ? `提高了约 ${dv} 个百分点` : '几乎没有变化'}。${o.show === 'num' ? '把呈现方式换成“亲身体验或图片”，看看会怎样。' : '当人们亲身体验商品或看到图片，而不是逐项比较数字时，模型中诱饵的作用被设得很小，这与研究中发现的边界方向一致。'}`}</p>
+        <p class="lab-note">真实研究：休伯等人（1982）首先报告了这种效应；弗雷德里克等人（2014）发现，当商品被亲身体验，或者至少有一个属性用图片等感知方式呈现时，这种效应通常不会出现。这些是论文报告的结论，与上面的模型数字无关。</p>`;
+    };
+    gen();
+    bindControls(host, o, draw);
+    action(actions, '换一批虚构的购物者', () => { seed += 1; gen(); draw(); });
+    action(actions, '恢复默认设置', () => { o.d = 'none'; o.show = 'num'; seed = 18; gen(); host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(o[b.dataset.k])))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 18-02 · savedefault: 500 invented employees, each with a contribution rate they would pick if they
+     thought it through (0–12 %; about one in eight would pick 0). Under opt-in an employee is enrolled only
+     if they act; under automatic enrolment everyone starts at the default unless they act; under active
+     choice everyone must state a rate. Whether someone acts within a year is set by the slider. */
+  function savedefault(host) {
+    const o = { plan: 'optin', rate: 3 };
+    const { fig, out, actions } = shell(host, '默认选项怎样改变储蓄',
+      '一家虚构公司的 500 名员工，每个人都有一个自己认真考虑后会选择的缴费比例。比较三种安排：主动申请、自动登记（可以随时退出或更改）和要求每个人主动做出选择。',
+      [['plan', '安排', [['optin', '主动申请'], ['auto', '自动登记'], ['active', '要求主动选择']]], ['rate', '自动登记的默认比例', [[3, '3%'], [6, '6%']]]],
+      '员工和他们的理想比例都由程序随机生成；“有多少人会主动更改设置”由下面的滑块决定。这是说明原理的模型，不是任何真实公司或研究的数据。', 'Model · 模型演示');
+    const sr = slider('一年内会主动处理这件事的员工：', 10, 90, 10, 30);
+    const box = document.createElement('div'); fig.append(sr.box, box);
+    let seed = 1802, people = [];
+    const gen = () => { const r = seeded(seed), g = gaussFrom18(r); people = Array.from({ length: 500 }, () => ({ pref: r() < 0.12 ? 0 : Math.min(12, Math.max(1, Math.round(6 + 2.6 * g()))), act: r() })); };
+    const pc = (x) => `${Math.round(x * 100)}%`;
+    const draw = () => {
+      const p = Number(sr.input.value) / 100, def = o.plan === 'optin' ? 0 : o.plan === 'auto' ? o.rate : null;
+      sr.val.textContent = ` ${sr.input.value}%`; sr.input.setAttribute('aria-valuetext', `${sr.input.value}%`);
+      const res = people.map(({ pref, act }) => { const acted = o.plan === 'active' || act < p; return { pref, acted, rate: acted ? pref : def }; });
+      const n = res.length, part = res.filter((x) => x.rate > 0).length / n, stay = def === null ? 0 : res.filter((x) => !x.acted).length / n;
+      const below = res.filter((x) => x.rate < x.pref).length / n, above = res.filter((x) => x.rate > x.pref).length / n;
+      const cnt = Array(13).fill(0), want = Array(13).fill(0), idle = Array(13).fill(0); res.forEach((x) => { cnt[x.rate]++; want[x.pref]++; if (!x.acted) idle[x.rate]++; });
+      const W = widthOf(fig), L = 40, Rm = 8, T = 14, Hc = 170, H = T + Hc + 74, HV = H + (W >= 440 ? 0 : 22), cw = (W - L - Rm) / 13, mx = Math.max(...cnt, ...want) / n;
+      const top = Math.ceil(mx * 10) / 10, Y = (v) => T + (1 - v / top) * Hc;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${HV}`, role: 'img', 'aria-label': `模型：参加比例 ${pc(part)}，停留在默认设置上的员工 ${pc(stay)}，实际比例低于自己理想比例的员工 ${pc(below)}。` }, box);
+      [0, top / 2, top].forEach((v) => { el('line', { x1: L, x2: W - Rm, y1: Y(v), y2: Y(v), stroke: 'var(--rule)', 'stroke-width': 1 }, svg); text(svg, L - 6, Y(v) + 4, pc(v), 'lab-tick', 'end'); });
+      cnt.forEach((c, k) => {
+        const x = L + k * cw, h = Y(0) - Y(c / n);
+        el('rect', { x: x + 3, y: Y(c / n), width: cw - 6, height: Math.max(0, h), fill: 'var(--blue)' }, svg);
+        if (idle[k]) el('rect', { x: x + 3, y: Y(idle[k] / n), width: cw - 6, height: Y(0) - Y(idle[k] / n), fill: 'var(--red)' }, svg);
+        el('rect', { x: x + 3, y: Y(want[k] / n), width: cw - 6, height: Y(0) - Y(want[k] / n), fill: 'none', stroke: 'var(--text)', 'stroke-width': 1.2, 'stroke-dasharray': '3 3' }, svg);
+        if (k % 3 === 0) text(svg, x + cw / 2, Y(0) + 16, `${k}%`, 'lab-tick', 'middle');
+      });
+      el('line', { x1: L, x2: W - Rm, y1: Y(0), y2: Y(0), class: 'lab-axis' }, svg);
+      text(svg, W - Rm, Y(0) + 34, '缴费比例（0% 表示没有参加）→', 'lab-tick', 'end');
+      el('rect', { x: L, y: H - 20, width: 12, height: 12, fill: 'var(--red)' }, svg); text(svg, L + 18, H - 10, def === null ? '没有默认' : '没有主动处理，停在默认上', 'lab-tick');
+      const lx = W >= 440 ? L + 190 : L; const lyy = W >= 440 ? H - 10 : H + 12; el('rect', { x: lx, y: lyy - 10, width: 12, height: 12, fill: 'none', stroke: 'var(--text)', 'stroke-dasharray': '3 3' }, svg); text(svg, lx + 18, lyy, '虚线框：员工自己的理想比例', 'lab-tick');
+      const msg = {
+        optin: `需要主动申请时，只有主动处理的人才会参加；其余的人哪怕本来想存钱，也停在“不参加”上。把滑块往左拖，惰性越强，参加的人越少。`,
+        auto: `自动登记让参加比例大幅上升；但不主动处理的人都停在 ${o.rate}% 上，其中本来想多存的人存少了，本来不想参加或想少存的人存多了。${o.rate === 3 ? '把默认比例改成 6%，看看“存少了”的人有什么变化。' : '默认比例提高后，“存少了”的人减少，“存多了”的人增加。'}`,
+        active: '要求每个人主动选择时，没有人因为惰性而停在某个比例上，参加比例接近“认真考虑后想参加的人”的比例；代价是每个人都必须花时间做这个决定。',
+      }[o.plan];
+      out.innerHTML = `<ul class="lab-parts"><li><span>参加储蓄计划的员工（模型）</span><b>${pc(part)}</b></li><li><span>停留在默认设置上的员工</span><b>${def === null ? '—' : pc(stay)}</b></li><li><span>实际比例低于自己理想比例的员工</span><b>${pc(below)}</b></li><li><span>实际比例高于自己理想比例的员工</span><b>${pc(above)}</b></li></ul>
+        <p>${msg}</p>
+        <p class="lab-note">真实研究：马德里安和谢伊（2001）发现，一家公司改为自动登记后，参加退休储蓄计划的比例大幅上升，同时许多员工停留在公司设定的默认缴费比例和默认投资组合上。这是论文报告的结论，与上面的模型数字无关；默认比例怎样设定才对员工最有利，取决于他们的实际情况。</p>`;
+    };
+    gen();
+    sr.input.addEventListener('input', draw);
+    bindControls(host, o, draw);
+    action(actions, '恢复默认设置', () => { sr.input.value = 30; o.plan = 'optin'; o.rate = 3; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(o[b.dataset.k])))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander, decoy, savedefault };
 })();
