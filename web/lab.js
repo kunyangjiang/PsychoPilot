@@ -2607,5 +2607,57 @@
   }
 
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue };
+  /* =====================================================================
+     Stage 14 · close relationships. One model demo; every number is drawn
+     at random in the browser from the variance shares set on screen.
+     ===================================================================== */
+
+  /* 14-01 · pairvar: desire of perceiver i for target j = actor a_i + partner b_j + relationship g_ij.
+     The share of g is set by the slider; the rest is split evenly between a and b. "What general
+     tendencies predict" = row mean + column mean − grand mean, i.e. the actor/partner estimates. */
+  function pairvar(host) {
+    const N = 8, ROW = '甲乙丙丁戊己庚辛', COL = 'ABCDEFGH', HI = [1, 5];
+    const o = { view: 'actual' };
+    const { fig, out, actions } = shell(host, '谁普遍受欢迎，和这两个人会不会互相心动',
+      '设想 8 位参与者（甲到辛）各自和 8 位约会对象（A 到 H）快速约会，然后给每位对象的心动程度打分。每个分数由三部分相加：这位参与者普遍有多容易心动，这位对象普遍有多受欢迎，以及只属于这一对的部分。调节最后一部分所占的比例，比较实际分数和“只看两人各自的普遍倾向”得到的预期。',
+      [['view', '显示', [['actual', '模拟的心动分数'], ['expect', '只看普遍倾向的预期'], ['resid', '只属于这一对的部分']]]],
+      '三部分的大小和每个分数都是程序随机生成的，用来说明“普遍倾向”和“两人特有的吸引”的区别，不是任何一项研究的数据。');
+    const sr = slider('只属于这一对的部分占总差异的比例：', 0, 80, 10, 40);
+    const box = document.createElement('div'); fig.append(sr.box, box);
+    let A, Bv, G;
+    const deal = () => { A = Array.from({ length: N }, rnorm); Bv = Array.from({ length: N }, rnorm); G = Array.from({ length: N }, () => Array.from({ length: N }, rnorm)); };
+    const draw = () => {
+      const share = Number(sr.input.value) / 100, wa = Math.sqrt((1 - share) / 2), wg = Math.sqrt(share);
+      sr.val.textContent = ` ${Math.round(share * 100)}%`; sr.input.setAttribute('aria-valuetext', `${Math.round(share * 100)}%`);
+      const D = A.map((a, i) => Bv.map((b, j) => wa * a + wa * b + wg * G[i][j]));
+      const rm = D.map((r) => mean(r)), cm = D[0].map((_, j) => mean(D.map((r) => r[j]))), gm = mean(rm);
+      const E = D.map((r, i) => r.map((_, j) => rm[i] + cm[j] - gm)), Rz = D.map((r, i) => r.map((v, j) => v - E[i][j]));
+      const flat = (M) => M.flat(), r2 = corr(flat(D), flat(E)) ** 2;
+      const M = o.view === 'actual' ? D : o.view === 'expect' ? E : Rz;
+      const W = widthOf(fig), lab = 22, cell = Math.floor(Math.min(42, (W - lab - 4) / N)), gw = cell * N, x0 = Math.round((W - gw - lab) / 2) + lab, y0 = 22, H = y0 + gw + 30;
+      box.innerHTML = '';
+      const [hi, hj] = HI;
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：8 乘 8 的心动分数表。在这批模拟数据中，两人各自的普遍倾向能解释约 ${Math.round(r2 * 100)}% 的差异。` }, box);
+      COL.split('').forEach((c, j) => text(svg, x0 + j * cell + cell / 2, y0 - 7, c, 'lab-tick', 'middle'));
+      ROW.split('').forEach((c, i) => text(svg, x0 - 6, y0 + i * cell + cell / 2 + 4, c, 'lab-tick', 'end'));
+      M.forEach((row, i) => row.forEach((v, j) => {
+        const a = Math.min(0.9, Math.abs(v) / 2.2 * 0.9 + 0.04);
+        el('rect', { x: x0 + j * cell + 1, y: y0 + i * cell + 1, width: cell - 2, height: cell - 2, rx: 2, fill: v >= 0 ? 'var(--blue)' : 'var(--red)', 'fill-opacity': a.toFixed(2) }, svg);
+      }));
+      el('rect', { x: x0 + hj * cell - 1, y: y0 + hi * cell - 1, width: cell + 2, height: cell + 2, rx: 3, fill: 'none', stroke: 'var(--text)', 'stroke-width': 2 }, svg);
+      text(svg, x0, y0 + gw + 20, '蓝色：高于平均　红色：低于平均', 'lab-tick');
+      const f = (x) => (x >= 0 ? '+' : '−') + fmt(Math.abs(x), 1);
+      out.innerHTML = `<ul class="lab-parts"><li><span>这批模拟数据中，两人各自的普遍倾向能解释的差异</span><b>${Math.round(r2 * 100)}%</b></li><li><span>黑框（${ROW[hi]} 对 ${COL[hj]}）：实际分数</span><b>${f(D[hi][hj])}</b></li><li><span>黑框：只看普遍倾向的预期</span><b>${f(E[hi][hj])}</b></li><li><span>黑框：只属于这一对的部分</span><b>${f(Rz[hi][hj])}</b></li></ul>
+        <p>${share === 0 ? '没有“只属于这一对的部分”时，知道每个人的普遍倾向，就能几乎完全预测每一对的分数。' : `即使完全知道每个人普遍有多容易心动、普遍有多受欢迎，仍有约 ${100 - Math.round(r2 * 100)}% 的差异只属于具体的一对。切换到第三个视图，看看这部分在表中怎样分布：它和行、列都没有关系。`}</p>
+        <p class="lab-note">这里假设“普遍倾向”可以被完全估计出来。真实研究中，约埃尔、伊斯特威克和芬克尔（2017）用一百多项事先的自我报告测量，只预测了 4% 到 18% 的行动者方差和 7% 到 27% 的对象方差，对只属于两人之间的关系方差则完全预测不了。这些是论文报告的数字，与上面的模拟数字无关。</p>`;
+    };
+    sr.input.addEventListener('input', draw);
+    bindControls(host, o, draw);
+    action(actions, '换一批模拟数据', () => { deal(); draw(); });
+    action(actions, '恢复默认设置', () => { sr.input.value = 40; o.view = 'actual'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === 'actual'))); draw(); }, 'lab-clear');
+    deal(); draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar };
 })();

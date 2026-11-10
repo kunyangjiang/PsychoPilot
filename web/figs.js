@@ -2965,6 +2965,288 @@
   }, { dur: 1200 });
 
 
+  /* =====================================================================
+     Stage 14 · attraction, attachment and close relationships. Static
+     schematics: boxes, a plane, a triangle and loops illustrate stated ideas.
+     The only scatter (attspace) uses seeded, made-up points and says so.
+     ===================================================================== */
+
+  // stages joined by arrows: a row on wide screens, a column on narrow ones.
+  // items: [title, sub, cls, detail]; detail (optional) hangs in a dashed box under its stage
+  const flow14 = (fig, items, note, top) => figure(fig, (box, w, api) => {
+    const n = items.length, wide = w >= 600, gap = wide ? 34 : 0, cw = wide ? (w - gap * (n - 1)) / n : w, gs = [];
+    const tw = Math.min(w, 520), th = top ? bx13H(tw, top[0], top[1], 46) : 0, y0 = top ? th + 34 : 0;
+    const hh = Math.max(...items.map(([t, sub]) => bx13H(cw, t, sub, 56)));
+    const dh = Math.max(0, ...items.map(([, , , d]) => (d ? bx13H(cw, '', d, 40) : 0)));
+    const step = hh + (dh ? 10 + dh : 0), vgap = 40;
+    const H = y0 + (wide ? step : n * step + (n - 1) * vgap), s = svgIn(box, w, H, fig);
+    if (top) {
+      const g = el('g', {}, s); gs.push(g);
+      bx13(g, (w - tw) / 2, 0, tw, top[0], top[1], top[2] || 'b', th);
+      arrow(g, w / 2, th + 4, w / 2, y0 - 4, '', 6);
+    }
+    items.forEach(([t, sub, cls, d], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = wide ? i * (cw + gap) : 0, y = y0 + (wide ? 0 : i * (step + vgap));
+      bx13(g, x, y, cw, t, sub, cls || 'b', hh);
+      if (d) bx13(g, x, y + hh + 10, cw, '', d, 'm', dh);
+      if (i) {
+        if (wide) arrow(g, x - gap + 5, y + hh / 2, x - 5, y + hh / 2, '', 6);
+        else arrow(g, w / 2, y - vgap + 5, w / 2, y - 5, '', 6);
+      }
+    });
+    api.out.innerHTML = note;
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.35)));
+  }, { dur: 1200 });
+
+  // a 2 × 2 grid with a label over each column and each row; cells: [title, sub, cls] in reading order
+  const quad14 = (fig, cols, rows, cells, note) => figure(fig, (box, w, api) => {
+    const gap = 10, cw = (w - gap) / 2, gs = [];
+    const rh = [0, 1].map((r) => Math.max(...cells.slice(r * 2, r * 2 + 2).map(([t, sub]) => bx13H(cw, t, sub, 70))));
+    const H = 22 + 24 + rh[0] + 12 + 24 + rh[1], s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    cols.forEach((c, j) => tx(g0, j * (cw + gap) + cw / 2, 14, c, 'fx-n', 'middle'));
+    let y = 22;
+    rows.forEach((r, i) => {
+      tx(g0, 0, y + 17, r, 'fx-n'); y += 24;
+      cells.slice(i * 2, i * 2 + 2).forEach(([t, sub, cls], j) => {
+        const g = el('g', {}, s); gs.push(g);
+        bx13(g, j * (cw + gap), y, cw, t, sub, cls || 'b', rh[i]);
+      });
+      y += rh[i] + 12;
+    });
+    api.out.innerHTML = note;
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.12, 0.35)));
+  }, { dur: 1100 });
+
+  // a loop of four steps: a diamond on wide screens, a column with a return lane on narrow ones
+  const cycle14 = (fig, nodes, centre, note) => figure(fig, (box, w, api) => {
+    const wide = w >= 560, gs = [];
+    let s;
+    if (wide) {
+      const bw = Math.min(240, w * 0.36), bh = Math.max(...nodes.map(([t, sub]) => bx13H(bw, t, sub, 60)));
+      const vg = 30, H = bh * 3 + vg * 2, cx = w / 2;
+      s = svgIn(box, w, H, fig);
+      const P = [[cx - bw / 2, 0], [w - bw, bh + vg], [cx - bw / 2, 2 * (bh + vg)], [0, bh + vg]];
+      nodes.forEach(([t, sub, cls], i) => { const g = el('g', {}, s); gs.push(g); bx13(g, P[i][0], P[i][1], bw, t, sub, cls || 'b', bh); });
+      const g = el('g', {}, s); gs.push(g);
+      const E = [
+        [cx + bw / 2 + 4, bh / 2, w - bw / 2, bh + vg - 4],
+        [w - bw / 2, 2 * bh + vg + 4, cx + bw / 2 + 4, 2 * (bh + vg) + bh / 2],
+        [cx - bw / 2 - 4, 2 * (bh + vg) + bh / 2, bw / 2, 2 * bh + vg + 4],
+        [bw / 2, bh + vg - 4, cx - bw / 2 - 4, bh / 2],
+      ];
+      E.forEach(([a, b, c, d]) => arrow(g, a, b, c, d, 'r', 7));
+      lines(g, cx, H / 2 - (centre.length - 1) * 9 + 4, centre, 'fx-s', 18, 'middle');
+    } else {
+      const lane = 26, bw = w - lane, bh = Math.max(...nodes.map(([t, sub]) => bx13H(bw, t, sub, 50))), vg = 34;
+      const ct = wrapZh(centre.join(''), w - 10, 12.5), H = nodes.length * bh + (nodes.length - 1) * vg + 18 + ct.length * 17;
+      s = svgIn(box, w, H, fig);
+      nodes.forEach(([t, sub, cls], i) => {
+        const g = el('g', {}, s); gs.push(g); const y = i * (bh + vg);
+        bx13(g, 0, y, bw, t, sub, cls || 'b', bh);
+        if (i) arrow(g, bw / 2, y - vg + 4, bw / 2, y - 4, 'r', 6);
+      });
+      const g = el('g', {}, s); gs.push(g);
+      const yl = (nodes.length - 1) * (bh + vg) + bh / 2, xl = w - 6;
+      el('path', { d: `M${bw + 2},${yl} L${xl},${yl} L${xl},${bh / 2}`, class: 'fx-ln fx-lr', fill: 'none' }, g);
+      arrow(g, xl, bh / 2, bw + 3, bh / 2, 'r', 6);
+      lines(g, 0, nodes.length * bh + (nodes.length - 1) * vg + 18, ct, 'fx-s', 17);
+    }
+    api.out.innerHTML = note;
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.35)));
+  }, { dur: 1300 });
+
+  /* ----- 14-01 · opportunities to meet → initial attraction → longer-term development ----- */
+  F.meetstage = (fig) => flow14(fig, [
+    ['1　相遇的机会', '能不能遇见、有没有机会反复互动', 'b', '住得近；同一个班级、单位或项目组；共同的朋友；同一个线上社区'],
+    ['2　最初的吸引', '见面或交谈之后，是否被对方打动', 'b', '外表；熟悉程度；感知到的相似；对方是否表现出喜欢'],
+    ['3　关系的发展', '是否开始约会、确定关系并持续下去', 'b', '回应与支持；信任；承诺；双方的处境和外部条件'],
+  ], '<p>很多相遇停在第一步，很多吸引停在第二步。在一个阶段起作用的因素（例如外表在初见时的作用），不一定能预测下一个阶段会怎样。</p>');
+
+  /* ----- 14-01 · stated preferences vs observed choices ----- */
+  F.statedpref = (fig) => split13(fig, {
+    cols: [
+      ['问卷上说的', '陈述偏好', 'm', [['怎样测量', '理想伴侣问卷；评价照片或文字描述', 'm'], ['常见的结果', '外表、经济前景的重要性有稳定的平均性别差异', 'm']]],
+      ['实际的选择', '显示偏好', 'b', [['怎样测量', '面对面见过的人；快速约会；真实的伴侣', 'b'], ['常见的结果', '外表作用较大、经济前景作用较小，男女之间差别很小；事先说的偏好预测不了实际的心动', 'b']]],
+    ],
+    bottom: ['两类数据回答不同的问题', '而且，群体平均都不能用来推断某一个人的偏好', 'r'],
+    note: '<p>左栏是人们相信自己想要什么，右栏是实际见面时什么与心动有关（伊斯特威克和芬克尔，2008；伊斯特威克等，2014）。</p>',
+  });
+
+  /* ----- 14-02 · one situation, several responses (fictional, non-diagnostic) ----- */
+  F.onesit = (fig) => fan13(fig, '同一个情境', '伴侣四个小时没有回复消息', '四种虚构的反应：怎样解读，怎样做', [
+    ['反复查看手机', '“是不是我说错了什么？”连续发了三条消息', 'b', 0],
+    ['正好独处一会儿', '“他大概在休息，我也想安静一下”', 'b', 0],
+    ['问候一句就去忙别的', '发了“早点休息”，之后没有再看手机', 'b', 0],
+    ['完全没有在意', '两人早就约好了今晚各自忙', 'b', 0],
+  ], '<p>四个人物都是虚构的。同一个人在不同的日子、不同的关系中也可能作出不同的反应；一次反应不能用来判断任何人的依恋倾向。</p>', 2);
+
+  /* ----- 14-02 · the anxiety × avoidance plane: continuous scores, an arbitrary cut, change over time ----- */
+  F.attspace = (fig) => figure(fig, (box, w, api) => {
+    const side = Math.min(w, 460), L = (w - side) / 2 + 4, T = 22, P = side - 34, H = T + P + 36, s = svgIn(box, w, H, fig);
+    const X = (u) => L + u * P, Y = (v) => T + (1 - v) * P, r = rng(1402), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('rect', { x: X(0), y: Y(1), width: P, height: P, class: 'fx-pill m' }, g0).style.fill = 'none';
+    tx(g0, X(0), T - 8, '依恋焦虑 ↑', 'fx-n');
+    tx(g0, X(1), Y(0) + 18, '依恋回避 →', 'fx-n', 'end');
+    const cw = P / 2 - 12;
+    [[0.02, 0.06, '常被称为“安全”', 'start'], [0.02, 0.97, '常被称为“焦虑”或“专注”', 'start'], [0.98, 0.06, '常被称为“回避”或“冷漠”', 'end'], [0.98, 0.97, '常被称为“恐惧”', 'end']]
+      .forEach(([u, v, t, a]) => lines(g0, X(u), Y(v) + (v > 0.5 ? 12 : -4 - (wrapZh(t, cw, 12).length - 1) * 15), wrapZh(t, cw, 12), 'fx-n fx-halo', 15, a));
+    const gd = el('g', {}, s); gs.push(gd);
+    for (let i = 0; i < 150; i++) {
+      const u = clamp(0.4 + 0.17 * gauss(r), 0.03, 0.97), v = clamp(0.4 + 0.17 * gauss(r), 0.03, 0.97);
+      el('circle', { cx: X(u), cy: Y(v), r: 2.6, class: 'fx-node m' }, gd);
+    }
+    const gc = el('g', {}, s); gs.push(gc);
+    el('line', { x1: X(0.5), x2: X(0.5), y1: Y(1), y2: Y(0), class: 'fx-hair fx-dash' }, gc);
+    el('line', { x1: X(0), x2: X(1), y1: Y(0.5), y2: Y(0.5), class: 'fx-hair fx-dash' }, gc);
+    tx(gc, X(1), T - 8, '虚线：流行测试常在这里切开', 'fx-n', 'end');
+    const gp = el('g', {}, s); gs.push(gp);
+    [[0.28, 0.78, 0.3, 0.5, '甲'], [0.62, 0.3, 0.7, 0.56, '乙']].forEach(([u1, v1, u2, v2, nm]) => {
+      el('circle', { cx: X(u1), cy: Y(v1), r: 4.5, class: 'fx-node r' }, gp);
+      arrow(gp, X(u1), Y(v1) + (v2 < v1 ? 6 : -6), X(u2), Y(v2) + (v2 < v1 ? -6 : 6), 'r', 6);
+      el('circle', { cx: X(u2), cy: Y(v2), r: 4.5, class: 'fx-node r' }, gp);
+      tx(gp, X(u1) + 9, Y(v1) + 4, nm, 'fx-s fx-r fx-halo');
+    });
+    api.out.innerHTML = '<p>灰色的点是随机生成的示意，不是测量数据：它们表示分数连续分布、大多集中在中间，没有天然的分界。虚线是流行测试把连续分数切成“类型”的地方，线两侧紧挨着的两个人会被贴上不同的标签。红色是两个虚构的人在几年间的变化：甲的焦虑降低了，乙则朝不安全的方向移动。</p>';
+    return (t) => { show(g0, stage(t, 0, 0.3)); show(gd, stage(t, 0.15, 0.4)); show(gc, stage(t, 0.45, 0.3)); show(gp, stage(t, 0.65, 0.35)); };
+  }, { dur: 1400 });
+
+  /* ----- 14-02 · forces for continuity and for change ----- */
+  F.attchange = (fig) => split13(fig, {
+    top: ['依恋取向', '中等程度地稳定，也会改变', 'b'],
+    cols: [
+      ['倾向于保持稳定', '', 'b', [['已有的期待', '影响人们怎样解读新的经历', 'b'], ['熟悉的关系模式', '人们倾向于选择和维持熟悉的相处方式', 'b'], ['较稳定的个人特点', '例如人格和情绪上的倾向', 'b']]],
+      ['可能促成改变', '', 'r', [['长期可靠的关系', '对方回应及时、说到做到', 'r'], ['重大的生活转变', '分手、结婚、为人父母、失去亲人', 'r'], ['年龄与经验', '焦虑和回避平均随年龄缓慢下降', 'r']]],
+    ],
+    bottom: ['两种力量同时存在', '改变通常是渐进的，也可能朝不安全的方向发展', 'm'],
+    note: '<p>左右两栏都来自本讲介绍的纵向研究，但每个箭头在具体的人身上有多强，研究无法预先算出。</p>',
+  });
+
+  /* ----- 14-03 · Sternberg's triangle ----- */
+  F.lovetri = (fig) => figure(fig, (box, w, api) => {
+    const bw = Math.min(210, w * 0.46), ah = bx13H(bw, '亲密', '亲近、理解、联结', 50), ch = Math.max(bx13H(bw, '激情', '渴望、身体上的吸引', 50), bx13H(bw, '决定与承诺', '决定去爱，并维持这份爱', 50));
+    const tri = Math.min(w - 40, 520) * 0.62, ax = w / 2, ay = ah + 10, by = ay + tri, half = tri / Math.sqrt(3) * 1.15;
+    const B = [ax - half, by], C = [ax + half, by], H = by + 12 + ch, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('path', { d: `M${ax},${ay} L${B[0]},${B[1]} L${C[0]},${C[1]} Z`, class: 'fx-ln fx-lb', fill: 'none' }, g0).style.strokeWidth = 1.8;
+    const gv = el('g', {}, s); gs.push(gv);
+    bx13(gv, ax - bw / 2, 0, bw, '亲密', '亲近、理解、联结', 'b', ah);
+    bx13(gv, Math.max(0, B[0] - bw / 2), by + 12, bw, '激情', '渴望、身体上的吸引', 'b', ch);
+    bx13(gv, Math.min(w - bw, C[0] - bw / 2), by + 12, bw, '决定与承诺', '决定去爱，并维持这份爱', 'b', ch);
+    const ge = el('g', {}, s); gs.push(ge);
+    const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], A = [ax, ay];
+    [[mid(A, B), '浪漫的爱', '亲密＋激情', 'end', -10], [mid(A, C), '伴侣式的爱', '亲密＋承诺', 'start', 10], [mid(B, C), '愚蠢的爱', '激情＋承诺', 'middle', 0]].forEach(([[x, y], t, sub, a, dx], i) => {
+      el('circle', { cx: x, cy: y, r: 3.5, class: 'fx-node b' }, ge);
+      const yy = i === 2 ? y - 26 : y;
+      tx(ge, x + dx, yy, t, 'fx-s fx-b fx-halo', a); tx(ge, x + dx, yy + 15, sub, 'fx-n fx-halo', a);
+    });
+    const gc = el('g', {}, s); gs.push(gc);
+    const cy = ay + tri * 0.6;
+    el('circle', { cx: ax, cy: cy - 24, r: 5, class: 'fx-node r' }, gc);
+    tx(gc, ax, cy - 2, '完美的爱', 'fx-s fx-r fx-halo', 'middle'); tx(gc, ax, cy + 13, '三者兼备', 'fx-n fx-halo', 'middle');
+    api.out.innerHTML = '<p>顶点是三个成分，边的中点是两两组合，中央是三者兼备。只有一个成分时，斯滕伯格分别称为喜欢（只有亲密）、迷恋（只有激情）和空洞的爱（只有承诺）。这些名称是理论的分类，不是对哪段关系好坏的评判。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.35)));
+  }, { dur: 1200 });
+
+  /* ----- 14-03 · satisfaction and stability are different outcomes ----- */
+  F.satstab = (fig) => quad14(fig, ['关系持续', '关系结束'], ['满意度高', '满意度低'], [
+    ['满意而持续', '双方都觉得关系很好，也一直在一起', 'b'],
+    ['满意但结束', '例如因为异地工作、家庭反对或人生方向不同而分开', 'b'],
+    ['不满意但持续', '例如因为孩子、经济依赖、社会压力或替代选择很差而留下', 'r'],
+    ['不满意而结束', '关系让人痛苦，最终分开', 'b'],
+  ], '<p>红框一格说明：持续时间长不等于关系健康。只用“是否分手”衡量关系，会把这一格和左上角混为一谈。</p>');
+
+  /* ----- 14-03 · the popular love-languages claims vs what the studies measure ----- */
+  F.lovelang = (fig) => split13(fig, {
+    cols: [
+      ['流行的说法', '', 'r', [['每人一种主要语言', '只要找到对方的那一种', 'r'], ['正好五种', '言辞、时间、礼物、服务、接触', 'r'], ['匹配才会满意', '说对方的语言，关系就会好', 'r']]],
+      ['研究实际检验的', '', 'b', [['很多人看重多种表达', '强迫选出一种，可能掩盖真实的需要', 'b'], ['五类来自咨询经验', '而不是对大量数据的系统分析', 'b'], ['少量小样本相关研究', '结果不一致，难以区分因果', 'b']]],
+    ],
+    bottom: ['更有证据支持的说法', '人们需要多种形式的关心与回应，就像饮食需要多种营养', 'b'],
+    note: '<p>右栏和下方的比喻来自因佩特、帕克和缪斯（2024）的综述；“均衡的饮食”本身也是一个比喻，而不是实验结论。</p>',
+  });
+
+  /* ----- 14-04 · behaviour, emotion, inferred intention ----- */
+  F.threelayer = (fig) => flow14(fig, [
+    ['1　可以观察到的行为', '看着手机，只回了一个“嗯”', 'b', '双方都能看到，可以客观描述'],
+    ['2　我的情绪反应', '失望，觉得被忽视', 'b', '真实的感受，只有自己能直接体验'],
+    ['3　推断的意图', '可能是：不在乎我；累了，没听进去；在处理急事', 'r', '有多种可能，却常常被当作事实说出口'],
+  ], '<p>“你一边看手机一边回我，我有点失望”说的是第 1、2 层；“你根本不在乎我”说的是第 3 层里的一种猜测。前一种说法给对方留下了回应的空间。</p>', ['同一个时刻', '我在说想一起计划假期，伴侣在看手机', 'm']);
+
+  /* ----- 14-04 · demand–withdraw: each partner's reading feeds the next step ----- */
+  F.dwcycle = (fig) => cycle14(fig, [
+    ['提出要求或批评', '“你每次都不听我说话”', 'b'],
+    ['感到被指责', '把它理解为攻击，开始防御', 'm'],
+    ['退缩或沉默', '“我很累”，然后离开房间', 'b'],
+    ['感到被忽视', '把退缩理解为不在乎', 'm'],
+  ], ['每个人都觉得', '自己只是在回应对方'], '<p>实线框是看得见的行为，虚线框是各自的解读。研究发现，谁更常处在“要求”的位置，很大程度上取决于谁想要改变，而不是性别本身（克里斯滕森和希维，1990）。</p>');
+
+  /* ----- 14-05 · the investment model, plus constraints it leaves out ----- */
+  F.investmodel = (fig) => figure(fig, (box, w, api) => {
+    const IN = [['满意度', '关系带来的好处与代价', '＋'], ['替代选择的质量', '离开之后的可能', '−'], ['投入的大小', '时间、情感、共同的住所、孩子、朋友', '＋']];
+    const wide = w >= 600, gs = [];
+    let s;
+    if (wide) {
+      const lw = w * 0.36, mw = w * 0.22, rw = w * 0.2, gx = (w - lw - mw - rw) / 2, ih = Math.max(...IN.map(([t, sub]) => bx13H(lw, t, sub, 56))), vg = 14;
+      const colH = 3 * ih + 2 * vg, ch = 60, ey = colH + 34, eh = bx13H(w * 0.7, '模型之外的约束', '安全风险、强制控制、住房和法律问题，也会直接影响能否离开', 46), H = ey + eh;
+      s = svgIn(box, w, H, fig);
+      const mx = lw + gx, rx = mx + mw + gx, my = colH / 2 - ch / 2;
+      IN.forEach(([t, sub, sg], i) => {
+        const g = el('g', {}, s); gs.push(g); const y = i * (ih + vg);
+        bx13(g, 0, y, lw, t, sub, 'b', ih);
+        arrow(g, lw + 4, y + ih / 2, mx - 4, my + ch / 2 + (i - 1) * 14, sg === '−' ? 'r' : '', 6);
+        tx(g, lw + gx / 2, (y + ih / 2 + my + ch / 2 + (i - 1) * 14) / 2 - 6, sg, 'fx-h fx-halo' + (sg === '−' ? ' fx-r' : ''), 'middle');
+      });
+      const g = el('g', {}, s); gs.push(g);
+      bx13(g, mx, my, mw, '承诺', '打算维持这段关系', 'b', ch);
+      arrow(g, mx + mw + 4, my + ch / 2, rx - 4, my + ch / 2, '', 7);
+      bx13(g, rx, my, rw, '留下或离开', '', 'b', ch);
+      const ge = el('g', {}, s); gs.push(ge);
+      bx13(ge, (w - w * 0.7) / 2, ey, w * 0.7, '模型之外的约束', '安全风险、强制控制、住房和法律问题，也会直接影响能否离开', 'm', eh);
+      const a = arrow(ge, (w + w * 0.7) / 2 - 20, ey - 2, rx + rw / 2, my + ch + 4, 'r', 6); a.querySelector('line').style.strokeDasharray = '4 4';
+    } else {
+      const ih = Math.max(...IN.map(([t, sub]) => bx13H(w - 30, t, sub, 50))), vg = 10, colH = 3 * ih + 2 * vg, ch = 56, my = colH + 44, oy = my + ch + 40, eh = bx13H(w, '模型之外的约束', '安全风险、强制控制、住房和法律问题，也会直接影响能否离开', 46), ey = oy + ch + 40;
+      const H = ey + eh; s = svgIn(box, w, H, fig);
+      IN.forEach(([t, sub, sg], i) => {
+        const g = el('g', {}, s); gs.push(g); const y = i * (ih + vg);
+        bx13(g, 30, y, w - 30, t, sub, 'b', ih);
+        tx(g, 12, y + ih / 2 + 6, sg, 'fx-h' + (sg === '−' ? ' fx-r' : ''), 'middle');
+      });
+      const g = el('g', {}, s); gs.push(g);
+      tx(g, 0, colH + 18, '＋ 越高，承诺越强；− 越好，承诺越弱', 'fx-n');
+      arrow(g, w / 2, colH + 24, w / 2, my - 4, '', 6);
+      bx13(g, 0, my, w, '承诺', '打算维持这段关系', 'b', ch);
+      arrow(g, w / 2, my + ch + 4, w / 2, oy - 4, '', 6);
+      bx13(g, 0, oy, w, '留下或离开', '', 'b', ch);
+      const ge = el('g', {}, s); gs.push(ge);
+      const a = arrow(ge, w / 2, ey - 4, w / 2, oy + ch + 4, 'r', 6); a.querySelector('line').style.strokeDasharray = '4 4';
+      bx13(ge, 0, ey, w, '模型之外的约束', '安全风险、强制控制、住房和法律问题，也会直接影响能否离开', 'm', eh);
+    }
+    api.out.innerHTML = '<p>“＋”表示越高承诺越强，“−”表示替代选择越好承诺越弱。三者合起来解释了承诺差异的近三分之二（勒和阿格纽，2003）。满意度只是其中之一：满意度很低时，替代选择差、投入多，仍可能产生很强的承诺。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.13, 0.35)));
+  }, { dur: 1300 });
+
+  /* ----- 14-05 · many constraints on leaving ----- */
+  F.leaveconstraints = (fig) => fan13(fig, '离开一段关系', '是一个过程，常常同时受到多种约束', '可能的约束（不同的人组合不同）', [
+    ['经济', '收入、工作、账户和财产在谁名下', 'b', 0],
+    ['孩子', '抚养、探视、孩子生活的稳定', 'b', 0],
+    ['住房', '能否找到安全的住处', 'b', 0],
+    ['情感', '仍有的感情、希望、矛盾的心情', 'b', 0],
+    ['社会与文化', '家人的期待、对分手或离婚的看法', 'b', 0],
+    ['法律与身份', '证件、居留、财产和抚养的程序', 'b', 0],
+    ['安全', '离开时和离开后可能的危险', 'r', 0],
+  ], '<p>红框单独标出，是因为在存在暴力或控制的关系中，离开时和离开之后可能是风险最高的时期之一。没有一种约束能单独解释所有人的处境。</p>');
+
+  /* ----- 14-05 · commitment is not well-being ----- */
+  F.commitwell = (fig) => quad14(fig, ['承诺高', '承诺低'], ['身心状况好', '身心状况差'], [
+    ['投入，也过得好', '一段让人投入、也让人过得好的关系', 'b'],
+    ['平和，但不打算长久', '例如双方对未来没有长期的打算', 'b'],
+    ['想留下，却很痛苦', '常常是投入多、替代选择少或外部约束多的结果', 'r'],
+    ['想离开，也过得不好', '关系让人痛苦，也已不想继续', 'b'],
+  ], '<p>红框一格最容易被误解：“他没有离开”常被当作“情况没那么糟”的证据，但承诺的高低不能说明一段关系是否健康。</p>');
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;
