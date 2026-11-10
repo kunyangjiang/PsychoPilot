@@ -1,0 +1,209 @@
+<!-- PsychoPilot · 17-04 · 精神科药物治疗：疗效、局限与“化学失衡”说法
+     Manuscript of the lesson body. Loaded by lesson.js into course.html.
+     Conventions: each <section> has an <h2> (numbered by the reader); [n] marks link to #ref-n;
+     <figure data-figure="…"> is drawn by figs.js, <div data-quiz> by lesson.js. -->
+
+<p class="l-open">“抑郁是因为大脑里缺少血清素，吃药就是把它补回来。”许多人都听过这样的解释，它简单、好记，也似乎能减少人们对抑郁的羞耻感：问题不是“想不开”，而是化学物质的失衡。另一种同样流行的说法则走向了反面：“精神科的药都是控制人的，一吃就停不下来。”这两种说法都过于简单。前者把一个复杂的问题归结为一种物质，后者把一类可能帮助许多人的治疗描述为有害。</p>
+<p>这一讲的核心问题是：<strong>精神科药物怎样影响心理症状？它们的局限是什么？为什么流行的“化学失衡”说法具有误导性？</strong>我们会介绍主要的药物类别、它们的作用方式和研究证据，讨论平均效果与个体反应、副作用、停药反应和复发，以及药物与心理治疗的关系。需要特别说明的是：这一讲只介绍科学证据，<b>不提供任何用药建议</b>。开始、停止或调整任何药物，都需要在医生的评估和指导下进行。</p>
+
+<section id="s1">
+  <h2>精神药理学的发展</h2>
+  <p>现代精神科药物大多出现在 20 世纪 50 年代以后，其中许多发现带有偶然性。1952 年，原本作为麻醉辅助用药研究的氯丙嗪被发现能够减轻精神病性症状，成为第一种抗精神病药，深刻改变了精神病院的面貌。[1] 同一时期，用于治疗结核病的异烟肼类药物异丙烟肼被观察到能改善病人的情绪，三环类的丙咪嗪也在研究中表现出抗抑郁作用，成为最早的两种抗抑郁药；20 世纪 80 年代末，选择性血清素再摄取抑制剂（SSRI）氟西汀进入临床，再次改变了抑郁的治疗。[2]</p>
+  <p>这段历史有一个重要的特点：<b>先发现药物有效，后研究它怎样起作用</b>。研究者在分析这些药物作用于哪些神经递质之后，才提出了关于抑郁和精神病的“单胺假说”和“多巴胺假说”。后面会看到，这种从药物作用倒推病因的思路，本身就存在逻辑上的问题。</p>
+</section>
+
+<section id="s2">
+  <h2>主要的药物类别</h2>
+  <p>精神科药物通常按照它们最初或最主要的用途分类，但这种名称并不完全反映它们的实际用途：例如，许多“抗抑郁药”也用于治疗焦虑障碍和强迫症。</p>
+  <div class="l-table" role="region" aria-label="主要的精神科药物类别" tabindex="0">
+    <table>
+      <thead><tr><th>类别</th><th>主要用于</th><th>主要作用方式（简化）</th><th>需要关注的问题举例</th></tr></thead>
+      <tbody>
+        <tr><td>抗抑郁药</td><td>抑郁障碍，也用于多种焦虑障碍和强迫症</td><td>多数影响血清素和（或）去甲肾上腺素系统</td><td>胃肠反应、睡眠改变、性功能问题、停药反应</td></tr>
+        <tr><td>抗焦虑和镇静催眠药（如苯二氮䓬类）</td><td>急性焦虑、失眠的短期处理</td><td>增强抑制性神经递质 GABA 的作用</td><td>镇静、耐受、依赖、停药反应</td></tr>
+        <tr><td>心境稳定剂（如锂盐）</td><td>双相障碍的治疗和预防复发</td><td>机制尚未完全清楚</td><td>需要定期监测血药浓度和身体指标</td></tr>
+        <tr><td>抗精神病药</td><td>精神分裂症等精神病性障碍，也用于双相障碍</td><td>多数阻断多巴胺 D2 受体，常同时作用于其他受体</td><td>体重和代谢变化、运动方面的副作用、镇静</td></tr>
+        <tr><td>兴奋剂类药物</td><td>注意缺陷多动障碍</td><td>增加多巴胺和去甲肾上腺素的作用</td><td>食欲下降、睡眠问题，以及误用的风险</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="l-aside">表格是高度简化的概括，每一类药物内部差异很大，不能用来判断任何具体药物是否适合某个人。具体药物的用途、风险和注意事项，以当地药品监管部门批准的说明书和医生的评估为准。</p>
+</section>
+
+<section id="s3">
+  <h2>神经递质与药物怎样起作用</h2>
+  <p>第 3 阶段介绍过神经元之间的化学传递：一个神经元把神经递质释放到突触间隙，递质与下一个神经元上的受体结合，之后被重新摄取回原来的神经元，或者被酶分解。精神科药物通常作用于这个过程中的某一个环节。例如，选择性血清素再摄取抑制剂阻断了血清素的再摄取，使突触间隙中的血清素在短时间内增加；大多数抗精神病药阻断多巴胺 D2 受体；苯二氮䓬类药物增强 GABA 受体的作用。</p>
+  <figure class="l-fig" data-figure="synapse" data-alt="简化的突触示意图。左侧是释放神经递质的神经元末梢，右侧是接收信号的神经元，中间是突触间隙。图中标出几个药物可能作用的环节：一、再摄取转运体，选择性血清素再摄取抑制剂阻断血清素的再摄取；二、突触后受体，多数抗精神病药阻断多巴胺 D2 受体；三、抑制性受体，苯二氮䓬类增强 GABA 的作用。图中注明：药物在突触上的直接作用往往在几小时内出现，而临床上的改善常常需要数周，说明“作用位置”并不等于“起效原因”；一种神经递质也不对应一种情绪。">
+    <figcaption>图 1　药物在突触上的几个作用环节（高度简化）。药物的直接作用与临床改善之间隔着许多尚未完全理解的步骤，一种神经递质也不对应一种情绪。</figcaption>
+  </figure>
+  <p>这里有一个值得注意的现象：选择性血清素再摄取抑制剂在服药后不久就能改变突触中的血清素水平，但抑郁的改善通常需要数周才明显。这说明，药物的直接作用与症状改善之间，还隔着许多复杂的、尚未完全理解的下游变化。神经递质也不是“情绪物质”：血清素、多巴胺等参与了大脑中许多不同的功能，同一种递质在不同的脑区和受体上可能产生非常不同的效果。</p>
+</section>
+
+<section id="s4">
+  <h2>抗抑郁药的证据</h2>
+  <p>抗抑郁药是研究得最多的精神科药物之一。2018 年的一项网络元分析纳入了 522 项双盲随机对照试验、十一万多名患有重性抑郁障碍的成年人，比较了 21 种抗抑郁药。所有药物在短期治疗中的“反应”率都高于安慰剂，比值比在约 1.37 到 2.13 之间；但大多数试验的偏倚风险为中等，证据的确定性从中等到极低。[3]</p>
+  <p>“优于安慰剂”是一个相对的说法，关键在于差别有多大。一项分析使用了提交给美国食品药品监督管理局的全部试验数据（包括未发表的数据），发现药物与安慰剂之间的差别随着抑郁的严重程度而增加：在中度抑郁中几乎没有差别，在非常严重的抑郁中差别较大，但即使在严重抑郁中，差别也相对较小。[4] 另一项使用个体患者数据的研究发现，在抑郁量表得分较低的患者中，药物相对于安慰剂的效果量小于 0.2。[5]</p>
+  <p>2022 年的一项研究分析了 1979 年到 2016 年提交给美国食品药品监督管理局的 232 项试验、七万多名参与者的个体数据。平均来说，药物组的症状改善只比安慰剂组多 1.75 分。这个分数以 17 项汉密尔顿抑郁量表（HAMD-17，总分 0 到 52 分）为单位：用其他量表测量的结果，都被换算成了这个量表上的等值分数。1.75 分是两组平均值之间的距离，是群体层面的结果：它不能告诉我们某一个人服药后会改善多少，本身也不能说明这个差别在临床上是否有意义，后者需要另外的标准来判断，研究者对此仍有争论（第 17-01 讲讨论过统计显著与临床显著的区别）。这个平均数还掩盖了个体差异：参与者的反应大致可以分为“大幅改善”“中等改善”（作者称为“非特异反应”）和“很少改善”三类，药物组中出现大幅改善的比例约为 25%，安慰剂组约为 10%。作者估计，约 15% 的参与者获得了超出安慰剂效应的明显效果。[6]</p>
+  <p>这些研究的解读存在争论。有人强调平均差别很小，认为抗抑郁药的价值被高估了；也有人强调，对于一部分患者，尤其是较严重的抑郁，药物带来了重要的帮助，而且临床试验中的“安慰剂反应”本身包含了自然好转、定期随访和关注等因素。两种观点都同意的一点是：<b>抗抑郁药平均来说有效果，但效果的大小有限，而且个体差异很大</b>。</p>
+</section>
+
+<section id="s5">
+  <h2>抗焦虑药物</h2>
+  <p>苯二氮䓬类药物能够迅速减轻焦虑、帮助入睡，作用通常在服药后不久就出现。但它们也有明显的问题：长期使用可能产生耐受（需要更大的剂量才能达到同样的效果）和依赖，突然停用可能出现停药反应，还可能带来镇静、注意力下降，在老年人中增加跌倒的风险。[7] 因此，许多临床指南建议，这类药物一般用于短期处理，长期治疗焦虑障碍通常考虑其他药物或心理治疗。具体的选择需要由医生根据个人情况判断。</p>
+  <p>许多焦虑障碍的药物治疗，实际上使用的是抗抑郁药。这也说明，药物的名称与它所治疗的问题之间并不是一一对应的。</p>
+</section>
+
+<section id="s6">
+  <h2>心境稳定剂</h2>
+  <p>第 16-02 讲介绍过双相障碍。锂盐是最早用于治疗双相障碍的药物，至今仍是重要的选择之一。一项元分析汇总了 5 项随机对照试验，发现在长期治疗中，锂盐比安慰剂更能减少复发，对躁狂发作的预防作用比较明确，对抑郁发作的作用则较小且不够确定。[8] 另一项汇总了 48 项随机对照试验的元分析发现，在心境障碍患者中，锂盐与安慰剂相比减少了自杀的人数。[9]</p>
+  <p>锂盐的有效浓度与可能中毒的浓度之间距离较小，因此需要定期检测血液中的药物浓度，以及肾脏、甲状腺等身体指标。这个例子说明，药物的效果和风险需要放在一起权衡，并依赖持续的临床监测。</p>
+</section>
+
+<section id="s7">
+  <h2>抗精神病药</h2>
+  <p>2019 年的一项网络元分析纳入了 402 项研究、五万多名精神分裂症急性期的成年患者，比较了 32 种口服抗精神病药。几乎所有药物在减轻总体症状上都优于安慰剂（其中 6 种的差别没有达到统计显著）；不同药物之间的疗效差别大多是渐进的，而副作用的差别更加明显，例如体重增加、催乳素升高、镇静、需要使用抗帕金森药物的运动方面副作用，以及心电图的变化。[10] 作者指出，医生需要根据患者的身体状况和偏好，在疗效和不同的副作用之间权衡。</p>
+  <p>在长期治疗方面，一项元分析汇总了 65 项试验，比较了病情稳定后继续使用抗精神病药与改用安慰剂的患者：一年内，继续用药组的复发率约为 27%，安慰剂组约为 64%。[11] 这说明维持治疗能够显著减少复发；但长期用药也伴随着代谢和运动方面的风险，而且并不是每一个人都需要同样长时间的维持治疗。怎样在复发风险和长期副作用之间取得平衡，是精神科医生和患者需要共同讨论的问题，也是研究中仍有争论的领域。</p>
+</section>
+
+<section id="s8">
+  <h2>兴奋剂类药物与注意缺陷多动障碍</h2>
+  <p>第 16-05 讲讨论过注意缺陷多动障碍。治疗这一障碍的药物包括哌甲酯和苯丙胺类等兴奋剂，以及一些非兴奋剂类药物。一项网络元分析纳入了 133 项双盲随机对照试验，发现在儿童和青少年中，根据临床医生的评定，所有被研究的药物都比安慰剂更能减轻核心症状；在成年人中，多数药物也优于安慰剂；但一些药物的耐受性较差，因副作用而退出研究的比例高于安慰剂。[12] 这些试验大多是短期的，关于长期效果和长期安全性的证据相对有限。</p>
+  <p>兴奋剂类药物也存在被误用的风险，例如没有诊断的人为了“提高学习效率”而使用。这类使用并没有经过评估，也可能带来健康风险。</p>
+</section>
+
+<section id="s9">
+  <h2>血清素与抑郁：“化学失衡”说法</h2>
+  <p>“抑郁是由血清素不足引起的化学失衡”这一说法，在 20 世纪 90 年代以后广为流传，部分原因在于药品广告和大众宣传。2005 年，两位研究者分析了这些广告，指出它们传达的“血清素失衡”说法，与当时的科学文献并不一致。[13]</p>
+  <p>2022 年发表的一项综述系统地回顾了关于血清素与抑郁关系的多类研究，包括血液和脑脊液中的血清素代谢物、血清素受体和转运体、人为降低血清素的实验以及相关基因的研究，结论是没有一致的证据支持抑郁与血清素水平降低或活性降低有关。[14] 第 16-02 讲提到过这项研究。这项综述引起了很大的争议：批评者指出，它没有说明抗抑郁药无效，血清素系统仍可能以更复杂的方式参与抑郁及其治疗；不少研究者也表示，“简单的血清素不足”早已不是学术界的主流观点。</p>
+  <p>比较稳妥的结论是：<b>“抑郁就是血清素不足”的简单说法没有得到证据的支持</b>；抑郁是一种异质性很高的状况，涉及多种生物、心理和社会因素。同时，这个结论<b>不等于“抗抑郁药无效”</b>，药物是否有效，需要由临床试验来回答，而不是由病因理论来回答。</p>
+</section>
+
+<section id="s10">
+  <h2>多巴胺与精神病</h2>
+  <p>抗精神病药阻断多巴胺 D2 受体，而能够增加多巴胺作用的药物（例如苯丙胺）在大剂量时可以引起精神病性症状，这些观察促成了精神分裂症的“多巴胺假说”。经过几十年的修正，当代的版本认为，许多精神病患者纹状体中多巴胺的合成和释放能力增高，这可能与把不相关的事物体验为“有特别意义”有关，并被看作多种风险因素可能共同通向的一条“最终共同通路”。[15]</p>
+  <p>然而，这并不意味着精神分裂症“就是多巴胺过多”。多巴胺假说主要与阳性症状有关，难以解释阴性症状和认知方面的困难；谷氨酸等其他神经递质系统、神经发育的异常以及环境因素也被认为参与其中。[16] 第 16-04 讲讨论过精神病性障碍的多因素解释。</p>
+</section>
+
+<section id="s11">
+  <h2>药物的作用机制不等于疾病的原因</h2>
+  <p>从药物的作用倒推疾病的原因，是一个常见的逻辑错误。一个经典的比喻是：阿司匹林可以缓解头痛，但这不说明头痛是由“阿司匹林不足”引起的。同样，一种增加血清素作用的药物能改善部分人的抑郁，也不能证明这些人的抑郁是由血清素不足引起的；一种阻断多巴胺受体的药物能减轻幻觉和妄想，也不能证明精神病就是多巴胺过多。</p>
+  <figure class="l-fig" data-figure="mechcause" data-alt="对比示意图，上下两个问题。上面是“药物怎样起作用？”：药物作用于某个环节，例如增加血清素作用，经过一系列尚未完全理解的下游变化，部分人的症状得到改善。下面是“疾病为什么出现？”：多种风险因素，包括遗传、发育、应激、生活处境和其他尚未明确的生物过程，通过多条路径导致症状。两者之间画了一个带问号的虚线连接，旁边注明：药物能改善症状，不能证明疾病的原因就是药物作用的那个环节；阿司匹林能缓解头痛，不说明头痛来自缺少阿司匹林。">
+    <figcaption>图 2　药物作用机制与疾病病因是两个不同的问题。一种药物可能通过绕过或补偿的方式改善症状，而不是纠正了最初的原因。</figcaption>
+  </figure>
+  <p>药物可能通过补偿、绕过或者间接影响其他过程来改善症状，而不是纠正了最初出了问题的那个环节。这个原则与第 17-03 讲讨论的“治疗有效不等于理论正确”是同一个逻辑：无论是心理治疗还是药物，<b>“它有效”和“它为什么有效”以及“问题为什么出现”，是三个不同的问题</b>。</p>
+</section>
+
+<section id="s12">
+  <h2>平均效果、个体反应与起效时间</h2>
+  <p>临床试验报告的是平均效果，但每一个人的反应都可能不同。有些人对第一种药物反应良好，有些人需要尝试不同的药物，还有一些人对多种药物都没有明显的反应。目前，研究者还不能可靠地预测哪一个人会对哪一种药物产生反应。</p>
+  <figure class="l-fig" data-figure="avgindiv" data-alt="分布示意图：模拟的药物组和安慰剂组中，每个人症状改善程度的分布。两条分布曲线大部分重叠，药物组的曲线略向“改善更多”的方向移动，平均值之间只相差一小段距离。图中标出：安慰剂组中也有很多人明显改善；药物组中也有人几乎没有改善；平均差别描述的是两组的中心位置，不能告诉我们某一个人会怎样。图中注明：数据是模拟的，不代表任何真实研究。">
+    <figcaption>图 3　平均效果与个体差异。两组的分布大部分重叠：安慰剂组中也有人明显改善，药物组中也有人改善很少。数据是模拟的。</figcaption>
+  </figure>
+  <p>起效的时间也因药物而异。苯二氮䓬类药物的作用很快，而抗抑郁药的临床改善通常需要数周才能充分显现；副作用则可能在开始服药后不久就出现，这可能让一些人在药物起效之前就停止服用。因此，医生通常会在开始治疗后的一段时间内安排随访，评估效果和副作用，并根据情况做出调整。</p>
+</section>
+
+<section id="s13">
+  <h2>副作用与不良反应</h2>
+  <p>所有有效的药物都有可能带来副作用。抗抑郁药常见的副作用包括胃肠不适、睡眠改变、性功能方面的问题等；抗精神病药可能导致体重增加和代谢变化、运动方面的问题以及镇静；兴奋剂类药物可能影响食欲和睡眠。不同的药物、不同的人，副作用的种类和程度差别很大。[10]</p>
+  <p>一个需要特别关注的问题，是抗抑郁药在年轻人中与自杀想法和行为的关系。美国食品药品监督管理局分析了 24 项儿童和青少年的安慰剂对照试验、四千五百多名参与者，发现服用抗抑郁药的人报告自杀想法或行为的风险约为服用安慰剂者的两倍，绝对风险的差别约为 2 个百分点；这些试验中没有发生自杀死亡。[17] 根据这些数据，监管部门要求在说明书中加入警示，并建议在治疗初期对年轻患者进行密切观察。这个发现说明了<b>临床监测的重要性</b>，而不是说明年轻人一律不能使用抗抑郁药：是否使用、怎样观察，需要由医生在评估风险和益处之后与患者及家属共同决定。</p>
+</section>
+
+<section id="s14">
+  <h2>停药反应、复发与再发</h2>
+  <p>停用精神科药物时可能出现的问题，需要区分三种不同的情况：</p>
+  <ul class="l-points">
+    <li><b>停药反应</b>（也称撤药症状）：在减少或停止药物后出现的新的症状，例如头晕、类似“电击”的感觉、睡眠问题、易怒或焦虑，它们来自身体对药物撤除的适应过程。</li>
+    <li><b>复发</b>：原来那一次发作在完全恢复之前重新出现，通常发生在停药后不久。</li>
+    <li><b>再发</b>：在恢复了一段时间之后，出现一次新的发作。</li>
+  </ul>
+  <figure class="l-fig" data-figure="stopping" data-alt="三条时间线的示意图，横轴都是停药后的时间。第一条是停药反应：减少或停止药物后数天内出现新的症状，例如头晕或类似电击的感觉，多数在一段时间内减轻，少数持续较久。第二条是复发：原来的症状在完全恢复之前重新出现，逐渐加重。第三条是再发：在一段较长的稳定期之后，出现一次新的发作。图中注明：三者的含义和处理方式不同；停药反应可能被误认为是复发，从而影响后续的治疗决定；曲线是示意，不代表真实的病程。">
+    <figcaption>图 4　停药反应、复发与再发的区别。三者的出现时间和性质不同，但在实际中有时难以区分。曲线只是示意。</figcaption>
+  </figure>
+  <p>停药反应有多常见？不同研究的估计差别很大。一项系统综述汇总了 14 项研究，发现抗抑郁药停药反应的发生率在 27% 到 86% 之间，加权平均约为 56%，并指出有相当一部分人的症状持续超过两周。[18] 2024 年，亨斯勒等人的元分析纳入了 79 项研究（44 项随机对照试验和 35 项观察性研究）、两万多名患者：停用抗抑郁药后至少出现一种停药症状的比例约为 31%，停用安慰剂的人中也有约 17% 报告了类似症状；考虑到这些非特异的因素，作者估计停药反应的发生率约为 15%。严重停药症状的比例，在停用抗抑郁药的人中约为 2.8%，在停用安慰剂的人中约为 0.6%。作者也指出，研究之间的差异很大。[19]</p>
+  <p>这篇综述发表后引起了争论。2025 年，蒙克里夫、霍罗威茨等人对它进行了评估和重新分析，指出了几个方法上的问题：纳入的数据大多来自以检验疗效为目的、由制药企业资助的试验，停药症状主要依靠参与者自发报告的不良事件，而不是用专门的方法系统地询问；一部分停药症状可能被归类为复发；许多研究中参与者此前服药的时间较短，停药后的观察时间也较短；用来估计“严重”停药反应的指标也值得商榷。他们只保留了 5 项用系统而相关的方法测量停药症状的研究，合并后的比例约为 55%（95% 置信区间 31% 到 81%，没有减去安慰剂组的类似症状），研究之间的异质性很高；而且这 5 项研究中，除一项外，参与者此前的服药时间都不超过 12 周。[20] 这个 55% 同样不能被看作适用于所有人的发生率：它只来自 5 项研究，置信区间很宽。</p>
+  <p>同年发表的另一项元分析纳入了 50 项随机对照试验，其中 49 项进入了合并分析。在用标准化停药症状量表测量的 11 项研究中，停药后第一周，停用抗抑郁药的人平均比继续服药或停用安慰剂的人多出约 1 种停药症状，最常见的是头晕。作者认为，这个平均数低于通常用来界定临床上明显的停药综合征的阈值；他们还认为停药后的情绪恶化更可能反映复发，不过这一点只基于 5 项研究。[21] 需要注意，这项研究衡量的是<b>平均多出的症状数量</b>，而不是<b>出现停药反应的人所占的比例</b>，所以它和上面 31%、15% 或 55% 这样的百分比不能直接相比。</p>
+  <p>把这些研究放在一起，比较稳妥的结论是：停药反应是真实存在的；估计出来的发生率，在很大程度上取决于怎样测量（自发报告还是系统询问）、此前服药多久、观察多长时间、研究怎样设计以及怎样定义“停药症状”；现有的几篇综述得出了不同的估计，也各有方法上的局限，目前的证据还不足以给出一个适用于所有人的精确百分比。严重或持续很久的停药反应不应被忽视，但它们在人群中究竟有多常见，仍不确定。这些讨论同样提醒我们，区分停药反应、复发和再发，在研究和临床中都很重要。</p>
+  <p>英国国家卫生与临床优化研究所（NICE）2022 年的抑郁症指南写道：停药反应可能很轻，通常在一到两周内消失；但有时会更困难，症状可能持续数周，偶尔持续数月；有时也可能很严重，尤其是在突然停药时。指南建议，想要停药的人应与开药的医生讨论，通常需要分阶段逐步减少剂量，同时也说明，大多数人能够成功停药。[22] 也有研究者提出，现行的减药速度对一些人可能过快，主张更缓慢的减量方式，并提醒停药反应可能被误认为是复发，导致不必要的长期用药。[23] 这一领域的证据和指南仍在发展之中。</p>
+  <p class="l-aside" role="note">请不要根据这一讲的内容自行开始、停止或改变任何药物的用法。如果你对正在使用的药物有疑问或担忧，包括想要停药，请与开药的医生讨论；突然停药可能带来风险。</p>
+</section>
+
+<section id="s15">
+  <h2>维持治疗与复发风险</h2>
+  <p>对于已经从抑郁中恢复的人，继续服用抗抑郁药能否减少复发？一项汇总了 31 项随机试验的分析发现，在治疗起效后被随机分配到继续服药组的患者，复发率约为 18%，而改用安慰剂的患者约为 41%。[24] 这类研究支持维持治疗对一部分人有益，尤其是复发风险较高的人。</p>
+  <p>但这些研究也有需要注意的地方。在许多“停药试验”中，改用安慰剂的患者停药较快，其中一部分被记录为“复发”的情况，可能实际上包含了停药反应。[23] 此外，维持治疗的益处需要与长期副作用、个人偏好和其他可选的预防方法（例如第 17-02 讲提到的认知治疗的持续效果）一起考虑。研究者对于维持治疗应该持续多久、对哪些人最有益，仍在讨论之中。</p>
+</section>
+
+<section id="s16">
+  <h2>依从性与治疗决定</h2>
+  <p>在实际生活中，相当多的人没有按照处方服药，或者自行停药。原因多种多样：副作用难以忍受，看不到明显的效果，担心依赖，对“长期吃药”感到羞耻，或者症状好转后认为不再需要。这些原因都值得被认真对待。</p>
+  <p>把不按处方服药简单地看作患者“不配合”，既不公平，也无益于解决问题。更有帮助的做法，是医生和患者坦诚地讨论药物的预期效果、可能的副作用和担忧，把它看作治疗关系中需要共同解决的问题。当一种药物不合适时，可以调整剂量、更换药物或者考虑其他治疗，这些都应该在医生的参与下进行。</p>
+</section>
+
+<section id="s17">
+  <h2>药物与心理治疗：比较与联合</h2>
+  <p>药物和心理治疗哪一个更好？对于成年人的抑郁，一项网络元分析纳入了 101 项研究、一万一千多名患者，发现单用心理治疗和单用药物治疗的效果没有显著差别，而两者联合比单用任何一种更有效。[25] 另一项元分析发现，在抗抑郁药的基础上加上心理治疗，对抑郁、惊恐障碍和强迫症都有额外的益处。[26] 第 17-02 讲也提到，认知行为治疗在长期随访中可能有更持久的效果。</p>
+  <p>不同的指南根据各自的证据评估和医疗条件，给出的建议有所不同。例如，英国 NICE 2022 年的抑郁症指南建议，对于程度较轻的抑郁，不要常规地把抗抑郁药作为首选治疗，除非这是患者在知情后的偏好；对于较严重的抑郁，则把心理治疗与药物联合作为选项之一。[22] 这份指南针对的是英国（英格兰）的医疗体系，其他国家和地区的指南可能不同。对于另一些问题，例如精神分裂症和双相障碍，药物通常是治疗的核心部分，心理社会干预作为补充。因此，“药物还是心理治疗”并没有一个适用于所有人和所有问题的答案。</p>
+</section>
+
+<section id="s18">
+  <h2>共同决策与临床监测</h2>
+  <p>当代的医疗实践越来越强调<b>共同决策</b>：医生提供关于不同选择的信息，包括可能的益处、风险、不确定性以及不治疗的后果；患者表达自己的价值、偏好和顾虑；双方共同做出决定。NICE 的指南也把为患者提供治疗选择、尊重其拒绝治疗的权利，列为基本的原则。[22]</p>
+  <p>药物治疗也需要持续的<b>临床监测</b>：定期评估症状、功能和副作用，必要时进行血液或身体检查，并根据情况调整。由于药物的批准用途、警示信息和指南建议会随着新证据而更新，并且在不同国家和地区有所不同，可靠的信息来源是当地药品监管部门批准的最新说明书、当前的临床指南和负责治疗的医生，而不是过时的总结、网络传言或他人的经验。</p>
+</section>
+
+<section id="s19">
+  <h2>结语：既不神化，也不妖魔化</h2>
+  <p>回到开头的两种说法。“抑郁就是缺少血清素，吃药把它补回来”过于简单：它没有得到证据的支持，也可能让人误以为药物是唯一的出路。“精神科的药都有害”同样过于简单：对于许多人，尤其是患有严重精神障碍的人，药物能够减轻痛苦、减少复发，是治疗的重要组成部分。</p>
+  <p>比较符合证据的看法是：精神科药物平均来说有效果，但效果的大小因药物、障碍和个人而不同；它们都有副作用和风险，停药也需要谨慎；药物的作用机制不能说明疾病的原因；是否使用、怎样使用，需要在专业评估的基础上共同决定，并持续监测。下一讲，我们会把本阶段的原则整合起来，讨论怎样评价各种心理健康干预，以及治疗中的伦理问题。</p>
+  <p class="l-aside" role="note">以下信息仅适用于中国大陆：全国统一心理援助热线是 12356，各地的服务时段可能不同；出现药物过量或其他紧急情况，请立即拨打 120；遇到其他紧急危险，请拨打 110。在其他国家和地区，可以查询当地的紧急电话和心理援助热线。</p>
+</section>
+
+<section id="sum" class="l-sum">
+  <h2>本讲要点</h2>
+  <ul>
+    <li>许多精神科药物是偶然发现的，关于病因的神经递质假说是在发现药物之后提出的。</li>
+    <li>主要的药物类别包括抗抑郁药、抗焦虑和镇静催眠药、心境稳定剂、抗精神病药和兴奋剂类药物；药物的名称不完全反映它们的用途。</li>
+    <li>抗抑郁药平均来说优于安慰剂，但平均差别有限，与严重程度有关，个体差异很大；抗精神病药和锂盐在减少复发方面有较清楚的证据。</li>
+    <li>“抑郁就是血清素不足”和“精神分裂症就是多巴胺过多”都是过度简化；药物的作用机制不等于疾病的原因。</li>
+    <li>所有药物都有副作用；年轻人使用抗抑郁药时需要特别注意监测。</li>
+    <li>停药反应、复发和再发是不同的情况；停药反应是真实存在的，但它的发生率估计取决于测量方法和研究设计，目前没有一个适用于所有人的精确数字；停药需要在医生指导下进行。</li>
+    <li>对于成年人的抑郁，药物和心理治疗平均效果相近，联合治疗更有效；具体选择需要共同决策和持续监测，并以当地最新的说明书和指南为准。</li>
+  </ul>
+</section>
+
+<section id="quiz">
+  <h2>检验一下</h2>
+  <div data-quiz></div>
+</section>
+
+<section id="refs" class="l-refs">
+  <h2>参考文献</h2>
+  <ol>
+    <li id="ref-1">López-Muñoz, F., Alamo, C., Cuenca, E., Shen, W., Clervoy, P., &amp; Rubio, G. (2005). History of the discovery and clinical introduction of chlorpromazine. <i>Annals of Clinical Psychiatry, 17</i>(3), 113–135. <a href="https://doi.org/10.1080/10401230591002002">doi:10.1080/10401230591002002</a></li>
+    <li id="ref-2">López-Muñoz, F., &amp; Alamo, C. (2009). Monoaminergic neurotransmission: The history of the discovery of antidepressants from 1950s until today. <i>Current Pharmaceutical Design, 15</i>(14), 1563–1586. <a href="https://doi.org/10.2174/138161209788168001">doi:10.2174/138161209788168001</a></li>
+    <li id="ref-3">Cipriani, A., Furukawa, T. A., Salanti, G., Chaimani, A., Atkinson, L. Z., Ogawa, Y., Leucht, S., Ruhe, H. G., Turner, E. H., Higgins, J. P. T., Egger, M., Takeshima, N., Hayasaka, Y., Imai, H., Shinohara, K., Tajika, A., Ioannidis, J. P. A., &amp; Geddes, J. R. (2018). Comparative efficacy and acceptability of 21 antidepressant drugs for the acute treatment of adults with major depressive disorder: A systematic review and network meta-analysis. <i>The Lancet, 391</i>(10128), 1357–1366. <a href="https://doi.org/10.1016/s0140-6736(17)32802-7">doi:10.1016/s0140-6736(17)32802-7</a></li>
+    <li id="ref-4">Kirsch, I., Deacon, B. J., Huedo-Medina, T. B., Scoboria, A., Moore, T. J., &amp; Johnson, B. T. (2008). Initial severity and antidepressant benefits: A meta-analysis of data submitted to the Food and Drug Administration. <i>PLoS Medicine, 5</i>(2), e45. <a href="https://doi.org/10.1371/journal.pmed.0050045">doi:10.1371/journal.pmed.0050045</a></li>
+    <li id="ref-5">Fournier, J. C., DeRubeis, R. J., Hollon, S. D., Dimidjian, S., Amsterdam, J. D., Shelton, R. C., &amp; Fawcett, J. (2010). Antidepressant drug effects and depression severity. <i>JAMA, 303</i>(1), 47–53. <a href="https://doi.org/10.1001/jama.2009.1943">doi:10.1001/jama.2009.1943</a></li>
+    <li id="ref-6">Stone, M. B., Yaseen, Z. S., Miller, B. J., Richardville, K., Kalaria, S. N., &amp; Kirsch, I. (2022). Response to acute monotherapy for major depressive disorder in randomized, placebo controlled trials submitted to the US Food and Drug Administration: Individual participant data analysis. <i>BMJ, 378</i>, e067606. <a href="https://doi.org/10.1136/bmj-2021-067606">doi:10.1136/bmj-2021-067606</a></li>
+    <li id="ref-7">Lader, M. (2011). Benzodiazepines revisited—Will we ever learn? <i>Addiction, 106</i>(12), 2086–2109. <a href="https://doi.org/10.1111/j.1360-0443.2011.03563.x">doi:10.1111/j.1360-0443.2011.03563.x</a></li>
+    <li id="ref-8">Geddes, J. R., Burgess, S., Hawton, K., Jamison, K., &amp; Goodwin, G. M. (2004). Long-term lithium therapy for bipolar disorder: Systematic review and meta-analysis of randomized controlled trials. <i>American Journal of Psychiatry, 161</i>(2), 217–222. <a href="https://doi.org/10.1176/appi.ajp.161.2.217">doi:10.1176/appi.ajp.161.2.217</a></li>
+    <li id="ref-9">Cipriani, A., Hawton, K., Stockton, S., &amp; Geddes, J. R. (2013). Lithium in the prevention of suicide in mood disorders: Updated systematic review and meta-analysis. <i>BMJ, 346</i>, f3646. <a href="https://doi.org/10.1136/bmj.f3646">doi:10.1136/bmj.f3646</a></li>
+    <li id="ref-10">Huhn, M., Nikolakopoulou, A., Schneider-Thoma, J., Krause, M., Samara, M., Peter, N., Arndt, T., Bäckers, L., Rothe, P., Cipriani, A., Davis, J., Salanti, G., &amp; Leucht, S. (2019). Comparative efficacy and tolerability of 32 oral antipsychotics for the acute treatment of adults with multi-episode schizophrenia: A systematic review and network meta-analysis. <i>The Lancet, 394</i>(10202), 939–951. <a href="https://doi.org/10.1016/s0140-6736(19)31135-3">doi:10.1016/s0140-6736(19)31135-3</a></li>
+    <li id="ref-11">Leucht, S., Tardy, M., Komossa, K., Heres, S., Kissling, W., Salanti, G., &amp; Davis, J. M. (2012). Antipsychotic drugs versus placebo for relapse prevention in schizophrenia: A systematic review and meta-analysis. <i>The Lancet, 379</i>(9831), 2063–2071. <a href="https://doi.org/10.1016/s0140-6736(12)60239-6">doi:10.1016/s0140-6736(12)60239-6</a></li>
+    <li id="ref-12">Cortese, S., Adamo, N., Del Giovane, C., Mohr-Jensen, C., Hayes, A. J., Carucci, S., Atkinson, L. Z., Tessari, L., Banaschewski, T., Coghill, D., Hollis, C., Simonoff, E., Zuddas, A., Barbui, C., Purgato, M., Steinhausen, H., Shokraneh, F., Xia, J., &amp; Cipriani, A. (2018). Comparative efficacy and tolerability of medications for attention-deficit hyperactivity disorder in children, adolescents, and adults: A systematic review and network meta-analysis. <i>The Lancet Psychiatry, 5</i>(9), 727–738. <a href="https://doi.org/10.1016/s2215-0366(18)30269-4">doi:10.1016/s2215-0366(18)30269-4</a></li>
+    <li id="ref-13">Lacasse, J. R., &amp; Leo, J. (2005). Serotonin and depression: A disconnect between the advertisements and the scientific literature. <i>PLoS Medicine, 2</i>(12), e392. <a href="https://doi.org/10.1371/journal.pmed.0020392">doi:10.1371/journal.pmed.0020392</a></li>
+    <li id="ref-14">Moncrieff, J., Cooper, R. E., Stockmann, T., Amendola, S., Hengartner, M. P., &amp; Horowitz, M. A. (2023). The serotonin theory of depression: A systematic umbrella review of the evidence. <i>Molecular Psychiatry, 28</i>(8), 3243–3256. <a href="https://doi.org/10.1038/s41380-022-01661-0">doi:10.1038/s41380-022-01661-0</a></li>
+    <li id="ref-15">Howes, O. D., &amp; Kapur, S. (2009). The dopamine hypothesis of schizophrenia: Version III—The final common pathway. <i>Schizophrenia Bulletin, 35</i>(3), 549–562. <a href="https://doi.org/10.1093/schbul/sbp006">doi:10.1093/schbul/sbp006</a></li>
+    <li id="ref-16">McCutcheon, R. A., Reis Marques, T., &amp; Howes, O. D. (2020). Schizophrenia—An overview. <i>JAMA Psychiatry, 77</i>(2), 201–210. <a href="https://doi.org/10.1001/jamapsychiatry.2019.3360">doi:10.1001/jamapsychiatry.2019.3360</a></li>
+    <li id="ref-17">Hammad, T. A., Laughren, T., &amp; Racoosin, J. (2006). Suicidality in pediatric patients treated with antidepressant drugs. <i>Archives of General Psychiatry, 63</i>(3), 332–339. <a href="https://doi.org/10.1001/archpsyc.63.3.332">doi:10.1001/archpsyc.63.3.332</a></li>
+    <li id="ref-18">Davies, J., &amp; Read, J. (2019). A systematic review into the incidence, severity and duration of antidepressant withdrawal effects: Are guidelines evidence-based? <i>Addictive Behaviors, 97</i>, 111–121. <a href="https://doi.org/10.1016/j.addbeh.2018.08.027">doi:10.1016/j.addbeh.2018.08.027</a></li>
+    <li id="ref-19">Henssler, J., Schmidt, Y., Schmidt, U., Schwarzer, G., Bschor, T., &amp; Baethge, C. (2024). Incidence of antidepressant discontinuation symptoms: A systematic review and meta-analysis. <i>The Lancet Psychiatry, 11</i>(7), 526–535. <a href="https://doi.org/10.1016/s2215-0366(24)00133-0">doi:10.1016/s2215-0366(24)00133-0</a></li>
+    <li id="ref-20">Moncrieff, J., Hobday, H., Sørensen, A., Read, J., Plöderl, M., Hengartner, M., Kamp, C., Jakobsen, J., Juul, S., Davies, J., &amp; Horowitz, M. (2025). Evidence on antidepressant withdrawal: An appraisal and reanalysis of a recent systematic review. <i>Psychological Medicine, 55</i>, e191. <a href="https://doi.org/10.1017/s0033291725100652">doi:10.1017/s0033291725100652</a></li>
+    <li id="ref-21">Kalfas, M., Tsapekos, D., Butler, M., McCutcheon, R. A., Pillinger, T., Strawbridge, R., Bhat, B. B., Haddad, P. M., Cowen, P. J., Howes, O. D., Joyce, D. W., Nutt, D. J., Baldwin, D. S., Pariante, C. M., Lewis, G., Young, A. H., Lewis, G., Hayes, J. F., &amp; Jauhar, S. (2025). Incidence and nature of antidepressant discontinuation symptoms: A systematic review and meta-analysis. <i>JAMA Psychiatry, 82</i>(9), 896–904. <a href="https://doi.org/10.1001/jamapsychiatry.2025.1362">doi:10.1001/jamapsychiatry.2025.1362</a></li>
+    <li id="ref-22">National Institute for Health and Care Excellence. (2022). <i>Depression in adults: Treatment and management</i> (NICE guideline NG222). <a href="https://www.nice.org.uk/guidance/ng222">www.nice.org.uk/guidance/ng222</a></li>
+    <li id="ref-23">Horowitz, M. A., &amp; Taylor, D. (2019). Tapering of SSRI treatment to mitigate withdrawal symptoms. <i>The Lancet Psychiatry, 6</i>(6), 538–546. <a href="https://doi.org/10.1016/s2215-0366(19)30032-x">doi:10.1016/s2215-0366(19)30032-x</a></li>
+    <li id="ref-24">Geddes, J. R., Carney, S. M., Davies, C., Furukawa, T. A., Kupfer, D. J., Frank, E., &amp; Goodwin, G. M. (2003). Relapse prevention with antidepressant drug treatment in depressive disorders: A systematic review. <i>The Lancet, 361</i>(9358), 653–661. <a href="https://doi.org/10.1016/s0140-6736(03)12599-8">doi:10.1016/s0140-6736(03)12599-8</a></li>
+    <li id="ref-25">Cuijpers, P., Noma, H., Karyotaki, E., Vinkers, C. H., Cipriani, A., &amp; Furukawa, T. A. (2020). A network meta-analysis of the effects of psychotherapies, pharmacotherapies and their combination in the treatment of adult depression. <i>World Psychiatry, 19</i>(1), 92–107. <a href="https://doi.org/10.1002/wps.20701">doi:10.1002/wps.20701</a></li>
+    <li id="ref-26">Cuijpers, P., Sijbrandij, M., Koole, S. L., Andersson, G., Beekman, A. T., &amp; Reynolds, C. F. (2014). Adding psychotherapy to antidepressant medication in depression and anxiety disorders: A meta-analysis. <i>World Psychiatry, 13</i>(1), 56–67. <a href="https://doi.org/10.1002/wps.20089">doi:10.1002/wps.20089</a></li>
+  </ol>
+</section>

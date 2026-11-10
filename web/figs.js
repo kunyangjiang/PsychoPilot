@@ -3817,6 +3817,332 @@
     ['功能损害与持续', '尽管带来明显伤害仍然继续', 'r', '诊断还要考虑持续时间和严重程度，并由专业人员评估'],
   ], '<p>这不是一条必然的道路：人们可以停留在任何阶段，也可以向回移动。区分这四个阶段，比只看“用了多少”或“玩了多久”更有意义。</p>');
 
+  /* =====================================================================
+     Stage 17 · psychotherapy, medication and evaluating interventions.
+     Static two-ink concept diagrams; none of them recommends, selects or
+     scores a treatment for anyone. Every curve, distribution and number
+     drawn here is schematic or simulated and says so on the figure.
+     ===================================================================== */
+
+  /* a smooth bump for schematic distributions */
+  const gauss17 = (x, m, sd) => Math.exp(-0.5 * ((x - m) / sd) ** 2);
+  const curve17 = (X, Y, f, a = 0, b = 1, n = 80) => Array.from({ length: n + 1 }, (_, i) => { const t = a + (b - a) * i / n; return `${i ? 'L' : 'M'}${X(t).toFixed(1)},${Y(f(t)).toFixed(1)}`; }).join('');
+  const ease17 = (pts) => (t) => { const p = t * (pts.length - 1), i = Math.min(pts.length - 2, Math.floor(p)), k = (1 - Math.cos((p - i) * Math.PI)) / 2; return pts[i] * (1 - k) + pts[i + 1] * k; };
+
+  /* ----- 17-01 · techniques, relationship and context (no partition into percentages) ----- */
+  F.txcomponents = (fig) => split13(fig, {
+    cols: [
+      ['特定技术', '针对具体问题的方法', 'b', [['例如暴露练习', ''], ['例如认知重构', ''], ['例如解释人际模式', '']]],
+      ['治疗关系', '工作联盟', 'b', [['目标一致', ''], ['任务一致', ''], ['情感联结', '信任与尊重']]],
+      ['情境与个体因素', '', 'm', [['期望与偏好', ''], ['治疗师之间的差异', ''], ['问题的性质、严重程度与生活环境', '']]],
+    ],
+    bottom: ['治疗结果', '各部分相互重叠、相互影响', 'r'],
+    note: '<p>这些因素不能简单相加，也不能用一个百分比划分各自的“贡献”。不同的问题、不同的人，各部分的重要性可能不同。</p>',
+  });
+
+  /* ----- 17-01 · comparison conditions, weaker to stronger ----- */
+  F.controls = (fig) => flow14(fig, [
+    ['等待名单', '控制：时间流逝与自然好转', 'm', '不控制关注和期望；可能让对照组结果偏低'],
+    ['常规治疗', '控制：通常可以得到的服务', 'm', '内容因地而异，需要看它具体是什么'],
+    ['心理安慰剂或支持性对照', '进一步控制：关注、关系与期望', 'b', '结构越接近真正的治疗，差别越小'],
+    ['另一种有效的治疗', '回答：哪一种更好', 'r', '差别通常很小，需要很大的样本'],
+  ], '<p>从左到右（或从上到下），对照条件越来越接近真正的治疗，治疗显示出的额外效果通常越来越小。不同研究的效果大小，只有在对照条件相同时才能直接比较。</p>');
+
+  /* ----- 17-01 · efficacy vs effectiveness ----- */
+  F.effvseff = (fig) => split13(fig, {
+    cols: [
+      ['效力研究', '在理想条件下，治疗能否起作用？', 'b', [['参与者', '经过严格筛选，常排除共病和高风险者'], ['治疗师', '受过专门训练，接受督导'], ['治疗', '严格按手册进行'], ['优点与局限', '因果推断可靠；能否推广不确定', 'm']]],
+      ['效果研究', '在日常临床中，治疗表现如何？', 'r', [['参与者', '多样，常有多种问题', 'r'], ['治疗师', '训练和经验各不相同', 'r'], ['治疗', '根据需要调整，次数可能更少', 'r'], ['优点与局限', '更接近现实；控制较少，更难确定因果', 'm']]],
+    ],
+    bottom: ['两类研究回答不同的问题', '需要相互补充', 'm'],
+    note: '<p>一种治疗在效力研究中有效，是它在日常实践中有效的前提，但不是保证；反过来，没有对照的“真实世界”报告，也不能单独证明有效。</p>',
+  });
+
+  /* ----- 17-01 · statistical vs clinical significance (schematic; three invented clients) ----- */
+  F.clinsig = (fig) => figure(fig, (box, w, api) => {
+    const x0 = 8, x1 = w - 8, X = (v) => x0 + v * (x1 - x0), gs = [], wide = w >= 520;
+    const n1 = wrapZh('样本足够大时，这么小的平均差别也可能“统计显著”，但对个人来说可能几乎感觉不到。', w - 4, 12.5), h2 = [0, 1];
+    const t1 = 22, base1 = t1 + 96, t2 = base1 + 42 + n1.length * 16 + 14, ax = t2 + (h2.length - 1) * 19 + 40, rowH = wide ? 50 : 62, P = [
+      ['甲', 0.2, 0.26, '变化在测量误差范围内：没有可靠的变化', 'm'],
+      ['乙', 0.1, 0.44, '可靠的改善，但仍在临床范围内', 'b'],
+      ['丙', 0.16, 0.8, '可靠的改善，并进入功能正常范围：临床显著', 'r'],
+    ], cut = 0.6, H = ax + 30 + P.length * rowH + 24, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, 0, 14, '一项大型研究：两组的平均分', 'fx-h');
+    el('line', { x1: x0, x2: x1, y1: base1, y2: base1, class: 'fx-ln' }, g0);
+    [[0.47, 'fx-ln fx-lb fx-thick fx-dash', '对照组'], [0.53, 'fx-ln fx-lr fx-thick', '治疗组']].forEach(([m, c]) => el('path', { d: curve17(X, (v) => base1 - v * 78, (t) => gauss17(t, m, 0.14)), class: c, fill: 'none' }, g0));
+    el('line', { x1: X(0.47), x2: X(0.47), y1: base1 - 82, y2: base1 + 6, class: 'fx-hair fx-dash' }, g0);
+    el('line', { x1: X(0.53), x2: X(0.53), y1: base1 - 82, y2: base1 + 6, class: 'fx-hair' }, g0);
+    tx(g0, X(0.47) - 6, base1 + 20, '对照组', 'fx-n', 'end'); tx(g0, X(0.53) + 6, base1 + 20, '治疗组', 'fx-n fx-r');
+    lines(g0, 0, base1 + 42, n1, 'fx-n', 16);
+    const g1 = el('g', {}, s); gs.push(g1);
+    tx(g1, 0, t2 + 4, '三位虚构的来访者', 'fx-h'); tx(g1, 0, t2 + 23, '空心：治疗前　实心：治疗后', 'fx-n');
+    el('line', { x1: x0, x2: x1, y1: ax, y2: ax, class: 'fx-ln fx-thick' }, g1);
+    tx(g1, x0, ax + 18, '症状较重', 'fx-n'); tx(g1, x1, ax + 18, '症状较轻', 'fx-n', 'end');
+    el('line', { x1: X(cut), x2: X(cut), y1: ax - 8, y2: H - 22, class: 'fx-ln fx-dash' }, g1);
+    tx(g1, X(cut) - 6, ax - 8, '临床范围', 'fx-n', 'end'); tx(g1, X(cut) + 6, ax - 8, '功能正常范围', 'fx-n');
+    P.forEach(([n, a, b, d, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const y = ax + 44 + i * rowH;
+      el('line', { x1: X(a), x2: X(b) - 7, y1: y, y2: y, class: c === 'r' ? 'fx-ln fx-lr fx-thick' : 'fx-ln fx-lb fx-thick' }, g);
+      el('circle', { cx: X(a), cy: y, r: 5.5, class: 'fx-node m' }, g);
+      el('circle', { cx: X(b), cy: y, r: 6, class: c === 'r' ? 'fx-node r' : 'fx-node b' }, g);
+      tx(g, 0, y + 5, n, 'fx-s fx-strong');
+      lines(g, 18, y + 22, wrapZh(d, w - 22, 12), c === 'r' ? 'fx-n fx-r fx-halo' : 'fx-n fx-halo', 15);
+    });
+    tx(g1, x1, H - 4, '数值是示意，不是真实数据', 'fx-n', 'end');
+    api.out.innerHTML = '<p>临床显著性看的是每一个人：变化是否超出了测量误差（甲没有），以及是否进入了功能正常的范围（乙还没有，丙做到了）。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.38)));
+  }, { dur: 1300 });
+
+  /* ----- 17-01 · the spread of individual outcomes around an average (simulated) ----- */
+  F.outcomes = (fig) => figure(fig, (box, w, api) => {
+    const x0 = 6, x1 = w - 6, top = 34, base = top + 140, gs = [], lo = -0.5, hi = 1.3, N = w >= 520 ? 26 : 18;
+    const X = (v) => x0 + (v - lo) / (hi - lo) * (x1 - x0), bw = (x1 - x0) / N, H = base + 78, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, x0, 14, '人数（示意）', 'fx-n');
+    el('line', { x1: x0, x2: x1, y1: base, y2: base, class: 'fx-ln' }, g0);
+    const g1 = el('g', {}, s); gs.push(g1);
+    for (let i = 0; i < N; i++) {
+      const c = lo + (i + 0.5) * (hi - lo) / N, h = 128 * gauss17(c, 0.38, 0.36);
+      const cls = c < -0.12 ? 'fx-bar' : c < 0.15 ? 'fx-node m' : 'fx-bar b';
+      el('rect', { x: x0 + i * bw + 1.5, y: base - h, width: bw - 3, height: h, class: cls }, g1);
+    }
+    const g2 = el('g', {}, s); gs.push(g2);
+    el('line', { x1: X(0.38), x2: X(0.38), y1: top - 6, y2: base + 4, class: 'fx-ln fx-dash' }, g2);
+    tx(g2, X(0.38) + 6, top + 4, '平均改善', 'fx-n fx-halo');
+    [[-0.32, '恶化', 'fx-n fx-r'], [0.02, '几乎没变', 'fx-n'], [0.45, '有所改善', 'fx-n'], [0.98, '明显改善', 'fx-n']].forEach(([v, t, c]) => tx(g2, X(v), base + 20, t, c, 'middle'));
+    tx(g2, x0, base + 46, '← 变差', 'fx-n'); tx(g2, x1, base + 46, '变好 →', 'fx-n', 'end');
+    tx(g2, x1, H - 4, '数据是模拟的，不代表任何真实研究', 'fx-n', 'end');
+    api.out.innerHTML = '<p>同一种治疗中，大多数人有所改善，但有人几乎没有变化，少数人还会变差。平均值只告诉我们这一群人的中心在哪里，不能告诉我们某一个人会落在哪一段。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 17-02 · avoidance and negative reinforcement ----- */
+  F.avoidcycle = (fig) => cycle14(fig, [
+    ['面对引起恐惧的情境', '例如电梯', 'b'],
+    ['焦虑迅速上升', '预期“会发生可怕的事”', 'r'],
+    ['回避或逃离', '例如改走楼梯；或依赖安全行为', 'r'],
+    ['焦虑立刻下降', '这种缓解是负强化', 'b'],
+  ], ['短期轻松，', '长期维持：', '危险预期从未被检验'], '<p>回避让焦虑立刻下降，所以下一次更可能回避；但“乘电梯会出事”的预期一直没有机会被修正，恐惧因此得以维持，甚至扩展到相似的情境。</p>');
+
+  /* ----- 17-02 · expectancy violation across exposure practices (simulated) ----- */
+  F.exposure = (fig) => figure(fig, (box, w, api) => {
+    const L = 34, Rm = 8, T = 30, Hc = 170, n = 8, X = (i) => L + i / (n - 1) * (w - L - Rm), Y = (v) => T + (1 - v / 100) * Hc, gs = [];
+    const pred = [90, 78, 82, 60, 50, 54, 38, 30], act = [6, 4, 8, 5, 3, 6, 4, 5], H = T + Hc + 92, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, 0, 14, '“担心的事会发生”的可能性（自评，示意）', 'fx-n');
+    [0, 50, 100].forEach((v) => { el('line', { x1: L, x2: w - Rm, y1: Y(v), y2: Y(v), class: v ? 'fx-hair fx-dash' : 'fx-ln' }, g0); tx(g0, L - 6, Y(v) + 4, `${v}%`, 'fx-n', 'end'); });
+    pred.forEach((_, i) => tx(g0, X(i), Y(0) + 18, `${i + 1}`, 'fx-n', 'middle'));
+    tx(g0, w - Rm, Y(0) + 36, '练习次数 →', 'fx-n', 'end');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('path', { d: pred.map((v, i) => `${i ? 'L' : 'M'}${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(''), class: 'fx-ln fx-lr fx-thick', fill: 'none' }, g1);
+    pred.forEach((v, i) => el('circle', { cx: X(i), cy: Y(v), r: 4.5, class: 'fx-node r' }, g1));
+    const g2 = el('g', {}, s); gs.push(g2);
+    act.forEach((v, i) => el('rect', { x: X(i) - 4.5, y: Y(v) - 4.5, width: 9, height: 9, fill: 'var(--paper)', stroke: 'var(--blue)', 'stroke-width': 2 }, g2));
+    el('line', { x1: X(0) + 12, x2: X(0) + 12, y1: Y(pred[0]) + 4, y2: Y(act[0]) - 6, class: 'fx-ln fx-dash' }, g2);
+    tx(g2, X(0) + 18, (Y(pred[0]) + Y(act[0])) / 2, '预期被违背', 'fx-n fx-halo');
+    const g3 = el('g', {}, s), ly = T + Hc + 60; gs.push(g3);
+    el('circle', { cx: 8, cy: ly - 4, r: 4.5, class: 'fx-node r' }, g3); tx(g3, 20, ly, '练习前的预期', 'fx-n');
+    el('rect', { x: 124, y: ly - 8.5, width: 9, height: 9, fill: 'var(--paper)', stroke: 'var(--blue)', 'stroke-width': 2 }, g3); tx(g3, 140, ly, '实际发生的', 'fx-n');
+    tx(g3, w - Rm, H - 4, '数值是模拟的，不是真实数据', 'fx-n', 'end');
+    api.out.innerHTML = '<p>早期练习中，预期与实际结果之间差距很大；随着反复练习，预期逐渐被修正。真实的进展常常有起伏（例如第 3 次和第 6 次），这并不表示失败。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 17-02 · thoughts, emotions, bodily sensations and behaviour ----- */
+  F.tfb = (fig) => cycle14(fig, [
+    ['想法', '“他一定是讨厌我”', 'b'],
+    ['情绪', '难过、羞愧', 'r'],
+    ['身体感觉', '胸口发紧、脸发热', 'b'],
+    ['行为', '以后避开他', 'r'],
+  ], ['情境：', '熟人没有回应', '我的招呼'], '<p>四个环节相互影响，箭头只画出了其中一个方向：情绪和行为同样会反过来影响想法。这个模型不表示想法总是最先出现，也不表示所有困难都来自想法。</p>');
+
+  /* ----- 17-02 · withdrawal in low mood and where behavioural activation steps in ----- */
+  F.bafeedback = (fig) => cycle14(fig, [
+    ['情绪低落、精力下降', '', 'r'],
+    ['退缩和回避', '减少活动和社交', 'b'],
+    ['愉快和有意义的经历减少', '问题积累', 'b'],
+    ['情绪更加低落', '', 'r'],
+  ], ['行为激活从“行为”介入：', '按个人价值安排', '小而可行的活动'], '<p>行为激活的目的，是打破这个向下的循环，而不是追求忙碌或高效。选择什么活动，取决于它对当事人是否有意义；同时观察活动与情绪之间的联系。</p>');
+
+  /* ----- 17-03 · classical psychoanalysis → modern psychodynamic therapy ----- */
+  F.pdhistory = (fig) => split13(fig, {
+    cols: [
+      ['经典精神分析', '19 世纪末到 20 世纪中叶', 'm', [['形式', '通常持续数年，每周多次', 'm'], ['设置', '躺椅；分析师较少说话', 'm'], ['重点', '童年经历、驱力与被压抑的冲突', 'm'], ['证据', '主要来自个案报告', 'm']]],
+      ['现代心理动力治疗', '当代', 'b', [['形式', '常见短程方案，每周约一次'], ['设置', '面对面；治疗师更积极'], ['重点', '反复出现的关系模式、回避的情绪、当前生活'], ['证据', '接受随机对照试验的检验']]],
+    ],
+    bottom: ['有连续性，但不能混为一谈', '对经典理论的批评不能直接套用到现代治疗上；现代治疗的疗效也不能证明经典理论', 'r'],
+    note: '<p>这是简化的对比。“心理动力治疗”内部也有许多不同的方法，它们的研究证据并不相同。</p>',
+  });
+
+  /* ----- 17-03 · individual, interpersonal and systemic levels (nested) ----- */
+  F.txlevels = (fig) => figure(fig, (box, w, api) => {
+    const pad = w >= 520 ? 16 : 10, gs = [];
+    const L = [
+      ['社会与经济条件', '会影响心理健康，但通常超出心理治疗本身能够改变的范围', 'm'],
+      ['系统层面', '家庭、伴侣中的互动、角色与规则。例如：家庭治疗、伴侣治疗', 'b'],
+      ['人际层面', '当前重要关系中的模式与冲突。例如：人际心理治疗；心理动力治疗对关系模式的关注', 'b'],
+      ['个人层面', '想法、情绪、行为与学习。例如：认知行为疗法、人本主义治疗', 'r'],
+    ];
+    const hd = L.map(([t, d], i) => { const iw = w - 2 * pad * i - 20; return 22 + wrapZh(d, iw, 12.5).length * 17 + 10; });
+    const inner = 12, H = hd.reduce((a, b) => a + b, 0) + inner + 2 * pad * 0 + 4 * 0, s = svgIn(box, w, H + L.length * pad, fig);
+    let y = 0;
+    const tops = []; L.forEach((_, i) => { tops.push(y); y += hd[i]; });
+    const bottom = H + L.length * pad;
+    L.forEach(([t, d, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = pad * i, yy = tops[i] + pad * i * 0, ww = w - 2 * x, hh = bottom - tops[i] - pad * i - 1;
+      el('rect', { x: x + 0.75, y: yy + 0.75, width: ww - 1.5, height: hh - 1.5, rx: 8, class: 'fx-pill ' + c, ...(c === 'm' ? { 'stroke-dasharray': '5 4' } : {}) }, g);
+      tx(g, x + 10, yy + 20, t, c === 'r' ? 'fx-h fx-r' : 'fx-h');
+      lines(g, x + 10, yy + 38, wrapZh(d, ww - 20, 12.5), 'fx-s', 17);
+    });
+    api.out.innerHTML = '<p>由内向外，干预的对象从个人扩展到关系和系统。这些层面相互重叠，许多治疗同时在几个层面上工作；最外层的社会和经济条件，往往需要心理治疗以外的方式来改变。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.38)));
+  }, { dur: 1200 });
+
+  /* ----- 17-04 · where medication classes act at a synapse (highly simplified) ----- */
+  F.synapse = (fig) => figure(fig, (box, w, api) => {
+    const D = Math.min(w, 420), ox = (w - D) / 2, gs = [], wide = w >= 520;
+    const preY = 10, preH = 110, cleft = 46, postY = preY + preH + cleft, postH = 66;
+    const notes = [
+      ['1', '再摄取转运体', '选择性血清素再摄取抑制剂（SSRI）阻断血清素的再摄取'],
+      ['2', '突触后受体', '多数抗精神病药阻断多巴胺 D2 受体'],
+      ['3', '抑制性受体', '苯二氮䓬类增强 GABA 的作用'],
+    ];
+    const nl = notes.map(([, h, d]) => wrapZh(`${h}：${d}`, w - 30, 12.5));
+    const legY = postY + postH + 30, H = legY + nl.reduce((a, l) => a + l.length * 17 + 10, 0) + 40, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    const cx = ox + D / 2, pw = D * 0.62;
+    el('path', { d: `M${cx - pw / 2},${preY} L${cx - pw / 2},${preY + preH - 20} Q${cx - pw / 2},${preY + preH} ${cx - pw / 2 + 20},${preY + preH} L${cx + pw / 2 - 20},${preY + preH} Q${cx + pw / 2},${preY + preH} ${cx + pw / 2},${preY + preH - 20} L${cx + pw / 2},${preY}`, class: 'fx-ln fx-lb fx-thick', fill: 'none' }, g0);
+    tx(g0, cx, preY + 22, '释放神经递质的神经元末梢', 'fx-n', 'middle');
+    [[-0.28, 58], [-0.08, 74], [0.12, 60], [0.26, 80], [0.02, 92]].forEach(([dx, dy]) => { el('circle', { cx: cx + dx * pw, cy: preY + dy, r: 9, class: 'fx-node m' }, g0); [[-3, -2], [3, 1], [0, 4]].forEach(([a, b]) => el('circle', { cx: cx + dx * pw + a, cy: preY + dy + b, r: 1.8, class: 'fx-node b' }, g0)); });
+    el('path', { d: `M${ox + 6},${postY} L${ox + D - 6},${postY} L${ox + D - 6},${postY + postH} M${ox + 6},${postY} L${ox + 6},${postY + postH}`, class: 'fx-ln fx-lb fx-thick', fill: 'none' }, g0);
+    tx(g0, cx, postY + postH - 12, '接收信号的神经元', 'fx-n', 'middle');
+    const g1 = el('g', {}, s); gs.push(g1);
+    seeded16(18, 5).forEach((r, i) => { const v = seeded16(18, 9)[i]; el('circle', { cx: cx - pw / 2 + 14 + r * (pw - 28), cy: preY + preH + 8 + v * (cleft - 16), r: 2.2, class: 'fx-node b' }, g1); });
+    tx(g1, ox + D - 4, preY + preH + cleft / 2 + 4, '突触间隙', 'fx-n', 'end');
+    const g2 = el('g', {}, s); gs.push(g2);
+    const tr = [cx + pw / 2 - 22, preY + preH], rc = [cx - 40, postY], gb = [cx + 54, postY];
+    el('rect', { x: tr[0] - 9, y: tr[1] - 7, width: 18, height: 14, rx: 3, class: 'fx-node r' }, g2);
+    [rc, gb].forEach(([x, y], k) => el('path', { d: `M${x - 10},${y + 10} L${x - 10},${y} L${x - 4},${y} L${x - 4},${y + 5} L${x + 4},${y + 5} L${x + 4},${y} L${x + 10},${y} L${x + 10},${y + 10} Z`, class: k ? 'fx-node b' : 'fx-node r' }, g2));
+    [[tr[0] + 14, tr[1] + 2, '1'], [rc[0], rc[1] + 26, '2'], [gb[0], gb[1] + 26, '3']].forEach(([x, y, n]) => { el('circle', { cx: x, cy: y, r: 9, class: 'fx-node m' }, g2); tx(g2, x, y + 4, n, 'fx-s fx-strong', 'middle'); });
+    const g3 = el('g', {}, s); gs.push(g3);
+    let yy = legY;
+    nl.forEach((l, i) => { el('circle', { cx: 9, cy: yy - 4, r: 9, class: 'fx-node m' }, g3); tx(g3, 9, yy, notes[i][0], 'fx-s fx-strong', 'middle'); lines(g3, 26, yy, l, 'fx-s', 17); yy += l.length * 17 + 10; });
+    lines(g3, 0, yy + 8, wrapZh('高度简化的示意：一种神经递质不对应一种情绪，药物的作用位置也不等于它改善症状的原因。', w - 4, 12), 'fx-n', 15);
+    api.out.innerHTML = '<p>药物在突触上的直接作用常常在几小时内出现，而抗抑郁药的临床改善通常需要数周。两者之间，还隔着许多尚未完全理解的下游变化。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.38)));
+  }, { dur: 1300 });
+
+  /* ----- 17-04 · how a drug works vs why a disorder arises ----- */
+  F.mechcause = (fig) => split13(fig, {
+    cols: [
+      ['药物怎样起作用？', '', 'b', [['作用于某个环节', '例如增加血清素的作用'], ['下游变化', '许多环节尚未完全理解'], ['部分人的症状改善', '']]],
+      ['疾病为什么出现？', '', 'r', [['多种风险因素', '遗传、发育、应激、生活处境等', 'r'], ['多条路径', '因人而异', 'r'], ['症状出现', '', 'r']]],
+    ],
+    bottom: ['两个问题不能互相替代', '阿司匹林能缓解头痛，不说明头痛来自缺少阿司匹林', 'm'],
+    note: '<p>一种药物可能通过补偿、绕过或间接影响其他过程来改善症状，而不是纠正了最初出问题的环节。“它有效”“它为什么有效”“问题为什么出现”是三个不同的问题。</p>',
+  });
+
+  /* ----- 17-04 · overlapping drug and placebo distributions (simulated) ----- */
+  F.avgindiv = (fig) => figure(fig, (box, w, api) => {
+    const x0 = 6, x1 = w - 6, top = 70, base = top + 130, X = (v) => x0 + v * (x1 - x0), Y = (v) => base - v * 120, gs = [], wide = w >= 520;
+    const H = base + 108, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: x0, x2: x1, y1: base, y2: base, class: 'fx-ln' }, g0);
+    tx(g0, x0, base + 18, '改善很少', 'fx-n'); tx(g0, x1, base + 18, '改善很多', 'fx-n', 'end');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('path', { d: curve17(X, Y, (t) => gauss17(t, 0.44, 0.17)), class: 'fx-ln fx-lb fx-thick fx-dash', fill: 'none' }, g1);
+    el('path', { d: curve17(X, Y, (t) => gauss17(t, 0.54, 0.18)), class: 'fx-ln fx-lr fx-thick', fill: 'none' }, g1);
+    const g2 = el('g', {}, s); gs.push(g2);
+    el('line', { x1: X(0.44), x2: X(0.44), y1: Y(1) - 6, y2: base, class: 'fx-hair fx-dash' }, g2);
+    el('line', { x1: X(0.54), x2: X(0.54), y1: Y(1) - 6, y2: base, class: 'fx-hair' }, g2);
+    tx(g2, (X(0.44) + X(0.54)) / 2, Y(1) - 12, '平均差别', 'fx-n fx-halo', 'middle');
+    el('circle', { cx: X(0.78), cy: Y(gauss17(0.78, 0.44, 0.17)), r: 4, class: 'fx-node b' }, g2);
+    el('circle', { cx: X(0.2), cy: Y(gauss17(0.2, 0.54, 0.18)), r: 4, class: 'fx-node r' }, g2);
+    const la = wrapZh('安慰剂组中也有人明显改善', wide ? 220 : w * 0.46, 12), lb = wrapZh('药物组中也有人改善很少', wide ? 220 : w * 0.46, 12);
+    const cx17 = (v, ls) => { const hw = Math.max(...ls.map((l) => l.length)) * 6.5; return Math.min(x1 - hw, Math.max(x0 + hw, X(v))); };
+    lines(g2, cx17(0.78, la), 14, la, 'fx-n', 15, 'middle');
+    lines(g2, cx17(0.2, lb), 14, lb, 'fx-n fx-r', 15, 'middle');
+    el('line', { x1: X(0.78), x2: X(0.78), y1: 14 + la.length * 15 - 6, y2: Y(gauss17(0.78, 0.44, 0.17)) - 7, class: 'fx-hair' }, g2);
+    el('line', { x1: X(0.2), x2: X(0.2), y1: 14 + lb.length * 15 - 6, y2: Y(gauss17(0.2, 0.54, 0.18)) - 7, class: 'fx-hair' }, g2);
+    const g3 = el('g', {}, s); gs.push(g3);
+    const ly = base + 46;
+    el('line', { x1: x0, x2: x0 + 30, y1: ly - 4, y2: ly - 4, class: 'fx-ln fx-lb fx-thick fx-dash' }, g3); tx(g3, x0 + 38, ly, '安慰剂组', 'fx-n');
+    el('line', { x1: x0 + 120, x2: x0 + 150, y1: ly - 4, y2: ly - 4, class: 'fx-ln fx-lr fx-thick' }, g3); tx(g3, x0 + 158, ly, '药物组', 'fx-n');
+    tx(g3, x1, H - 4, '数据是模拟的，不代表任何真实研究', 'fx-n', 'end');
+    api.out.innerHTML = '<p>两组的分布大部分重叠。平均差别描述的是两组中心位置的距离，它可以小于大多数人之间的差异，也不能告诉我们某一个人对药物会怎样反应。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 17-04 · discontinuation symptoms, relapse and recurrence (schematic) ----- */
+  F.stopping = (fig) => figure(fig, (box, w, api) => {
+    const wide = w >= 520, lw = wide ? 150 : 0, bandH = 70, gs = [];
+    const R = [
+      ['停药反应', '停药后数天内出现新的症状，多数在一段时间内减轻', 'fx-ln fx-lr fx-thick fx-dash', [0.12, 0.7, 0.55, 0.3, 0.16, 0.12, 0.12, 0.12]],
+      ['复发', '原来的发作在完全恢复前重新出现', 'fx-ln fx-lr fx-thick', [0.12, 0.16, 0.3, 0.48, 0.62, 0.72, 0.76, 0.78]],
+      ['再发', '稳定一段较长时间后，出现新的发作', 'fx-ln fx-lb fx-thick', [0.12, 0.12, 0.12, 0.12, 0.13, 0.2, 0.55, 0.75]],
+    ];
+    const desc = R.map(([, d]) => wrapZh(d, wide ? lw - 12 : w - 4, 12));
+    const rowH = R.map((_, i) => (wide ? Math.max(bandH + 10, 22 + desc[i].length * 15) : 22 + desc[i].length * 15 + bandH + 8) + 26);
+    const H = rowH.reduce((a, b) => a + b, 0) + 26, s = svgIn(box, w, H, fig), x0 = lw + 4, x1 = w - 4, X = (t) => x0 + t * (x1 - x0), ts = 0.12;
+    let y = 0;
+    R.forEach(([n, , cls, pts], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      tx(g, 0, y + 14, n, 'fx-h');
+      lines(g, 0, y + 32, desc[i], 'fx-n', 15);
+      const top = wide ? y + 6 : y + 22 + desc[i].length * 15 + 4, Yb = (v) => top + bandH * (1 - v);
+      el('line', { x1: x0, x2: x1, y1: Yb(0), y2: Yb(0), class: 'fx-hair' }, g);
+      el('line', { x1: X(ts), x2: X(ts), y1: top - 2, y2: Yb(0) + 4, class: 'fx-ln fx-dash' }, g);
+      tx(g, X(ts) + 4, top + 8, '停药', 'fx-n');
+      el('path', { d: curve17(X, Yb, ease17(pts)), class: cls, fill: 'none' }, g);
+      y += rowH[i];
+    });
+    const g = el('g', {}, s); gs.push(g);
+    tx(g, x1, H - 6, '时间 →　曲线是示意，不代表真实的病程', 'fx-n', 'end');
+    api.out.innerHTML = '<p>三种情况的出现时间和性质不同，处理方式也不同。在实际中它们有时难以区分：停药反应可能被误认为复发，从而影响后续的治疗决定。是否停药、怎样减药，需要与开药的医生讨论。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.18, 0.4)));
+  }, { dur: 1300 });
+
+  /* ----- 17-05 · evidence-based practice ----- */
+  F.ebp = (fig) => split13(fig, {
+    cols: [
+      ['研究证据', '一般情况下什么可能有效', 'b', [['系统综述与随机试验', ''], ['也要看证据的确定性和适用范围', '']]],
+      ['专业经验与判断', '把证据用到具体的人身上', 'b', [['评估与个案概念化', ''], ['关系技能与对进展的监测', '']]],
+      ['来访者的特点与价值', '这个人需要什么、想要什么', 'r', [['文化背景与生活处境', '', 'r'], ['目标与对不同选择的偏好', '', 'r']]],
+    ],
+    bottom: ['共同的决定', '在治疗过程中持续检查，必要时调整', 'm'],
+    note: '<p>循证实践不是简单地照指南办事，也不是只凭经验或只凭个人喜好。三者之间不一致时，需要坦诚地讨论证据和不确定性。</p>',
+  });
+
+  /* ----- 17-05 · an evidence hierarchy with the limits of each level ----- */
+  F.hierarchy = (fig) => flow14(fig, [
+    ['系统综述与元分析', '', 'b', '局限：取决于纳入研究的质量，可能放大发表偏倚'],
+    ['随机对照试验', '', 'b', '局限：参与者经过筛选，结果不一定能推广，随访常较短'],
+    ['观察性研究', '', 'm', '局限：难以排除混杂因素，不能单独确定因果'],
+    ['个案报告与个案系列', '', 'm', '局限：没有对照，无法区分治疗作用与自然好转'],
+    ['专家意见、个人经验与现身说法', '', 'r', '局限：容易受期望、记忆偏差和选择性分享的影响'],
+  ], '<p>从上到下，证据通常越来越弱，但等级只是粗略的参考：一项设计良好的观察性研究，可能比一项质量很差的随机试验更有信息量。现身说法可以提出值得研究的问题，但不能证明有效。</p>');
+
+  /* ----- 17-05 · evidence of benefit and evidence of harm are separate questions ----- */
+  F.benefitharm = (fig) => quad14(fig, ['益处：证据较充分', '益处：证据不足或未检验'], ['未发现明显伤害', '有伤害或风险的证据'], [
+    ['有研究支持的治疗', '仍需监测副作用和个人反应', 'b'],
+    ['新的或不常规的干预', '需要研究；不应夸大，也不应断定有害', 'm'],
+    ['需要权衡', '在专业指导下比较益处与风险', 'b'],
+    ['应当避免', '缺乏益处，却有伤害的证据', 'r'],
+  ], '<p>“不常规”“无效”和“有害”需要分别判断。右上角的“没有发现伤害”，可能只是因为还没有人系统地研究过；它既不等于安全有效，也不等于有害。</p>');
+
+  /* ----- 17-05 · formal treatment and health behaviours complement each other ----- */
+  F.complement = (fig) => split13(fig, {
+    cols: [
+      ['正式的临床治疗', '例如心理治疗、药物治疗', 'b', [['由谁提供', '有资质的专业人员，在评估的基础上'], ['证据', '针对具体障碍的研究'], ['要求', '知情同意与持续监测']]],
+      ['健康行为', '运动、睡眠、社会联系、饮食', 'm', [['由谁实践', '个人在日常生活中，可以得到支持', 'm'], ['证据', '强度不一，许多研究难以设盲', 'm'], ['注意', '心理困难本身会让这些行为更难做到', 'm']]],
+    ],
+    bottom: ['相互补充', '健康行为不能自动替代对严重或持续问题的专业评估和治疗', 'r'],
+    note: '<p>“与心理健康相关”和“作为临床推荐的治疗”是两回事。把“多运动就好了”当作建议，可能让当事人感到自己的痛苦被归咎于不够努力。</p>',
+  });
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;
