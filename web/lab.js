@@ -2872,5 +2872,77 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander, decoy, savedefault };
+  /* =====================================================================
+     Stage 19 · raters (19-01): how many independent raters does a ranking need?
+     20 invented employees with a "true" performance level (visible only in the
+     model). Each rater adds an independent error sized so that one rater's
+     ratings have a reliability of .52, an earlier meta-analytic average for
+     supervisory overall ratings (Viswesvaran et al., 1996); the 2024 update
+     (Zhou et al.) puts it near .65 and varying by job, so .52 is a setting.
+     Spearman–Brown gives the predicted reliability of the k-rater average; the
+     rank changes drawn are a simulated consequence, not the formula's output.
+     A bias shared by every rater (optional) does not average away.
+     ===================================================================== */
+  function raters(host) {
+    const REL = 0.52, ESD = Math.sqrt(1 / REL - 1), N = 20, KMAX = 6, BIAS = 1;
+    const o = { shared: 'none' };
+    const { fig, out, actions } = shell(host, '一位评价者够吗？',
+      '一个虚构部门的 20 名员工，各有一个“真实”的表现水平。现实中谁也看不到它，这里由模型设定。每位评价者的评分都包含自己的误差。改变独立评分的人数，比较“真实表现”的排名和“平均评分”的排名。',
+      [['shared', '所有评价者的共同偏见', [['none', '没有'], ['grp', '对其中 5 人评分都偏低']]]],
+      '员工、评价者和分数都由程序在你的浏览器里随机生成。单个评价者的信度被设定为 0.52，取自一项较早的元分析，不是适用于所有组织的确定值；偏见的大小（1 个标准差）也是设定值。这是说明原理的模型，不是任何真实组织的数据，也不是评价员工的工具。', 'Model · 模型演示');
+    const sr = slider('独立评分的评价者人数：', 1, KMAX, 1, 1);
+    const box = document.createElement('div'); fig.append(sr.box, box);
+    let seed = 1901, emp = [];
+    const gen = () => {
+      const r = seeded(seed), g = gaussFrom18(r);
+      emp = Array.from({ length: N }, (_, i) => ({ id: i, t: g(), e: Array.from({ length: KMAX }, () => g() * ESD), grp: false }));
+      const idx = emp.map((e) => e.id).sort(() => r() - 0.5).slice(0, 5); idx.forEach((i) => { emp[i].grp = true; });
+    };
+    const rankOf = (vals) => { const ord = vals.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]); const rk = Array(vals.length); ord.forEach(([, i], k) => { rk[i] = k + 1; }); return rk; };
+    const corr = (a, b) => { const n = a.length, ma = a.reduce((s, x) => s + x, 0) / n, mb = b.reduce((s, x) => s + x, 0) / n; let sab = 0, sa = 0, sb = 0; a.forEach((x, i) => { sab += (x - ma) * (b[i] - mb); sa += (x - ma) ** 2; sb += (b[i] - mb) ** 2; }); return sab / Math.sqrt(sa * sb); };
+    const f2 = (x) => x.toFixed(2).replace(/^0/, '').replace(/^-0/, '−');
+    const draw = () => {
+      const k = Number(sr.input.value), bias = o.shared === 'grp';
+      sr.val.textContent = ` ${k} 人`; sr.input.setAttribute('aria-valuetext', `${k} 位评价者`);
+      const tr = emp.map((e) => e.t), avg = emp.map((e) => e.t + (bias && e.grp ? -BIAS : 0) + e.e.slice(0, k).reduce((s, x) => s + x, 0) / k);
+      const rT = rankOf(tr), rA = rankOf(avg), moved = emp.filter((_, i) => Math.abs(rT[i] - rA[i]) >= 5).length;
+      const top5 = emp.filter((_, i) => rT[i] <= 5 && rA[i] <= 5).length, rr = corr(tr, avg), sb = (k * REL) / (1 + (k - 1) * REL);
+      const W = widthOf(fig), wd = W >= 440, T = 50, rowH = 15, L = wd ? 96 : 44, R = W - L, H = T + N * rowH + 34, Y = (rk) => T + (rk - 0.5) * rowH;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：${k} 位评价者的平均评分与真实表现的相关为 ${f2(rr)}，${moved} 名员工的排名变化了 5 位以上，真实前 5 名中有 ${top5} 人也在评分前 5 名。` }, box);
+      const rt = k === 1 ? '一位评价者的评分排名' : `${k} 位评价者的平均评分排名`;
+      if (wd) { text(svg, L, 14, '真实表现排名', 'lab-tick', 'middle'); text(svg, L, 31, '（模型中设定）', 'lab-tick', 'middle'); text(svg, R, 14, rt, 'lab-tick', 'middle'); }
+      else { text(svg, 0, 14, '← 真实表现排名（模型中设定）', 'lab-tick'); text(svg, W, 33, rt + ' →', 'lab-tick', 'end'); }
+      [1, 5, 10, 15, 20].forEach((rk) => { text(svg, L - 14, Y(rk) + 4, `${rk}`, 'lab-tick', 'end'); text(svg, R + 14, Y(rk) + 4, `${rk}`, 'lab-tick'); });
+      el('line', { x1: L - 6, x2: R + 6, y1: Y(5) + rowH / 2, y2: Y(5) + rowH / 2, stroke: 'var(--rule)', 'stroke-width': 1, 'stroke-dasharray': '3 3' }, svg);
+      text(svg, (L + R) / 2, Y(5) + rowH / 2 - 4, '前 5 名', 'lab-tick', 'middle');
+      emp.forEach((e, i) => {
+        const big = Math.abs(rT[i] - rA[i]) >= 5;
+        el('line', { x1: L, x2: R, y1: Y(rT[i]), y2: Y(rA[i]), stroke: big ? 'var(--red)' : 'var(--blue)', 'stroke-width': big ? 2 : 1.1, opacity: big ? 1 : 0.55 }, svg);
+      });
+      emp.forEach((e, i) => {
+        [[L, rT[i]], [R, rA[i]]].forEach(([x, rk]) => {
+          if (bias && e.grp) el('rect', { x: x - 4.5, y: Y(rk) - 4.5, width: 9, height: 9, fill: 'var(--paper)', stroke: 'var(--red)', 'stroke-width': 2 }, svg);
+          else el('circle', { cx: x, cy: Y(rk), r: 4, fill: 'var(--blue)' }, svg);
+        });
+      });
+      const ly = H - 12;
+      el('line', { x1: 0, x2: 22, y1: ly - 4, y2: ly - 4, stroke: 'var(--red)', 'stroke-width': 2 }, svg); text(svg, 28, ly, '排名变化 5 位以上', 'lab-tick');
+      if (bias) { const bx = W >= 440 ? 170 : W - 118; el('rect', { x: bx, y: ly - 9, width: 9, height: 9, fill: 'var(--paper)', stroke: 'var(--red)', 'stroke-width': 2 }, svg); text(svg, bx + 15, ly, '受共同偏见影响', 'lab-tick'); }
+      const grpRank = bias ? emp.filter((e) => e.grp).map((e) => rA[e.id] - rT[e.id]) : [], grpDrop = grpRank.length ? grpRank.reduce((s, x) => s + x, 0) / grpRank.length : 0;
+      out.innerHTML = `<ul class="lab-parts"><li><span>公式预测：平均评分的信度（斯皮尔曼—布朗公式）</span><b>${f2(sb)}</b></li><li><span>公式预测：平均评分与真实表现的相关</span><b>${f2(Math.sqrt(sb))}</b></li><li><span>模拟结果：这批员工中实际算出的相关（随样本波动）</span><b>${f2(rr)}</b></li><li><span>模拟结果：排名变化 5 位以上的员工</span><b>${moved} 人</b></li><li><span>模拟结果：真实前 5 名中，也在评分前 5 名的</span><b>${top5} 人</b></li></ul>
+        <p>${k === 1 ? '只有一位评价者时，评分中相当一部分是这位评价者自己的误差，许多人的排名会明显偏离真实表现。拖动滑块，增加独立评分的人数。' : `${k} 位评价者独立评分再取平均，各自的误差部分相互抵消，排名更接近真实表现。从 1 人增加到 2、3 人时改进最明显，之后的增益逐渐变小。`}${bias ? `但红框的 5 名员工受到所有评价者共同的偏见影响，平均排名下降了约 ${Math.round(grpDrop)} 位；增加评价者的人数不能消除这种偏见。` : ' 试着打开“共同偏见”，看看平均能不能解决它。'}</p>
+        <p class="lab-note">怎样读这些数字：标为“公式预测”的两项，是斯皮尔曼—布朗公式在其假设下（各位评价者测的是同一种表现，误差彼此独立）对合并评分的预测；标为“模拟结果”的各项和上图的排名变化，是这一批虚构员工的模拟结果，用来说明信度提高可能带来的一种后果，不是公式直接算出的。</p>
+        <p class="lab-note">真实研究：维斯维斯瓦兰等人（1996）的元分析估计，主管对整体工作表现评分的评分者间信度平均为 0.52，本模型沿用这个较早的数值。周等人（2024）更新的元分析汇总了 132 个独立样本，整体估计约为 0.65，管理岗位约 0.57，非管理岗位约 0.68，并建议使用针对具体工作或本组织的估计，而不是一个总平均值。斯卡伦等人（2000）发现，评价者自身的特异倾向占评分差异的一半以上。这些是研究汇总的结论，不保证适用于某一家公司；上面的员工和数字都是模型生成的。现实中，不同位置的评价者看到的是工作的不同侧面，他们之间的差异不全是误差。</p>`;
+    };
+    gen();
+    sr.input.addEventListener('input', draw);
+    bindControls(host, o, draw);
+    action(actions, '换一批虚构的员工', () => { seed += 1; gen(); draw(); });
+    action(actions, '恢复默认设置', () => { sr.input.value = 1; o.shared = 'none'; seed = 1901; gen(); host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(o[b.dataset.k])))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander, decoy, savedefault, raters };
 })();

@@ -4477,6 +4477,405 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.45)));
   }, { dur: 1100 });
 
+  /* =====================================================================
+     Stage 19 · work, teams and organizations.
+     Static two-ink concept diagrams of theories and frameworks. The only
+     numbers drawn are published estimates named on the figure; every
+     employee, score and distribution is invented and says so. None of
+     these is an assessment, a test or a score for a person or a team.
+     ===================================================================== */
+
+  /* ----- 19-01 · from job analysis to appraisal, with the validation loop ----- */
+  F.selectpipe = (fig) => figure(fig, (box, w, api) => {
+    const N = [['工作分析', '明确任务和要求'], ['吸引与筛选', '形成申请人群体'], ['测评', '面试、测验、工作样本等'], ['录用决定', '按规则组合信息'], ['绩效评价', '入职后的表现']];
+    const wide = w >= 640, gs = [], loop = '后来的表现数据，可以检验测评是否真的有预测力';
+    if (wide) {
+      const gap = 20, bw = (w - gap * 4) / 5, bh = Math.max(...N.map(([t, d]) => bx13H(bw, t, d, 64))), top = 6, yb = top + bh, cx = (i) => i * (bw + gap) + bw / 2;
+      const ll = wrapZh(loop, cx(4) - cx(1), 12.5), H = yb + 46 + ll.length * 17 + 6, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      N.forEach(([t, d], i) => { bx13(g0, i * (bw + gap), top, bw, t, d, i === 2 ? 'r' : 'b', bh); if (i) arrow(g0, i * (bw + gap) - gap + 3, top + bh / 2, i * (bw + gap) - 3, top + bh / 2, '', 6); });
+      const g1 = el('g', {}, s); gs.push(g1);
+      el('path', { d: `M${cx(4)},${yb + 3} L${cx(4)},${yb + 30} L${cx(2)},${yb + 30}`, class: 'fx-ln fx-lr fx-dash' }, g1);
+      arrow(g1, cx(2), yb + 30, cx(2), yb + 3, 'r', 6);
+      lines(g1, (cx(2) + cx(4)) / 2, yb + 50, ll, 'fx-n fx-r', 17, 'middle');
+    } else {
+      const lane = 44, bw = w - lane, vg = 26, hs = N.map(([t, d]) => bx13H(bw, t, d, 48)), ys = hs.reduce((a, h, i) => (a.push(i ? a[i - 1] + hs[i - 1] + vg : 0), a), []);
+      const ll = wrapZh(loop, w - 4, 12.5), H = ys[4] + hs[4] + 22 + ll.length * 17, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      N.forEach(([t, d], i) => { bx13(g0, 0, ys[i], bw, t, d, i === 2 ? 'r' : 'b', hs[i]); if (i) arrow(g0, bw / 2, ys[i] - vg + 3, bw / 2, ys[i] - 3, '', 6); });
+      const g1 = el('g', {}, s); gs.push(g1);
+      const lx = bw + 22, y4 = ys[4] + hs[4] / 2, y2 = ys[2] + hs[2] / 2;
+      el('path', { d: `M${bw + 3},${y4} L${lx},${y4} L${lx},${y2}`, class: 'fx-ln fx-lr fx-dash' }, g1);
+      arrow(g1, lx, y2, bw + 3, y2, 'r', 6);
+      lines(g1, 0, ys[4] + hs[4] + 22, ll, 'fx-n fx-r', 17);
+    }
+    api.out.innerHTML = '<p>这是一个概念流程，真实的组织可能省略或合并其中的步骤。红色虚线是最常被省略的一步：很少有组织回头检查，自己用来选人的方法，是否真的选出了表现更好的人。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 19-01 · reliability and validity are different questions ----- */
+  F.relvalid = (fig) => quad14(fig, ['与工作表现有关', '与工作表现无关'], ['稳定：换一次、换一个人测，结果接近', '不稳定：换一次、换一个人测，结果差别很大'], [
+    ['可以用于预测', '例如按统一标准评分的结构化面试问题', 'b'],
+    ['稳定，但测错了东西', '例如对与工作无关的爱好的一致评价', 'm'],
+    ['方向对，但误差太大', '例如只凭一次简短交谈的印象', 'm'],
+    ['既不稳定，也没有用', '', 'm'],
+  ], '<p>信度是效度的必要条件，但不是充分条件：不稳定的测量不可能有很高的预测力，而稳定的测量也可能什么都预测不了。这是概念示意，例子只用来说明每一格的含义。</p>');
+
+  /* ----- 19-01 · incremental validity as overlapping coverage (schematic sizes) ----- */
+  F.incvalid = (fig) => figure(fig, (box, w, api) => {
+    const D = Math.min(w, 460), ox = (w - D) / 2, Rb = D * 0.3, r = Rb * 0.62, bx = ox + D - Rb - 4, cy = 30 + Rb * 1.06, gs = [];
+    const A = [bx - Rb * 0.95, cy - Rb * 0.42], B = [bx - Rb * 0.95, cy + Rb * 0.42];
+    const M = [
+      [bx - Rb * 0.74, cy, '两种方法共同覆盖的部分：重复的信息，加入第二种方法后不会再增加'],
+      [bx - Rb * 0.55, cy - Rb * 0.62, '只有能力测验覆盖的部分'],
+      [bx - Rb * 0.55, cy + Rb * 0.62, '只有结构化面试覆盖的部分：在能力测验之外，面试带来的新信息，即增量效度'],
+      [bx + Rb * 0.45, cy, '两种方法都没有覆盖的部分：入职前无法预测的表现差异'],
+    ];
+    const lg = M.map(([, , t]) => wrapZh(t, w - 44, 12.5)), top = cy + Rb * 1.04 + 40, H = top + lg.reduce((a, l) => a + l.length * 17 + 8, 0) + 14, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('circle', { cx: bx, cy, r: Rb, class: 'fx-pill m' }, g0);
+    tx(g0, bx, cy - Rb - 8, '工作表现', 'fx-h', 'middle');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('circle', { cx: A[0], cy: A[1], r, class: 'fx-pill b' }, g1);
+    tx(g1, A[0], A[1] - r - 8, '认知能力测验', 'fx-s fx-strong', 'middle');
+    const g2 = el('g', {}, s); gs.push(g2);
+    el('circle', { cx: B[0], cy: B[1], r, class: 'fx-pill r' }, g2);
+    tx(g2, B[0], B[1] + r + 18, '结构化面试', 'fx-s fx-strong fx-r', 'middle');
+    const g3 = el('g', {}, s); gs.push(g3);
+    let yy = top;
+    M.forEach(([x, y], i) => {
+      el('circle', { cx: x, cy: y, r: 10, fill: 'var(--paper)', stroke: 'var(--text)', 'stroke-width': 1.4 }, g3);
+      tx(g3, x, y + 4, String(i + 1), 'fx-n fx-strong', 'middle');
+      el('circle', { cx: 10, cy: yy - 4, r: 10, fill: 'var(--paper)', stroke: 'var(--text)', 'stroke-width': 1.4 }, g3);
+      tx(g3, 10, yy, String(i + 1), 'fx-n fx-strong', 'middle');
+      lines(g3, 30, yy, lg[i], i === 2 ? 'fx-s fx-r' : 'fx-s', 17); yy += lg[i].length * 17 + 8;
+    });
+    tx(g3, w, H - 2, '圆的大小和重叠程度是示意，不代表真实数值', 'fx-n', 'end');
+    api.out.innerHTML = '<p>第二种方法是否“值得加”，不取决于它单独的效度有多高，而取决于它有多少信息是第一种方法没有覆盖的。两种测的东西越相似，增量越小。无论怎样组合，工作表现中都有很大一部分无法在入职前预测。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 19-01 · leniency, severity and central tendency on one invented group ----- */
+  F.raterr = (fig) => figure(fig, (box, w, api) => {
+    const base = [1.4, 1.8, 2.1, 2.4, 2.7, 2.9, 3.1, 3.3, 3.6, 3.9, 4.2, 4.6];
+    const R = [
+      ['比较准确的评分', '分数分散在整个范围内', base, 'b'],
+      ['宽大误差', '所有人都被评得偏高，挤在高分一端', base.map((b) => 3.5 + (b - 1) * 0.37), 'r'],
+      ['严苛误差', '所有人都被评得偏低，挤在低分一端', base.map((b) => 1.15 + (b - 1) * 0.37), 'r'],
+      ['趋中误差', '所有人都被评为中等，强弱无法区分', base.map((b) => 3 + (b - 3) * 0.22), 'r'],
+    ];
+    const x0 = 14, x1 = w - 14, X = (v) => x0 + (v - 1) / 4 * (x1 - x0), rowH = 78, gs = [];
+    const foot = wrapZh('光环效应不在这条轴上：它表现为同一个人在不同维度上的评分高度相似，例如“沟通好”的人在“文书准确”上也被打高分。', w - 4, 12.5);
+    const H = R.length * rowH + 30 + foot.length * 17 + 20, s = svgIn(box, w, H, fig);
+    R.forEach(([t, d, v, c], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const y = i * rowH, ay = y + 50;
+      tx(g, 0, y + 15, t, c === 'r' ? 'fx-h fx-r' : 'fx-h'); tx(g, Math.max(110, t.length * 16 + 12), y + 15, w >= 440 ? d : '', 'fx-n');
+      if (w < 440) tx(g, 0, y + 31, d, 'fx-n');
+      el('line', { x1: x0, x2: x1, y1: ay, y2: ay, class: 'fx-ln' }, g);
+      [1, 2, 3, 4, 5].forEach((k) => { el('line', { x1: X(k), x2: X(k), y1: ay, y2: ay + 5, class: 'fx-ln' }, g); if (i === R.length - 1) tx(g, X(k), ay + 20, `${k}`, 'fx-n', 'middle'); });
+      v.forEach((p, j) => el('circle', { cx: X(p), cy: ay - 7 - (j % 2) * 8, r: 4.2, class: 'fx-node ' + c }, g));
+    });
+    const g = el('g', {}, s); gs.push(g);
+    lines(g, 0, R.length * rowH + 26, foot, 'fx-n', 17);
+    tx(g, w, H - 2, '评分 1–5；12 名员工和分数都是虚构的', 'fx-n', 'end');
+    api.out.innerHTML = '<p>四行是同一组人。每一行的排序其实都一样，变的是分数落在哪里：在宽大的评价者那里，“4 分”可能只代表合格；在严苛的评价者那里，“3 分”可能已经不错。直接比较不同评价者给出的分数，就会把评价者的差异当成员工的差异。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.16, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 19-02 · the self-determination continuum, with work examples ----- */
+  F.sdtcontinuum = (fig) => figure(fig, (box, w, api) => {
+    const N = [
+      ['无动机', '不知道为什么要做', 'm'],
+      ['外部调节', '为了奖金，或者怕被批评', 'r'],
+      ['内摄调节', '不加班会内疚，觉得自己不够好', 'r'],
+      ['认同调节', '不喜欢写报告，但知道它对协作很重要', 'b'],
+      ['整合调节', '这项工作与自己的价值观融为一体', 'b'],
+      ['内在动机', '工作本身令人满足', 'b'],
+    ];
+    const G = [['受控动机', 1, 2, 'fx-ln fx-lr fx-thick', 'fx-n fx-strong fx-r'], ['自主动机', 3, 5, 'fx-ln fx-lb fx-thick', 'fx-n fx-strong']], wide = w >= 680, gs = [];
+    if (wide) {
+      const gap = 10, bw = (w - gap * 5) / 6, bh = Math.max(...N.map(([t, d]) => bx13H(bw, t, d, 70))), top = 34, H = top + bh + 44, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      arrow(g0, 0, 12, w - 2, 12, '', 6); tx(g0, w, 28, '自主程度越来越高 →', 'fx-n', 'end');
+      N.forEach(([t, d, c], i) => bx13(g0, i * (bw + gap), top, bw, t, d, c, bh));
+      const g1 = el('g', {}, s); gs.push(g1);
+      G.forEach(([t, a, b, lc, tc]) => { const xa = a * (bw + gap) + 4, xb = b * (bw + gap) + bw - 4, y = top + bh + 12; el('path', { d: `M${xa},${y - 6} L${xa},${y} L${xb},${y} L${xb},${y - 6}`, class: lc, fill: 'none' }, g1); tx(g1, (xa + xb) / 2, y + 22, t, tc, 'middle'); });
+    } else {
+      const lane = 30, bw = w - lane, vg = 8, hs = N.map(([t, d]) => bx13H(bw, t, d, 44)), ys = hs.reduce((a, h, i) => (a.push(i ? a[i - 1] + hs[i - 1] + vg : 26), a), []);
+      const H = ys[5] + hs[5] + 24, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      tx(g0, 0, 14, '自主程度 ↓ 越往下越高', 'fx-n');
+      N.forEach(([t, d, c], i) => bx13(g0, lane, ys[i], bw, t, d, c, hs[i]));
+      const g1 = el('g', {}, s); gs.push(g1);
+      G.forEach(([t, a, b, lc, tc]) => {
+        const ya = ys[a] + 4, yb = ys[b] + hs[b] - 4, x = 20; el('path', { d: `M${x + 8},${ya} L${x},${ya} L${x},${yb} L${x + 8},${yb}`, class: lc, fill: 'none' }, g1);
+        const tl = el('text', { x: 0, y: 0, class: tc, 'text-anchor': 'middle', transform: `translate(${x - 6},${(ya + yb) / 2}) rotate(-90)` }, g1); tl.textContent = t;
+      });
+      tx(g1, w, H - 4, '例子是虚构的', 'fx-n', 'end');
+    }
+    api.out.innerHTML = '<p>外在动机不全是“受控”的：认同一项工作的价值，即使它本身并不有趣，也是一种自主动机。一个人对同一份工作，常常同时有几种动机。这是理论框架的示意，不是测量工具。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 19-02 · expectancy theory: a chain of three links, each of which can break ----- */
+  F.expectancy = (fig) => figure(fig, (box, w, api) => {
+    const N = [['努力', 'b'], ['表现', 'b'], ['结果', 'b', '例如加薪、晋升、认可'], ['对个人的价值', 'b']];
+    const L = [
+      ['期望：努力能不能带来好的表现？', '断开的例子：目标根本不可能完成，或者缺少完成任务需要的工具和支持'],
+      ['工具性：好的表现能不能带来相应的结果？', '断开的例子：做得好和做得差的人待遇一样，或者晋升取决于关系而不是表现'],
+      ['效价：这些结果对我重要吗？', '断开的例子：组织提供的回报不是员工看重的'],
+    ];
+    const nw = Math.min(w, 420), nx = 0, lx = 30, tw = w - lx - 4, gs = [];
+    const nh = N.map(([t, , d]) => bx13H(nw, t, d || '', 40)), lt = L.map(([a, b]) => [wrapZh(a, tw, 13), wrapZh(b, tw, 12.5)]);
+    const lh = lt.map(([a, b]) => a.length * 18 + b.length * 17 + 22);
+    let y = 0; const ys = [];
+    N.forEach((_, i) => { ys.push(y); y += nh[i] + (i < 3 ? lh[i] : 0); });
+    const H = y + 20, s = svgIn(box, w, H, fig);
+    N.forEach(([t, c, d], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      bx13(g, nx, ys[i], nw, t, d || '', c, nh[i]);
+      if (i < 3) {
+        const y0 = ys[i] + nh[i], y1 = ys[i + 1];
+        arrow(g, 14, y0 + 3, 14, y1 - 3, '', 6);
+        let yy = y0 + 20; lt[i][0].forEach((l) => { tx(g, lx, yy, l, 'fx-s fx-strong'); yy += 18; });
+        lt[i][1].forEach((l) => { tx(g, lx, yy, l, 'fx-n fx-r'); yy += 17; });
+      }
+    });
+    tx(gs[3], w, H - 2, '这是理论框架的示意，不是计算公式', 'fx-n', 'end');
+    api.out.innerHTML = '<p>当一个团队“不愿意努力”时，问题可能出在三个不同的地方：目标是否现实、表现能否带来公平的结果、这些结果是否被看重。期望理论的实证支持比它的直观吸引力弱，更适合作为诊断问题的框架。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 19-02 · the job characteristics model ----- */
+  F.jcm = (fig) => figure(fig, (box, w, api) => {
+    const G = [[['技能多样性', '任务完整性', '任务重要性'], '体验到工作的意义'], [['自主性'], '体验到对结果的责任'], [['反馈'], '了解工作的实际结果']];
+    const out = ['结果', '内在工作动机、满意度、工作表现等'], extra = ['后来的研究补充', '社会特征（例如同事支持、相互依赖）和工作情境也有重要作用'];
+    const wide = w >= 600, gs = [];
+    if (wide) {
+      const gap = 36, cw = (w - gap * 2) / 3, ch = 40, cg = 8, grpG = 18, rows = [];
+      let y = 26; G.forEach(([cs]) => { rows.push(y); y += cs.length * (ch + cg) - cg + grpG; });
+      const bodyH = y - grpG, eh = bx13H(w, extra[0], extra[1], 46), H = bodyH + 28 + eh + 4, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      [['核心工作特征', 0], ['关键心理状态', 1], ['结果', 2]].forEach(([t, k]) => tx(g0, k * (cw + gap) + cw / 2, 14, t, 'fx-n', 'middle'));
+      G.forEach(([cs], gi) => cs.forEach((c, j) => bx13(g0, 0, rows[gi] + j * (ch + cg), cw, c, '', 'b', ch)));
+      const g1 = el('g', {}, s); gs.push(g1);
+      const sy = G.map(([cs], gi) => rows[gi] + (cs.length * (ch + cg) - cg) / 2);
+      G.forEach(([cs, st], gi) => {
+        cs.forEach((_, j) => arrow(g1, cw + 3, rows[gi] + j * (ch + cg) + ch / 2, cw + gap - 3, sy[gi], '', 6));
+        bx13(g1, cw + gap, sy[gi] - 26, cw, st, '', 'r', 52);
+      });
+      const g2 = el('g', {}, s); gs.push(g2);
+      const ox = 2 * (cw + gap), oh = bx13H(cw, out[0], out[1], 90), oy = 26 + (bodyH - 26 - oh) / 2;
+      sy.forEach((yy) => arrow(g2, cw * 2 + gap + 3, yy, ox - 3, Math.min(oy + oh - 10, Math.max(oy + 10, yy)), '', 6));
+      bx13(g2, ox, oy, cw, out[0], out[1], 'b', oh);
+      const g3 = el('g', {}, s); gs.push(g3);
+      bx13(g3, 0, bodyH + 28, w, extra[0], extra[1], 'm', eh);
+    } else {
+      const rw = w - 26, ind = 18, vg = 22, oh = bx13H(rw, out[0], out[1], 52), eh = bx13H(w, extra[0], extra[1], 46);
+      const items = []; G.forEach(([cs, st]) => { items.push([cs.join('、'), 'b', 0, rw]); items.push([st, 'r', ind, rw - ind]); });
+      const hs = items.map(([t, , , iw]) => bx13H(iw, t, '', 40)), ys = []; let y = 0;
+      items.forEach((_, i) => { ys.push(y); y += hs[i] + (i % 2 === 0 ? 18 : vg); });
+      const oy = y + 6, H = oy + oh + 22 + eh + 4, s = svgIn(box, w, H, fig), lx = w - 10, om = oy + oh / 2;
+      let g;
+      items.forEach(([t, c, x, iw], i) => {
+        if (i % 2 === 0) { g = el('g', {}, s); gs.push(g); }
+        bx13(g, x, ys[i], iw, t, '', c, hs[i]);
+        if (i % 2) {
+          arrow(g, rw / 2, ys[i] - 15, rw / 2, ys[i] - 3, '', 6);
+          el('path', { d: `M${x + iw + 3},${ys[i] + hs[i] / 2} L${lx},${ys[i] + hs[i] / 2} L${lx},${om}`, class: 'fx-ln', fill: 'none' }, g);
+        }
+      });
+      const g2 = el('g', {}, s); gs.push(g2);
+      arrow(g2, lx, om, rw + 3, om, '', 6);
+      bx13(g2, 0, oy, rw, out[0], out[1], 'b', oh);
+      bx13(g2, 0, oy + oh + 22, w, extra[0], extra[1], 'm', eh);
+    }
+    api.out.innerHTML = '<p>工作特征通过人对工作的体验影响动机。元分析发现，在任务本身的特征之外，社会特征还能额外解释相当一部分差异；不过这些研究大多是横断面的自我报告，不能直接得出因果结论。这是理论框架的示意。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 19-02 · satisfaction, engagement, commitment and performance are different constructs ----- */
+  F.satengperf = (fig) => figure(fig, (box, w, api) => {
+    const N = [['工作满意度', '我喜欢这份工作吗？', 'b'], ['工作投入', '我在工作中是否精力充沛、专注、有热情？', 'b'], ['组织承诺', '我为什么留在这个组织：想留、需要留，还是觉得应该留？', 'b'], ['工作表现', '我实际做了什么、做得怎样？', 'r']];
+    const F2 = [['满意度与表现', '平均真实相关约 0.30（贾奇等，2001 年，312 个样本）。中等强度，因果方向不明'], ['投入与满意度等态度', '可以区分；在解释表现时，投入能在这些态度之外提供额外的信息（克里斯蒂安等，2011 年）']];
+    const cols = w >= 680 ? 4 : 2, gap = 12, cw = (w - gap * (cols - 1)) / cols, rows = Math.ceil(N.length / cols), gs = [];
+    const bh = Math.max(...N.map(([t, d]) => bx13H(cw, t, d, 78))), gridH = rows * bh + (rows - 1) * gap;
+    const ft = F2.map(([a, b]) => [wrapZh(a, w - 36, 13), wrapZh(b, w - 36, 12.5)]), fh = ft.reduce((a, [x, y]) => a + x.length * 18 + y.length * 17 + 14, 0);
+    const H = gridH + 30 + fh + 20, s = svgIn(box, w, H, fig);
+    N.forEach(([t, d, c], i) => { const g = el('g', {}, s); gs.push(g); bx13(g, (i % cols) * (cw + gap), Math.floor(i / cols) * (bh + gap), cw, t, d, c, bh); });
+    const g = el('g', {}, s); gs.push(g);
+    let y = gridH + 34;
+    ft.forEach(([a, b]) => { el('line', { x1: 4, x2: 4, y1: y - 12, y2: y - 12 + a.length * 18 + b.length * 17, class: 'fx-ln fx-lb fx-thick' }, g); a.forEach((l) => { tx(g, 16, y, l, 'fx-s fx-strong'); y += 18; }); b.forEach((l) => { tx(g, 16, y, l, 'fx-n'); y += 17; }); y += 14; });
+    tx(g, w, H - 2, '相关不说明因果方向', 'fx-n', 'end');
+    api.out.innerHTML = '<p>四个概念彼此相关，但不能互相替代：满意的员工不一定投入，投入的员工不一定留下，留下的员工也不一定表现最好。用一个“员工满意度”分数代表其他几项，会丢失很多信息。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.14, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 19-02 · the job demands–resources model: two processes and a buffer ----- */
+  F.jdr = (fig) => figure(fig, (box, w, api) => {
+    const C = [
+      ['损耗过程', 'fx-n fx-strong fx-r', [['工作要求', '工作量、时间压力、情绪劳动、角色冲突', 'r'], ['耗竭与倦怠', '', 'r'], ['健康问题', '', 'r']], 'r'],
+      ['激励过程', 'fx-n fx-strong', [['工作资源', '自主性、上级和同事的支持、反馈、发展机会', 'b'], ['工作投入', '', 'b'], ['表现与承诺', '', 'b']], ''],
+    ];
+    const gap = w >= 480 ? 64 : 40, cw = (w - gap) / 2, vg = 34, gs = [];
+    const hs = [0, 1, 2].map((k) => Math.max(...C.map(([, , b]) => bx13H(cw, b[k][0], b[k][1], 44))));
+    const ys = [26, 26 + hs[0] + vg, 26 + hs[0] + hs[1] + 2 * vg], H = ys[2] + hs[2] + 26, s = svgIn(box, w, H, fig);
+    C.forEach(([t, tc, B, ac], ci) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = ci * (cw + gap);
+      tx(g, x + cw / 2, 14, t, tc, 'middle');
+      B.forEach(([bt, bd, c], k) => { bx13(g, x, ys[k], cw, bt, bd, c, hs[k]); if (k) arrow(g, x + cw / 2, ys[k] - vg + 3, x + cw / 2, ys[k] - 3, ac, 6); });
+    });
+    const g = el('g', {}, s); gs.push(g);
+    const ax = cw / 2, my = ys[1] - vg / 2, rx = cw + gap;
+    el('path', { d: `M${rx + 22},${ys[0] + hs[0] + 3} L${rx + 22},${my} L${ax + 9},${my}`, class: 'fx-ln fx-dash', fill: 'none' }, g);
+    el('line', { x1: ax + 4, x2: ax + 12, y1: my - 7, y2: my + 7, class: 'fx-ln fx-thick' }, g);
+    tx(g, cw + gap / 2, my - 6, '缓冲', 'fx-n fx-strong fx-halo', 'middle');
+    tx(g, w, H - 4, '这是理论框架的示意', 'fx-n', 'end');
+    api.out.innerHTML = '<p>长期过高的工作要求通过损耗过程导致耗竭；充足的资源通过激励过程促进投入，还能减弱高要求对倦怠的影响（虚线）。缺乏资源本身也与脱离有关。支持这一模型的证据大多来自相关研究，因果方向可能是双向的。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 19-03 · approaches to leadership and their limits ----- */
+  F.leadapproach = (fig) => figure(fig, (box, w, api) => {
+    const R = [
+      ['特质取向', '什么样的人会成为领导者？', '人格与领导的关系中等，且常把“像个领导”与“领导有效”混在一起'],
+      ['行为取向', '领导者做了什么？例如关怀和结构', '同样的行为，在不同情境中效果不同'],
+      ['权变取向', '在什么情境下，什么方式有效？', '具体的权变模型难以得到一致的验证'],
+      ['变革型与交易型', '领导者怎样激励下属、怎样交换？', '概念的定义和测量受到严肃批评，与权变奖励高度重叠'],
+      ['领导—成员交换', '领导者与每位成员的关系质量如何？', '多为相关研究；关系差异可能带来公平问题'],
+    ];
+    const wide = w >= 560, nw = wide ? Math.round(w * 0.27) : w, tx0 = wide ? nw + 18 : 12, tw = w - tx0 - 2, gap = 14, gs = [];
+    const lt = R.map(([, q, l]) => [wrapZh('问：' + q, tw, 13), wrapZh('局限：' + l, tw, 12.5)]);
+    const rh = R.map(([n], i) => { const th = lt[i][0].length * 18 + lt[i][1].length * 17 + 6; return wide ? Math.max(52, th + 12) : 44 + 10 + th; });
+    const H = rh.reduce((a, h) => a + h + gap, 0) + 6, s = svgIn(box, w, H, fig);
+    let y = 0;
+    R.forEach(([n], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      bx13(g, 0, y, nw, n, '', i === 3 ? 'r' : 'b', wide ? rh[i] : 44);
+      let yy = wide ? y + (rh[i] - (lt[i][0].length * 18 + lt[i][1].length * 17)) / 2 + 13 : y + 44 + 22;
+      if (!wide) el('line', { x1: 4, x2: 4, y1: yy - 13, y2: yy - 13 + lt[i][0].length * 18 + lt[i][1].length * 17, class: 'fx-hair' }, g);
+      lt[i][0].forEach((l) => { tx(g, tx0, yy, l, 'fx-s'); yy += 18; });
+      lt[i][1].forEach((l) => { tx(g, tx0, yy, l, 'fx-n fx-r'); yy += 17; });
+      y += rh[i] + gap;
+    });
+    api.out.innerHTML = '<p>这些取向不是相互替代的，而是从不同角度看同一个现象。每一种都回答了一部分问题，也都有自己的局限。这是概念示意，不是领导风格的分类工具。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.12, 0.35)));
+  }, { dur: 1100 });
+
+  /* ----- 19-03 · psychological safety and accountability are separate dimensions ----- */
+  F.safeacct = (fig) => quad14(fig, ['心理安全感低', '心理安全感高'], ['对工作标准和责任的要求高', '对工作标准和责任的要求低'], [
+    ['标准很高，但说出问题有风险', '人们可能隐瞒错误和坏消息', 'm'],
+    ['敢于说出问题，也对结果负责', '学习最可能发生的情况', 'r'],
+    ['既少坦率沟通，也少要求', '', 'm'],
+    ['气氛轻松，但缺少改进的压力', '“和气”不等于心理安全感', 'm'],
+  ], '<p>心理安全感指能够坦率地说出问题、错误和不同意见，而不是没有分歧、不用承担责任。这张图是对一种常见观点的概念概括，不是经过验证的分类，也不能用来给团队打分。</p>');
+
+  /* ----- 19-03 · shared mental models: three members' understanding of one task ----- */
+  F.smm = (fig) => figure(fig, (box, w, api) => {
+    const P = [['理解不一致', '需要大量解释，交接处容易出错', 0.95], ['理解较一致', '协调更顺畅，较少需要额外沟通', 0.42]];
+    const wide = w >= 560, gap = 30, pw = wide ? (w - gap) / 2 : w, R = Math.min(52, pw * 0.17), ph = R * 2 * 1.9 + 70, gs = [];
+    const H = (wide ? ph : ph * 2 + 20) + 40, s = svgIn(box, w, H, fig);
+    P.forEach(([t, d, sp], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = wide ? i * (pw + gap) : 0, y = wide ? 0 : i * (ph + 20), cx = x + pw / 2, cy = y + 32 + R * 2;
+      tx(g, x, y + 16, t, i ? 'fx-h fx-r' : 'fx-h');
+      const pts = [0, 1, 2].map((k) => { const a = -Math.PI / 2 + k * 2 * Math.PI / 3; return [cx + Math.cos(a) * R * 1.25 * sp * 1.05, cy + Math.sin(a) * R * 1.0 * sp * 1.05]; });
+      pts.forEach(([px, py], k) => { el('circle', { cx: px, cy: py, r: R, class: 'fx-pill ' + (i ? 'r' : 'b') }, g); });
+      pts.forEach(([px, py], k) => { const lx = px + (px - cx) * (i ? 1.4 : 0.35), ly = py + (py - cy) * (i ? 1.4 : 0.35); tx(g, lx, ly + 5, ['甲', '乙', '丙'][k], 'fx-s fx-strong fx-halo', 'middle'); });
+      if (i) tx(g, cx, cy + 5, '共享理解', 'fx-n fx-strong fx-halo', 'middle');
+      else [[0, 1], [1, 2], [2, 0]].forEach(([a, b]) => tx(g, (pts[a][0] + pts[b][0]) / 2, (pts[a][1] + pts[b][1]) / 2 + 5, '？', 'fx-h fx-r', 'middle'));
+      tx(g, x, y + ph - 6, d, 'fx-n');
+    });
+    const g = el('g', {}, s); gs.push(g);
+    lines(g, 0, H - 22, wrapZh('每个圆代表一位成员对任务、角色和彼此专长的理解。这是概念示意。', w - 14, 12), 'fx-n', 15);
+    api.out.innerHTML = '<p>共享不等于每个人知道同样的东西。在分工合作的团队中，成员的专长本来就不同；重要的是对流程和角色有一致的理解，并且知道“谁知道什么”。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 19-03 · organizational culture (Schein's layers) and organizational climate ----- */
+  F.cultclimate = (fig) => figure(fig, (box, w, api) => {
+    const Lr = [['人工制品', '口号、办公布局、仪式：最容易看到', 'm'], ['公开宣称的价值观', '例如“以客户为中心”“安全第一”', 'b'], ['基本假设', '视为理所当然的信念，例如“犯错的人会被追究”：最难看到，影响最深', 'r']];
+    const Cl = ['组织氛围', '员工从日常的政策、做法和程序中感受到的“这里真正重视什么”，通常针对特定方面，例如安全氛围、服务氛围'];
+    const Ex = ['一个例子', '墙上写着“安全第一”，但赶工期时，没有人因为违规被叫停。员工感受到的安全氛围，来自后者。'];
+    const wide = w >= 600, gs = [];
+    if (wide) {
+      const gap = 56, cw = (w - gap) / 2, vg = 10, hs = Lr.map(([t, d]) => bx13H(cw, t, d, 52)), ys = hs.reduce((a, h, i) => (a.push(i ? a[i - 1] + hs[i - 1] + vg : 24), a), []);
+      const colH = ys[2] + hs[2] - 24, ch = bx13H(cw, Cl[0], Cl[1], 80), cy = 24 + (colH - ch) / 2, eh = bx13H(w, Ex[0], Ex[1], 46), H = 24 + colH + 26 + eh + 4, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      tx(g0, cw / 2, 14, '组织文化（沙因的三个层次）', 'fx-n', 'middle');
+      Lr.forEach(([t, d, c], i) => bx13(g0, 0, ys[i], cw, t, d, c, hs[i]));
+      const g1 = el('g', {}, s); gs.push(g1);
+      tx(g1, cw + gap + cw / 2, 14, '组织氛围', 'fx-n', 'middle');
+      arrow(g1, cw + 4, ys[2] + hs[2] / 2, cw + gap - 4, cy + ch / 2, '', 6);
+      tx(g1, cw + gap / 2, ys[2] + hs[2] / 2 + 22, '日常做法', 'fx-n fx-halo', 'middle');
+      bx13(g1, cw + gap, cy, cw, Cl[0], Cl[1], 'b', ch);
+      const g2 = el('g', {}, s); gs.push(g2);
+      bx13(g2, 0, 24 + colH + 26, w, Ex[0], Ex[1], 'm', eh);
+    } else {
+      const vg = 8, hs = Lr.map(([t, d]) => bx13H(w, t, d, 46)), ys = hs.reduce((a, h, i) => (a.push(i ? a[i - 1] + hs[i - 1] + vg : 24), a), []);
+      const cy = ys[2] + hs[2] + 46, ch = bx13H(w, Cl[0], Cl[1], 60), ey = cy + ch + 22, eh = bx13H(w, Ex[0], Ex[1], 46), H = ey + eh + 4, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      tx(g0, 0, 14, '组织文化（沙因的三个层次）', 'fx-n');
+      Lr.forEach(([t, d, c], i) => bx13(g0, 0, ys[i], w, t, d, c, hs[i]));
+      const g1 = el('g', {}, s); gs.push(g1);
+      arrow(g1, w / 2, ys[2] + hs[2] + 4, w / 2, cy - 4, '', 6);
+      tx(g1, w / 2 + 10, ys[2] + hs[2] + 27, '通过日常做法，形成', 'fx-n');
+      bx13(g1, 0, cy, w, Cl[0], Cl[1], 'b', ch);
+      const g2 = el('g', {}, s); gs.push(g2);
+      bx13(g2, 0, ey, w, Ex[0], Ex[1], 'm', eh);
+    }
+    api.out.innerHTML = '<p>文化是深层的假设和价值观，较难直接观察；氛围是员工对日常做法的共同感知，可以通过调查测量。当公开宣称的价值观与基本假设不一致时，员工从日常经验中学到的是后者。这是概念示意。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 19-03 · inputs → mediators → outcomes, inside an organizational context ----- */
+  F.ipo = (fig) => figure(fig, (box, w, api) => {
+    const I = ['输入', '成员的能力和特点、团队构成、任务和相互依赖程度、领导'];
+    const M = [['团队过程', '沟通、协调、冲突处理'], ['涌现状态', '心理安全感、共享心智模型、凝聚力']];
+    const O = ['结果', '团队绩效、成员满意度、继续合作的能力'];
+    const wide = w >= 640, pad = 12, gs = [];
+    if (wide) {
+      const gap = 40, iw = w - pad * 2, cw = (iw - gap * 2) / 3, top = 40;
+      const mh = M.map(([t, d]) => bx13H(cw, t, d, 60)), colH = mh[0] + 12 + mh[1], ih = colH, H = top + colH + 62, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      el('rect', { x: 1, y: 1, width: w - 2, height: top + colH + 58, rx: 10, fill: 'none', class: 'fx-ln fx-dash' }, g0);
+      tx(g0, pad, 22, '组织情境：资源、奖励制度、文化与氛围', 'fx-n fx-strong');
+      bx13(g0, pad, top, cw, I[0], I[1], 'b', ih);
+      const g1 = el('g', {}, s); gs.push(g1);
+      M.forEach(([t, d], i) => bx13(g1, pad + cw + gap, top + (i ? mh[0] + 12 : 0), cw, t, d, 'r', mh[i]));
+      M.forEach((_, i) => arrow(g1, pad + cw + 3, top + (i ? mh[0] + 12 + mh[1] / 2 : mh[0] / 2), pad + cw + gap - 3, top + (i ? mh[0] + 12 + mh[1] / 2 : mh[0] / 2), '', 6));
+      const g2 = el('g', {}, s); gs.push(g2);
+      bx13(g2, pad + 2 * (cw + gap), top, cw, O[0], O[1], 'b', ih);
+      M.forEach((_, i) => arrow(g2, pad + 2 * cw + gap + 3, top + (i ? mh[0] + 12 + mh[1] / 2 : mh[0] / 2), pad + 2 * (cw + gap) - 3, top + (i ? mh[0] + 12 + mh[1] / 2 : mh[0] / 2), '', 6));
+      const yb = top + colH + 14, xo = pad + 2 * (cw + gap) + cw / 2, xi = pad + cw / 2;
+      el('path', { d: `M${xo},${top + colH + 3} L${xo},${yb} L${xi},${yb}`, class: 'fx-ln fx-lr fx-dash', fill: 'none' }, g2);
+      arrow(g2, xi, yb, xi, top + colH + 3, 'r', 6);
+      tx(g2, (xi + xo) / 2, yb + 26, '结果反过来影响下一轮的输入和过程', 'fx-n fx-r', 'middle');
+    } else {
+      const lane = 30, iw = w - pad * 2 - lane, vg = 26, top = 52;
+      const B = [[I[0], I[1], 'b'], [M[0][0], M[0][1], 'r'], [M[1][0], M[1][1], 'r'], [O[0], O[1], 'b']], hs = B.map(([t, d]) => bx13H(iw, t, d, 48));
+      const ys = hs.reduce((a, h, i) => (a.push(i ? a[i - 1] + hs[i - 1] + (i === 2 ? 10 : vg) : top), a), []), bot = ys[3] + hs[3], H = bot + 44, s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      el('rect', { x: 1, y: 1, width: w - 2, height: bot + 14, rx: 10, fill: 'none', class: 'fx-ln fx-dash' }, g0);
+      lines(g0, pad, 22, wrapZh('组织情境：资源、奖励制度、文化与氛围', w - pad * 2, 13), 'fx-n fx-strong', 17);
+      bx13(g0, pad, ys[0], iw, B[0][0], B[0][1], 'b', hs[0]);
+      const g1 = el('g', {}, s); gs.push(g1);
+      [1, 2].forEach((i) => bx13(g1, pad, ys[i], iw, B[i][0], B[i][1], 'r', hs[i]));
+      arrow(g1, pad + iw / 2, ys[1] - vg + 3, pad + iw / 2, ys[1] - 3, '', 6);
+      const g2 = el('g', {}, s); gs.push(g2);
+      arrow(g2, pad + iw / 2, ys[3] - vg + 3, pad + iw / 2, ys[3] - 3, '', 6);
+      bx13(g2, pad, ys[3], iw, B[3][0], B[3][1], 'b', hs[3]);
+      const lx = pad + iw + lane / 2;
+      el('path', { d: `M${pad + iw + 3},${ys[3] + hs[3] / 2} L${lx},${ys[3] + hs[3] / 2} L${lx},${ys[0] + hs[0] / 2}`, class: 'fx-ln fx-lr fx-dash', fill: 'none' }, g2);
+      arrow(g2, lx, ys[0] + hs[0] / 2, pad + iw + 3, ys[0] + hs[0] / 2, 'r', 6);
+      lines(g2, 0, bot + 36, ['红色虚线：结果反过来影响下一轮'], 'fx-n fx-r', 15);
+    }
+    api.out.innerHTML = '<p>领导只是输入之一。成员怎样沟通和协调（过程）、团队中形成了怎样的共同信念（涌现状态），以及组织提供了什么条件，都会影响结果。这是组织研究的框架，不是可以用来给团队打分的模型。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.4)));
+  }, { dur: 1200 });
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;
