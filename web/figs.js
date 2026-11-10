@@ -4876,6 +4876,464 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.4)));
   }, { dur: 1200 });
 
+  /* =====================================================================
+     Stage 20 · social media, digital life and AI.
+     Static two-ink diagrams. The only numbers drawn are published estimates
+     named on the figure (Orben & Przybylski 2019; Valkenburg et al. 2021;
+     Beyens et al. 2020; Orben et al. 2022; Bastani et al. 2025). Every
+     scatter point is invented and says so. None of these is a test, a
+     screener or a score for a person.
+     ===================================================================== */
+
+  /* ----- 20-01 · cue → check → unpredictable payoff → strengthened link ----- */
+  F.habitloop = (fig) => cycle14(fig, [
+    ['情境线索', '等车、睡前、通知声、红点', 'b'],
+    ['查看动作', '几乎自动地拿起手机、刷新', 'b'],
+    ['不可预测的回报', '有时有趣、有回应，有时什么也没有', 'r'],
+    ['联结被强化', '线索更容易引发下一次查看', 'b'],
+  ], ['通知和红点增加线索；', '无限滚动和自动播放', '去掉了自然的停止点'],
+  '<p>这个循环描述的是一般的学习原理，并不是数字平台独有的：许多日常习惯都是这样形成的。设计的作用在于增加线索、让回报更难预测，并把“继续”变成默认。理解循环的结构，也提示了改变的入口，例如减少线索（关闭不必要的通知）或重新加入停止点（设定使用上限）。</p>');
+
+  /* ----- 20-01 · heavy use is not problematic use is not a disorder ----- */
+  F.usespectrum = (fig) => flow14(fig, [
+    ['用得多', '时间多，但没有明显的损害', 'b', '很常见'],
+    ['与目标冲突', '用得比自己想要的多', 'b', '很常见'],
+    ['有问题的使用', '干扰睡眠、学习、工作或关系，想减少却难以做到', 'm', '较少'],
+    ['临床障碍', '长期失控，造成严重的功能损害', 'r', '少见，需要专业评估'],
+  ], '<p>四段之间没有清楚的分界线，一个人也可能在不同时期处于不同的位置。网上流传的多数“成瘾”问卷测量的是前三段的程度，不能区分有问题的使用和临床障碍。“社交媒体成瘾”和“智能手机成瘾”不是正式的诊断类别；《国际疾病分类》第 11 版中的“游戏障碍”有严格的标准。</p>');
+
+  /* ----- 20-01 · 0.4% of the variance as 4 cells out of 1000 ----- */
+  F.varexplained = (fig) => figure(fig, (box, w, api) => {
+    const cols = w >= 520 ? 50 : 40, rows = 1000 / cols, gap = 1.5, cs = Math.min(12, (w - gap * (cols - 1)) / cols), gw = cols * cs + (cols - 1) * gap, ox = (w - gw) / 2;
+    const top = 26, gh = rows * cs + (rows - 1) * gap, leg = wrapZh('其余 996 格：家庭、睡眠、学业、同伴关系、遗传、测量误差等其他因素，以及无法解释的部分', w - 30, 12.5);
+    const H = top + gh + 36 + leg.length * 17 + 40, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    tx(g0, ox, 15, '青少年幸福感差异的全部 = 1000 格', 'fx-n');
+    const hot = new Set([cols * 2 + 3, cols * 2 + 4, cols * 3 + 3, cols * 3 + 4]);
+    for (let i = 0; i < 1000; i++) {
+      if (hot.has(i)) continue;
+      const r = Math.floor(i / cols), c = i % cols;
+      el('rect', { x: ox + c * (cs + gap), y: top + r * (cs + gap), width: cs, height: cs, fill: 'var(--rule)' }, g0);
+    }
+    const g1 = el('g', {}, s); gs.push(g1);
+    hot.forEach((i) => { const r = Math.floor(i / cols), c = i % cols; el('rect', { x: ox + c * (cs + gap), y: top + r * (cs + gap), width: cs, height: cs, class: 'fx-bar' }, g1); });
+    const ly = top + gh + 26;
+    el('rect', { x: ox, y: ly - 10, width: 11, height: 11, class: 'fx-bar' }, g1);
+    tx(g1, ox + 18, ly, '4 格（0.4%）：数字技术使用最多能解释的部分', 'fx-s fx-r');
+    el('rect', { x: ox, y: ly + 14, width: 11, height: 11, fill: 'var(--rule)' }, g1);
+    lines(g1, ox + 18, ly + 24, leg, 'fx-s', 17);
+    tx(g1, w, H - 4, '数字来自奥尔本和普日比尔斯基（2019）报告的上限', 'fx-n', 'end');
+    api.out.innerHTML = '<p>0.4% 是三个大型数据集、多种分析方式中得到的上限，而且是相关，不是因果。这个数字很小，但它是平均值：它不能告诉我们特定的用途（例如深夜使用）或特定的人群是否受到更大的影响。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.4, 0.4)));
+  }, { dur: 1100 });
+
+  /* ----- 20-01 · what a correlation of about .38 looks like (invented points) ----- */
+  F.selfreportlog = (fig) => figure(fig, (box, w, api) => {
+    const S = Math.min(w, 420), ox = (w - S) / 2 + 30, pw = S - 40, ph = Math.min(300, pw), top = 26, H = top + ph + 54, s = svgIn(box, w, H, fig), gs = [];
+    const r = rng(2001), g = () => { let a = 0; for (let k = 0; k < 6; k++) a += r(); return (a - 3) / Math.sqrt(0.5); };
+    const rho = 0.38, P = Array.from({ length: 70 }, () => { const x = g(), y = rho * x + Math.sqrt(1 - rho * rho) * g(); return [x, y]; });
+    const X = (v) => ox + (Math.max(-2.6, Math.min(2.6, v)) + 2.6) / 5.2 * pw, Y = (v) => top + ph - (Math.max(-2.6, Math.min(2.6, v)) + 2.6) / 5.2 * ph;
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: ox, y1: top + ph, x2: ox + pw, y2: top + ph, class: 'fx-ln' }, g0);
+    el('line', { x1: ox, y1: top, x2: ox, y2: top + ph, class: 'fx-ln' }, g0);
+    el('line', { x1: ox, y1: top + ph, x2: ox + pw, y2: top, class: 'fx-ln fx-lb fx-dash' }, g0);
+    tx(g0, ox + pw, top - 10, '虚线：估计完全准确', 'fx-n', 'end');
+    tx(g0, ox + pw / 2, top + ph + 20, '设备记录的使用时间 →', 'fx-n', 'middle');
+    const yl = el('text', { x: 0, y: 0, class: 'fx-n', 'text-anchor': 'middle', transform: `translate(${ox - 12},${top + ph / 2}) rotate(-90)` }, g0); yl.textContent = '本人估计的时间 →';
+    const g1 = el('g', {}, s); gs.push(g1);
+    P.forEach(([x, y]) => el('circle', { cx: X(x), cy: Y(y), r: 3.6, class: y > x ? 'fx-node r' : 'fx-node b' }, g1));
+    const g2 = el('g', {}, s); gs.push(g2);
+    el('circle', { cx: ox + 6, cy: top + ph + 40, r: 3.6, class: 'fx-node r' }, g2); tx(g2, ox + 14, top + ph + 44, '高估', 'fx-n');
+    el('circle', { cx: ox + 56, cy: top + ph + 40, r: 3.6, class: 'fx-node b' }, g2); tx(g2, ox + 64, top + ph + 44, '低估', 'fx-n');
+    tx(g2, w, top + ph + 44, '70 个点都是虚构的', 'fx-n', 'end');
+    api.out.innerHTML = '<p>这些点是按约 0.38 的相关生成的示意，这个数值接近帕里等人（2021）元分析汇总的结果。在这样的相关下，知道一个人的估计，只能粗略地猜出他实际用了多久；许多人高估或低估了很多。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 20-02 · developmental windows of sensitivity (Orben et al., 2022) ----- */
+  F.devwindows = (fig) => figure(fig, (box, w, api) => {
+    const L = w >= 440 ? 52 : 40, R = w - 8, A0 = 10, A1 = 21, X = (a) => L + (a - A0) / (A1 - A0) * (R - L), rowH = 44, top = 8, gs = [];
+    const rows = [['女孩', [[11, 13], [19, 19]]], ['男孩', [[14, 15], [19, 19]]]];
+    const H = top + rows.length * rowH + 40, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    rows.forEach(([lab], i) => { const y = top + i * rowH; tx(g0, 0, y + 24, lab, 'fx-h'); el('rect', { x: L, y: y + 8, width: R - L, height: 24, class: 'fx-band2' }, g0); });
+    const ay = top + rows.length * rowH + 6;
+    el('line', { x1: L, x2: R, y1: ay, y2: ay, class: 'fx-ln' }, g0);
+    for (let a = A0; a <= A1; a++) { el('line', { x1: X(a), x2: X(a), y1: ay, y2: ay + 4, class: 'fx-ln' }, g0); if (w >= 440 || a % 2 === 1) tx(g0, X(a), ay + 18, `${a}`, 'fx-n', 'middle'); }
+    tx(g0, R, ay + 32, '岁', 'fx-n', 'end');
+    const g1 = el('g', {}, s); gs.push(g1);
+    const half = (X(11) - X(10)) / 2;
+    rows.forEach(([, bands], i) => bands.forEach(([a, b]) => el('rect', { x: X(a) - half, y: top + i * rowH + 8, width: X(b) - X(a) + half * 2, height: 24, class: 'fx-bar' }, g1)));
+    api.out.innerHTML = '<p>红色区间是这项研究中，较多的社交媒体使用预测一年后生活满意度下降的年龄段；生活满意度下降也预测随后使用增加，方向是双向的。效应很小，来自英国的一个纵向样本，需要在其他数据中重复，不能直接当作年龄限制的依据。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.4, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 20-02 · person-specific effects (Valkenburg et al., 2021; Beyens et al., 2020) ----- */
+  F.personspecific = (fig) => figure(fig, (box, w, api) => {
+    const B = [
+      ['社交媒体使用与自尊', '387 名 13–15 岁青少年，三周，每天六次', [[88, '没有或很小', 'm'], [4, '正面', 'b'], [8, '负面', 'r']]],
+      ['被动使用与即时情绪', '另一项一周的经验取样研究', [[44, '没有变化', 'm'], [46, '感觉更好', 'b'], [10, '感觉更差', 'r']]],
+    ];
+    const bh = 30, rowH = 120, gs = [], H = B.length * rowH + 8, s = svgIn(box, w, H, fig);
+    B.forEach(([t, sub, segs], i) => {
+      const g = el('g', {}, s); gs.push(g); const y = i * rowH;
+      tx(g, 0, y + 16, t, 'fx-h'); tx(g, 0, y + 34, sub, 'fx-n');
+      let x = 0; const by = y + 46;
+      segs.forEach(([p, lab, c], k) => {
+        const sw = p / 100 * w;
+        el('rect', { x, y: by, width: Math.max(1, sw - 1), height: bh, fill: c === 'm' ? 'var(--rule)' : c === 'b' ? 'var(--blue)' : 'var(--red)' }, g);
+        x += sw;
+      });
+      let lx = 0, ly = by + bh + 22;
+      segs.forEach(([p, lab, c]) => {
+        const tw = (`${p}% ${lab}`).length * 12 + 34;
+        if (lx && lx + tw > w) { lx = 0; ly += 20; }
+        el('rect', { x: lx, y: ly - 10, width: 11, height: 11, fill: c === 'm' ? 'var(--rule)' : c === 'b' ? 'var(--blue)' : 'var(--red)' }, g);
+        tx(g, lx + 16, ly, `${p}% ${lab}`, c === 'r' ? 'fx-s fx-r' : 'fx-s'); lx += tw;
+      });
+    });
+    api.out.innerHTML = '<p>两项研究都发现，平均效应接近零，但这个平均数由三种不同的反应组成。第一项测的是自尊的变化，第二项测的是被动使用后几小时内的情绪，都是短期波动，不能直接推到长期的心理健康上。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.35, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 20-02 · what each research design can answer ----- */
+  F.evidenceladder = (fig) => flow14(fig, [
+    ['横断面相关', '同一时刻，用得多的人是否感觉更差？', 'm', '不能判断方向，也难以排除其他因素'],
+    ['纵向研究', '之前用得多，之后是否更差？', 'm', '能看到先后，但仍可能受到其他因素影响'],
+    ['个人内部追踪', '同一个人用得多的时候，之后是否更差？', 'b', '能看到个体差异，但多是短期情绪'],
+    ['随机实验', '随机让人少用，是否感觉更好？', 'b', '支持因果，但时间短，参与者知道研究目的'],
+  ], '<p>从左到右（窄屏上从上到下），因果推断的能力逐步增强，但每一种设计都回答一个不同的问题，也都有自己的局限。关于社交媒体与心理健康，证据的大部分来自第一种设计。</p>');
+
+  /* ----- 20-03 · selective exposure, echo chambers and filter bubbles ----- */
+  F.bubblechamber = (fig) => split13(fig, {
+    top: ['为什么一个人只看到一部分观点？', '三种不同的解释，常被混在一起'],
+    cols: [
+      ['选择性接触', '个人倾向于选择支持已有观点的信息', 'b', [['来源', '个人的选择'], ['证据', '互联网之前就有大量研究；元分析发现中等程度的偏好']]],
+      ['回音室', '社交网络主要由观点相同的人组成，信息在其中相互强化', 'b', [['来源', '社会网络的结构'], ['证据', '同温层内容占多数，但多数人仍接触到一定的跨立场内容']]],
+      ['过滤气泡', '算法根据过去的行为过滤内容，使人看不到不同观点', 'r', [['来源', '推荐系统'], ['证据', '算法改变接触的内容，但常常不如用户自己的选择作用大']]],
+    ],
+    note: '<p>三者可以同时存在、相互强化，但需要分别测量：如果问题主要来自个人的选择，只调整算法的效果就会有限。</p>',
+  });
+
+  /* ----- 20-03 · algorithm → exposure → attitudes, with the 2023 findings ----- */
+  F.exposurechain = (fig) => figure(fig, (box, w, api) => {
+    const N = [['算法与平台设计', '排序、转发、推荐', 'b'], ['接触到的内容', '看到什么、看到多少', 'b'], ['态度与信念', '极化、对候选人的评价等', 'm']];
+    const E = [['强', '改变算法，接触的内容明显改变', 'b'], ['弱或未检测到', '三个月内没有可测量的态度变化', 'r']];
+    const lim = ['只研究了一次选举中的三个月', '只改变了个人的动态，没有改变整个网络', '态度可能在更长时间中缓慢形成'];
+    const wide = w >= 600, gs = [];
+    const ll = lim.map((t) => wrapZh('· ' + t, w - 8, 12.5));
+    let s, yEnd;
+    if (wide) {
+      const gap = 110, bw = (w - gap * 2) / 3, bh = Math.max(...N.map(([t, d]) => bx13H(bw, t, d, 60))), top = 6;
+      yEnd = top + bh + 40; const H = yEnd + 24 + ll.reduce((a, l) => a + l.length * 17, 0) + 6; s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      N.forEach(([t, d, c], i) => bx13(g0, i * (bw + gap), top, bw, t, d, c, bh));
+      E.forEach(([h, d, c], i) => {
+        const g = el('g', {}, s); gs.push(g); const x1 = (i + 1) * bw + i * gap + 4, x2 = x1 + gap - 8, y = top + bh / 2;
+        arrow(g, x1, y, x2, y, c === 'r' ? 'r' : '', 7);
+        if (c === 'r') g.querySelector('line').classList.add('fx-dash');
+        tx(g, (x1 + x2) / 2, y - 10, h, c === 'r' ? 'fx-s fx-strong fx-r' : 'fx-s fx-strong', 'middle');
+        lines(g, (x1 + x2) / 2, y + 20, wrapZh(d, gap - 6, 12), 'fx-n', 15, 'middle');
+      });
+    } else {
+      const bh = Math.max(...N.map(([t, d]) => bx13H(w, t, d, 50))), vg = 70;
+      yEnd = 3 * bh + 2 * vg + 16; const H = yEnd + 24 + ll.reduce((a, l) => a + l.length * 17, 0) + 6; s = svgIn(box, w, H, fig);
+      const g0 = el('g', {}, s); gs.push(g0);
+      N.forEach(([t, d, c], i) => bx13(g0, 0, i * (bh + vg), w, t, d, c, bh));
+      E.forEach(([h, d, c], i) => {
+        const g = el('g', {}, s); gs.push(g); const y1 = (i + 1) * bh + i * vg + 4, y2 = y1 + vg - 8;
+        arrow(g, 24, y1, 24, y2, c === 'r' ? 'r' : '', 7);
+        if (c === 'r') g.querySelector('line').classList.add('fx-dash');
+        tx(g, 40, y1 + 24, h, c === 'r' ? 'fx-s fx-strong fx-r' : 'fx-s fx-strong');
+        lines(g, 40, y1 + 42, wrapZh(d, w - 44, 12), 'fx-n', 15);
+      });
+    }
+    const g3 = el('g', {}, s); gs.push(g3);
+    tx(g3, 0, yEnd, '这些实验不能回答的：', 'fx-n fx-strong');
+    let yy = yEnd + 20; ll.forEach((l) => { lines(g3, 0, yy, l, 'fx-n', 17); yy += l.length * 17; });
+    api.out.innerHTML = '<p>第一个箭头的证据很强；第二个箭头在这些实验的条件下没有检测到。没有检测到不等于不存在：它排除的是“短期内调整个人的动态就会明显减少极化”这样的说法，而不是算法对社会的一切长期影响。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.25, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 20-03 · Mathur et al.'s seven categories of dark patterns ----- */
+  F.darkpatterns = (fig) => fan13(fig, '购物网站中的暗黑模式', '七个大类，每类一个例子和它利用的心理倾向', '', [
+    ['偷偷添加', '结账时自动加入额外的商品或服务；利用注意有限', 'r', 0],
+    ['制造紧迫', '与实际无关的倒计时；利用时间压力', 'r', 0],
+    ['误导', '“接受”醒目、“拒绝”不起眼；利用视觉显著性', 'r', 0],
+    ['社会证明', '“已有很多人购买”，数字可能是编造的；利用从众', 'r', 0],
+    ['稀缺', '“仅剩 2 件”；利用对失去机会的担心', 'r', 0],
+    ['阻碍', '注册容易、取消困难；利用努力成本与惰性', 'r', 0],
+    ['强制行动', '不注册、不同意就不能继续；剥夺选择', 'r', 0],
+  ], '<p>分类根据马图尔等人（2019）对约 1.1 万个购物网站的分析。同一种形式并不总是欺骗：真实的库存提示是有用的信息，编造的才是暗黑模式。判断的关键是信息是否真实，以及设计服务于谁的利益。</p>');
+
+  /* ----- 20-03 · four questions for judging respect for autonomy ----- */
+  F.autonomytest = (fig) => fan13(fig, '这个设计尊重用户的自主性吗？', '四个检验问题', '', [
+    ['透明', '如果用户知道这个设计怎样影响他们，还会接受吗？', 'b', 0],
+    ['对称', '做出选择和撤销选择，是否同样容易？', 'b', 0],
+    ['利益一致', '帮助用户实现的是他们自己的目标，还是平台的目标？', 'b', 0],
+    ['知情与可逆', '用户能否理解自己同意了什么，并改变主意？', 'b', 0],
+  ], '<p>这些问题帮助评价设计，不是可以机械套用的规则；同一个设计在不同情境中可能有不同的答案。依赖用户不知情才能起作用的设计，通常是操纵性的。</p>', 2);
+
+  /* ----- 20-04 · offloading: finishing the task vs learning the thing ----- */
+  F.offloadtrade = (fig) => split13(fig, {
+    top: ['同一个外部工具', '导航、计算器、搜索、AI 助手'],
+    cols: [
+      ['目标是完成任务', '卸载减轻负担，提高速度和准确性', 'b', [['通常是合理的选择', '例如用导航到达陌生地点、用计算器算账']]],
+      ['目标是学会这件事', '卸载减少了自己加工信息的机会', 'r', [['可能削弱记忆和理解', '例如学习一条路线、学会一类题的解法']]],
+    ],
+    note: '<p>卸载本身不是坏事，文字和书籍也是卸载工具。代价取决于目标：当你需要以后自己会做时，当下的帮助越多，留给自己的练习就越少。</p>',
+  });
+
+  /* ----- 20-04 · trust calibration ----- */
+  F.trustcal = (fig) => figure(fig, (box, w, api) => {
+    const S = Math.min(w - 40, 380), ox = (w - S) / 2 + 16, top = 10, H = top + S + 44, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('path', { d: `M${ox},${top + S} L${ox},${top} L${ox + S},${top} Z`, fill: 'rgba(226, 83, 58, .08)' }, g0);
+    el('path', { d: `M${ox},${top + S} L${ox + S},${top + S} L${ox + S},${top} Z`, class: 'fx-band2' }, g0);
+    el('line', { x1: ox, y1: top + S, x2: ox + S, y2: top + S, class: 'fx-ln' }, g0);
+    el('line', { x1: ox, y1: top, x2: ox, y2: top + S, class: 'fx-ln' }, g0);
+    tx(g0, ox + S / 2, top + S + 22, '系统在这项任务上的实际可靠性 →', 'fx-n', 'middle');
+    const yl = el('text', { x: 0, y: 0, class: 'fx-n', 'text-anchor': 'middle', transform: `translate(${ox - 10},${top + S / 2}) rotate(-90)` }, g0); yl.textContent = '人对系统的信任 →';
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('line', { x1: ox, y1: top + S, x2: ox + S, y2: top, class: 'fx-ln fx-thick' }, g1);
+    const dl = el('text', { x: 0, y: 0, class: 'fx-s fx-strong fx-halo', 'text-anchor': 'middle', transform: `translate(${ox + S * 0.55},${top + S * 0.45 - 8}) rotate(-45)` }, g1); dl.textContent = '校准良好';
+    const g2 = el('g', {}, s); gs.push(g2);
+    lines(g2, ox + 10, top + 24, ['过度信任', '误用、自动化偏差'], 'fx-s fx-r', 18);
+    lines(g2, ox + S - 10, top + S - 30, ['信任不足', '弃用、算法厌恶'], 'fx-s', 18, 'end');
+    api.out.innerHTML = '<p>对角线上方，信任超过了系统的实际能力；下方，信任低于系统的实际能力。同一个系统在不同任务上的可靠性可能相差很大，所以校准要针对具体任务，而不是对“AI”整体下判断。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 20-04 · when do human–AI combinations help? (Vaccaro et al., 2024) ----- */
+  F.hybridperf = (fig) => split13(fig, {
+    top: ['人与 AI 结合，是否比较好的一方单独工作更好？', '106 项实验、370 个效应量的元分析'],
+    cols: [
+      ['平均而言', '结合的表现差于较好的一方单独工作', 'r', [['效应量 g = −0.23', '2020 年至 2023 年中期发表的实验']]],
+      ['按任务类型', '结果因任务而异', 'b', [['做决策的任务', '结合多有损失'], ['创作内容的任务', '结合的收益明显更大']]],
+      ['按谁更强', '取决于单独工作时谁更准确', 'b', [['人比 AI 强', '结合往往带来提升'], ['AI 比人强', '结合常常不如 AI 单独工作']]],
+    ],
+    note: '<p>当 AI 更准确时，人会在一些情况下推翻 AI 正确的判断；当人更准确时，人能更好地识别 AI 的错误。“人加 AI 总是更好”不是研究的结论，结果取决于任务和分工。</p>',
+  });
+
+  /* ----- 20-04 · practice with AI vs exam without it (Bastani et al., 2025) ----- */
+  F.practiceexam = (fig) => figure(fig, (box, w, api) => {
+    const G = [['练习时（可以使用 AI）', [[100, '不使用 AI', 'm'], [148, '标准界面', 'r'], [227, '带学习保护的辅导', 'b']]], ['考试时（不能使用 AI）', [[100, '不使用 AI', 'm'], [83, '标准界面', 'r'], [100, '带学习保护的辅导', 'b', '与对照组无明显差别']]]];
+    const L = w >= 480 ? 130 : 0, bw = w - L - 46, X = (v) => L + v / 230 * bw, rowH = L ? 26 : 42, dy = L ? 0 : 16, gH = 3 * rowH + 34, gs = [];
+    const foot = wrapZh('以不使用 AI 的学生为 100；数字来自论文报告的相对变化；考试时辅导组画作 100，表示与对照组没有明显差别', w - 4, 12), H = G.length * gH + 14 + foot.length * 16, s = svgIn(box, w, H, fig);
+    G.forEach(([t, bars], i) => {
+      const g = el('g', {}, s); gs.push(g); const y0 = i * gH;
+      tx(g, 0, y0 + 16, t, 'fx-h');
+      bars.forEach(([v, lab, c, note], k) => {
+        const y = y0 + 28 + k * rowH;
+        if (L) tx(g, L - 8, y + 14, lab, 'fx-n', 'end');
+        el('rect', { x: L, y: y + 2 + dy, width: X(v) - L, height: 16, fill: c === 'm' ? 'var(--rule)' : c === 'b' ? 'var(--blue)' : 'var(--red)' }, g);
+        tx(g, X(v) + 6, y + 15 + dy, `${v}`, c === 'r' ? 'fx-s fx-r' : 'fx-s');
+        if (!L) tx(g, 0, y + 12, lab, 'fx-n');
+      });
+      el('line', { x1: X(100), x2: X(100), y1: y0 + 26 + dy, y2: y0 + 28 + 3 * rowH, class: 'fx-ln fx-dash' }, g);
+    });
+    const g = el('g', {}, s); gs.push(g);
+    lines(g, w, G.length * gH + 10, foot, 'fx-n', 16, 'end');
+    api.out.innerHTML = '<p>练习时，两种工具都让成绩明显提高；拿走工具后，使用标准界面的学生比从未使用 AI 的学生低约 17%，带学习保护的辅导工具基本消除了这种负面影响。练习中的表现提高，不等于学会。这是一项高中数学现场实验的结果，需要在其他学科和人群中重复。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.35, 0.45)));
+  }, { dur: 1100 });
+
+  /* =====================================================================
+     Stage 21 · scientific correction and the future of psychology.
+     Static two-ink diagrams. The only numbers drawn are published results
+     named on each figure (replication projects, Watts et al. 2018,
+     Scheel et al. 2021, Silberzahn et al. 2018); the overlap curves are
+     computed from an effect size and say so.
+     ===================================================================== */
+
+  /* ----- 21-01 · five large replication projects ----- */
+  F.repprojects = (fig) => figure(fig, (box, w, api) => {
+    const P = [
+      ['开放科学合作（2015）', '100 项研究', 36, 'r'],
+      ['许多实验室第一轮（2014）', '13 个效应中 10 个稳定重复', 77, 'b'],
+      ['许多实验室第二轮（2018）', '28 个发现', 54, 'r'],
+      ['社会科学实验重复（2018）', '21 项《自然》《科学》实验', 62, 'r'],
+      ['人格与人生结果重复（2019）', '78 项关联', 87, 'b'],
+    ];
+    const rowH = 52, R = w - 44, X = (v) => v / 100 * R, gs = [], H = P.length * rowH + 30, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    [0, 50, 100].forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: 0, y2: P.length * rowH, class: 'fx-hair' }, g0); tx(g0, X(v), P.length * rowH + 16, `${v}%`, 'fx-n', v === 0 ? 'start' : v === 100 ? 'end' : 'middle'); });
+    P.forEach(([t, sub, v, c], i) => {
+      const g = el('g', {}, s); gs.push(g); const y = i * rowH;
+      tx(g, 0, y + 15, t, 'fx-s fx-strong'); if (w >= 440) tx(g, w, y + 15, sub, 'fx-n', 'end');
+      el('rect', { x: 0, y: y + 22, width: X(v), height: 16, fill: c === 'b' ? 'var(--blue)' : 'var(--red)' }, g);
+      tx(g, X(v) + 6, y + 35, `${v}%`, c === 'r' ? 'fx-s fx-r' : 'fx-s');
+    });
+    api.out.innerHTML = '<p>比例是各项目报告的“重复成功”的比例；第一轮“许多实验室”的 77% 是根据 13 个中有 10 个稳定重复换算的。各项目选择研究的方式和成功的标准不同，比例不能直接相互比较；但它们共同显示，可重复的程度因领域和研究类型差别很大。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.13, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 21-01 · from original study to re-examination, seven cases ----- */
+  F.casetimeline = (fig) => figure(fig, (box, w, api) => {
+    const C = [
+      ['斯坦福监狱实验', [1971], [2019]],
+      ['面部反馈', [1988], [2016, 2022]],
+      ['棉花糖实验', [1989, 1990], [2018]],
+      ['刻板印象威胁', [1995], [2015]],
+      ['行为启动', [1996], [2012]],
+      ['自我损耗', [1998], [2014, 2016, 2021]],
+      ['权力姿势', [2010], [2015, 2017]],
+    ];
+    const wide = w >= 520, L = wide ? 110 : 0, R = w - 10, Y0 = 1965, Y1 = 2025, X = (y) => L + (y - Y0) / (Y1 - Y0) * (R - L), rowH = wide ? 34 : 44, gs = [];
+    const H = C.length * rowH + 50, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    const ay = C.length * rowH + 6;
+    el('line', { x1: L, x2: R, y1: ay, y2: ay, class: 'fx-ln' }, g0);
+    [1970, 1980, 1990, 2000, 2010, 2020].forEach((y) => { el('line', { x1: X(y), x2: X(y), y1: 0, y2: ay, class: 'fx-hair' }, g0); tx(g0, X(y), ay + 16, `${y}`, 'fx-n', 'middle'); });
+    C.forEach(([t, o, r], i) => {
+      const g = el('g', {}, s); gs.push(g); const y = i * rowH + (wide ? 18 : 30);
+      if (wide) tx(g, 0, y + 5, t, 'fx-s'); else tx(g, 0, y - 12, t, 'fx-s');
+      el('line', { x1: X(o[0]), x2: X(r[r.length - 1]), y1: y, y2: y, class: 'fx-ln fx-dash' }, g);
+      o.forEach((yy) => el('circle', { cx: X(yy), cy: y, r: 5, class: 'fx-node r' }, g));
+      r.forEach((yy) => el('circle', { cx: X(yy), cy: y, r: 5, class: 'fx-node b' }, g));
+    });
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('circle', { cx: L + 6, cy: H - 8, r: 5, class: 'fx-node r' }, g1); tx(g1, L + 16, H - 4, '原始研究', 'fx-n');
+    el('circle', { cx: L + 96, cy: H - 8, r: 5, class: 'fx-node b' }, g1); tx(g1, L + 106, H - 4, '主要的重复或重新检验', 'fx-n');
+    api.out.innerHTML = '<p>许多经典发现在发表后的十几年甚至几十年里被大量引用，却没有被直接重复。重复研究集中出现在 2010 年代中期以后，这与大规模重复项目和预先注册等新做法的兴起同步。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.1, 0.35)));
+  }, { dur: 1300 });
+
+  /* ----- 21-01 · the marshmallow association shrinking (Watts et al., 2018) ----- */
+  F.marshmallow = (fig) => figure(fig, (box, w, api) => {
+    const B = [['原始研究报告的关联', 100, 'm'], ['更大、更多样的样本', 50, 'r'], ['再控制家庭背景、早期能力和家庭环境', 17, 'r']];
+    const rowH = 52, R = w - 44, X = (v) => v / 100 * R, gs = [], foot = wrapZh('以原始关联为 100；按论文报告的“一半”“再减少三分之二”换算', w - 4, 12), H = B.length * rowH + 10 + foot.length * 16, s = svgIn(box, w, H, fig);
+    B.forEach(([t, v, c], i) => {
+      const g = el('g', {}, s); gs.push(g); const y = i * rowH;
+      tx(g, 0, y + 15, t, 'fx-s');
+      el('rect', { x: 0, y: y + 22, width: X(v), height: 18, fill: c === 'm' ? 'var(--rule)' : 'var(--red)' }, g);
+      tx(g, X(v) + 6, y + 36, `${v}`, c === 'r' ? 'fx-s fx-r' : 'fx-s');
+    });
+    const g = el('g', {}, s); gs.push(g);
+    lines(g, w, B.length * rowH + 8, foot, 'fx-n', 16, 'end');
+    api.out.innerHTML = '<p>关联没有消失，但变小了很多，而且大部分可以由孩子的家庭背景和早期能力解释。这说明原来看到的关联中，有相当一部分来自与等待能力和后来成绩都有关的共同因素。</p>';
+    return (t) => gs.forEach((gg, i) => show(gg, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 21-02 · the Mozart effect: finding → media → simpler explanation ----- */
+  F.mozart = (fig) => flow14(fig, [
+    ['原始发现', '大学生听莫扎特 10 分钟后，空间推理表现短暂提高', 'b', '持续十几分钟；对象是大学生'],
+    ['媒体演绎', '听莫扎特让人更聪明；婴儿听古典音乐能提高智力', 'r', '人群、时间和结果都被推广了'],
+    ['更简单的解释', '愉快、提高唤醒的刺激都可能暂时改善表现', 'b', '元分析：效应很小，与其他音乐相近'],
+  ], '<p>从“大学生短暂表现提高”到“婴儿变聪明”，中间跨越了人群、时间和结果三重鸿沟。原始研究从未涉及婴儿，也从未测量长期的智力。</p>');
+
+  /* ----- 21-02 · what a "small" difference looks like: d = 0.2 ----- */
+  F.overlapd = (fig) => figure(fig, (box, w, api) => {
+    const d = 0.2, ovl = 0.92; // overlapping coefficient 2Φ(−d/2) = 2 × 0.4602 for d = 0.2
+    const top = 10, ph = Math.min(170, w * 0.42), X = (z) => (z + 3.6) / 7.2 * w, Y = (p) => top + ph - p / 0.42 * ph, H = top + ph + 54, gs = [];
+    const s = svgIn(box, w, H, fig), pdf = (z, m) => Math.exp(-0.5 * (z - m) ** 2) / Math.sqrt(2 * Math.PI);
+    const path = (m) => curve17(X, Y, (z) => pdf(z, m), -3.6, 3.6, 120);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: 0, x2: w, y1: top + ph, y2: top + ph, class: 'fx-ln' }, g0);
+    el('path', { d: path(-d / 2), class: 'fx-ln fx-lb fx-thick', fill: 'none' }, g0);
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('path', { d: path(d / 2), class: 'fx-ln fx-lr fx-thick', fill: 'none' }, g1);
+    [-d / 2, d / 2].forEach((m, i) => el('line', { x1: X(m), x2: X(m), y1: Y(pdf(0, 0)), y2: top + ph, class: i ? 'fx-ln fx-lr fx-dash' : 'fx-ln fx-lb fx-dash' }, g1));
+    const g2 = el('g', {}, s); gs.push(g2);
+    tx(g2, w / 2, top + ph + 22, `两组平均数相差 0.2 个标准差；分布重叠约 ${Math.round(ovl * 100)}%`, 'fx-s fx-strong', 'middle');
+    tx(g2, w / 2, top + ph + 42, '曲线和重叠比例由效应量计算，不代表任何具体的特点', 'fx-n', 'middle');
+    api.out.innerHTML = '<p>海德（2005）回顾的性别差异元分析中，大多数差异属于小或接近零。在这样的差异下，知道一个人属于哪个群体，几乎不能帮助预测他在这个特点上的水平；少数心理变量上的差异较大，需要分别看待。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1100 });
+
+  /* ----- 21-02 · five questions applied to one viral claim ----- */
+  F.claimcheck = (fig) => fan13(fig, '“每天冥想十分钟，八周重塑大脑，焦虑减半”', '一条虚构但典型的网络说法', '', [
+    ['能被检验吗？', '“重塑大脑”太模糊：具体是什么变化，怎样测量？', 'b', 0],
+    ['机制还是关联？', '脑成像的变化不等于焦虑减少的原因', 'b', 0],
+    ['有没有其他解释？', '期望、自愿参加者的选择、对照组是否也投入了时间', 'b', 0],
+    ['效应多大，适用于谁？', '“减半”是平均还是个例？对象是病人还是健康学生？', 'b', 0],
+    ['证据从哪里来？', '具体是哪项研究？样本多大？是否被重复？谁在销售课程？', 'b', 0],
+  ], '<p>五个问题针对的是这条视频的说法，而不是冥想研究本身。分析的结果通常不是“完全正确”或“全是骗人的”，而是：哪一部分有依据，哪一部分被夸大了。</p>', 2);
+
+  /* ----- 21-03 · positive results: standard reports vs registered reports (Scheel et al., 2021) ----- */
+  F.rrpositive = (fig) => figure(fig, (box, w, api) => {
+    const B = [['标准格式的研究', '152 篇', 96, 'r'], ['注册报告', '71 篇', 44, 'b']];
+    const ch = 180, top = 22, bw = Math.min(110, w * 0.26), gap = Math.min(120, w * 0.2), x0 = (w - bw * 2 - gap) / 2, H = top + ch + 50, gs = [], s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: x0 - 20, x2: x0 + bw * 2 + gap + 20, y1: top + ch, y2: top + ch, class: 'fx-ln' }, g0);
+    B.forEach(([t, n, v, c], i) => {
+      const g = el('g', {}, s); gs.push(g); const x = x0 + i * (bw + gap), h = v / 100 * ch;
+      el('rect', { x, y: top + ch - h, width: bw, height: h, fill: c === 'b' ? 'var(--blue)' : 'var(--red)' }, g);
+      tx(g, x + bw / 2, top + ch - h - 8, `${v}%`, c === 'r' ? 'fx-h fx-r' : 'fx-h', 'middle');
+      tx(g, x + bw / 2, top + ch + 20, t, 'fx-s fx-strong', 'middle'); tx(g, x + bw / 2, top + ch + 38, n, 'fx-n', 'middle');
+    });
+    api.out.innerHTML = '<p>纵轴是第一个假设得到支持的比例。注册报告在知道结果之前就决定是否发表，因此不受“只发表阳性结果”的影响。差异可能部分来自两类研究的选题不同，但 96% 本身就高得不太现实。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.45)));
+  }, { dur: 1000 });
+
+  /* ----- 21-03 · 29 teams, one data set: range and median only (Silberzahn et al., 2018) ----- */
+  F.manyanalysts = (fig) => figure(fig, (box, w, api) => {
+    const A = 0.5, B = 3.5, L = 10, R = w - 10, X = (v) => L + (v - A) / (B - A) * (R - L), ay = 96, gs = [], H = ay + 64, s = svgIn(box, w, H, fig);
+    const g0 = el('g', {}, s); gs.push(g0);
+    el('line', { x1: L, x2: R, y1: ay, y2: ay, class: 'fx-ln' }, g0);
+    [0.5, 1, 1.5, 2, 2.5, 3, 3.5].forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: ay, y2: ay + 5, class: 'fx-ln' }, g0); tx(g0, X(v), ay + 20, `${v}`, 'fx-n', 'middle'); });
+    tx(g0, R, ay + 40, '比值比（大于 1：深肤色球员更常得到红牌）', 'fx-n', 'end');
+    el('line', { x1: X(1), x2: X(1), y1: 14, y2: ay, class: 'fx-ln fx-dash' }, g0);
+    tx(g0, X(1) + 5, 24, '没有差异', 'fx-n');
+    const g1 = el('g', {}, s); gs.push(g1);
+    el('line', { x1: X(0.89), x2: X(2.93), y1: 60, y2: 60, class: 'fx-ln fx-lr fx-thick' }, g1);
+    [0.89, 2.93].forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: 52, y2: 68, class: 'fx-ln fx-lr fx-thick' }, g1); tx(g1, X(v), 84, `${v}`, 'fx-s fx-r', v < 1 ? 'end' : 'middle'); });
+    el('circle', { cx: X(1.31), cy: 60, r: 6, class: 'fx-node b' }, g1);
+    tx(g1, X(1.31), 44, '中位数 1.31', 'fx-s fx-strong', 'middle');
+    api.out.innerHTML = '<p>红线是 29 个团队估计值的范围，只画出了论文报告的范围和中位数。20 个团队（69%）得到显著的正向效应，9 个团队（31%）没有。大多数估计的方向一致，差别在于大小和是否显著；分析者的先前看法和专业水平都不能解释这种差异。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.4, 0.45)));
+  }, { dur: 1000 });
+
+  /* ----- 21-03 · explanation and prediction (after Hofman et al., 2021) ----- */
+  F.predexplain = (fig) => quad14(fig, ['不检验预测', '检验对新数据的预测'], ['关注因果解释', '不关注因果解释'], [
+    ['解释，但不检验预测', '机制清楚，但不知道能否预测新的情况；许多传统实验研究', 'm'],
+    ['整合建模', '既检验因果机制，又检验对新数据的预测', 'b'],
+    ['描述', '总结数据中的模式', 'm'],
+    ['预测，但不解释', '预测得好，但不知道为什么；许多机器学习模型', 'r'],
+  ], '<p>根据霍夫曼等人（2021）提出的框架整理。两个目标不是对立的：好的心理学理论，最终需要同时经受因果检验和预测检验。</p>');
+
+  /* ----- 21-03 · one phenomenon, many levels (depression as the example) ----- */
+  F.multilevel = (fig) => figure(fig, (box, w, api) => {
+    const N = [
+      ['社会、经济与文化', '贫困、歧视、对求助的态度'],
+      ['人际关系与群体', '社会支持、孤立、冲突'],
+      ['个人行为与经历', '生活事件、睡眠、活动减少'],
+      ['认知与情绪过程', '负性思维模式、情绪调节'],
+      ['大脑网络', '与奖励和情绪调节有关的网络'],
+      ['神经元与神经递质', '多种递质系统，不只是“血清素”'],
+      ['基因与分子', '许多微小的遗传风险'],
+    ];
+    const wide = w >= 560, lane = 28, gs = [], vg = 8;
+    let s;
+    if (wide) {
+      const lw = (w - lane) * 0.42, rx = lane + lw + 16, bh = Math.max(...N.map(([t]) => bx13H(lw, t, '', 40))), H = N.length * (bh + vg) - vg;
+      s = svgIn(box, w, H, fig);
+      N.forEach(([t, d], i) => {
+        const g = el('g', {}, s); gs.push(g); const y = i * (bh + vg);
+        bx13(g, lane, y, lw, t, '', 'b', bh);
+        lines(g, rx, y + bh / 2 + 5, wrapZh(d, w - rx, 12.5), 'fx-s', 17);
+      });
+      const g = el('g', {}, s); gs.push(g);
+      arrow(g, 10, H / 2, 10, 4, '', 6); arrow(g, 10, H / 2, 10, H - 4, '', 6);
+    } else {
+      const bw = w - lane, hs = N.map(([t, d]) => bx13H(bw, t, d, 44)), H = hs.reduce((a, h) => a + h + vg, 0) - vg;
+      s = svgIn(box, w, H, fig); let y = 0;
+      N.forEach(([t, d], i) => { const g = el('g', {}, s); gs.push(g); bx13(g, lane, y, bw, t, d, 'b', hs[i]); y += hs[i] + vg; });
+      const g = el('g', {}, s); gs.push(g);
+      arrow(g, 10, H / 2, 10, 4, '', 6); arrow(g, 10, H / 2, 10, H - 4, '', 6);
+    }
+    api.out.innerHTML = '<p>每个层次都提供真实的信息，各层次也相互影响（左侧的双向箭头）；但没有一个层次能单独给出完整的解释。把某一层的发现说成“真正的原因”，例如“抑郁就是血清素不足”，是常见的错误。怎样严格地连接这些层次，仍是未解的问题。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.09, 0.35)));
+  }, { dur: 1200 });
+
+  /* ----- 21-03 · adversarial collaboration ----- */
+  F.adversarial = (fig) => flow14(fig, [
+    ['共同设计', '竞争理论的支持者与中立团队一起设计实验', 'b'],
+    ['预先注册', '写下每种理论的不同预测，以及每种结果意味着什么', 'b'],
+    ['收集数据', '多个实验室，多种脑成像方法', 'b'],
+    ['结果', '与两种理论的部分预测相符，也挑战了两者的核心主张', 'r'],
+  ], '<p>对抗性合作不保证得出明确的胜负，但它让理论在看到数据之前，就必须承诺什么样的结果会对自己不利。</p>');
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;

@@ -2944,5 +2944,69 @@
     onResize(draw);
   }
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander, decoy, savedefault, raters };
+  /* =====================================================================
+     Stage 20 · reliance (20-04): when does relying on an AI help?
+     100 invented cases. The simulated person is right on 70% of them on
+     their own; the simulated AI is right with the probability set by the
+     slider. The AI also says whether it is "sure"; that signal is either
+     informative (sure far more often when right) or uninformative (sure
+     equally often either way). Three reliance strategies are compared.
+     Every number is a setting of the model, not data from any study.
+     ===================================================================== */
+  function reliance(host) {
+    const N = 100, HUM = 0.7;
+    const o = { policy: 'conf', signal: 'good' };
+    const { fig, out, actions } = shell(host, '什么时候该采纳 AI 的答案？',
+      '100 个虚构的判断任务。模型中的人单独判断时有 70% 答对；AI 答对的比例由滑块设定。AI 每次还会说明自己“有把握”或“没把握”。比较三种依赖策略，并改变 AI 的“把握”是否可靠。',
+      [['policy', '依赖策略', [['all', '全部采纳 AI'], ['conf', 'AI 有把握时才采纳'], ['none', '不用 AI']]],
+       ['signal', 'AI 的“有把握”是否可靠', [['good', '可靠：答对时多半有把握'], ['poor', '不可靠：对错都同样自信']]]],
+      '任务、人和 AI 都是程序在你的浏览器里生成的。人的准确率 70%、AI 的准确率和“把握”的可靠程度都是设定值，不是任何真实系统或研究的数据。这个模型只说明一个原理：结合的效果取决于能否分辨 AI 什么时候可能出错。', 'Model · 模型演示');
+    const sr = slider('AI 单独判断的准确率：', 50, 95, 5, 80);
+    const box = document.createElement('div'); fig.append(sr.box, box);
+    let seed = 2004, C = [];
+    const gen = () => { const r = seeded(seed); C = Array.from({ length: N }, () => [r(), r(), r()]); };
+    const pct = (x) => `${Math.round(x)}%`;
+    const draw = () => {
+      const a = Number(sr.input.value) / 100;
+      sr.val.textContent = ` ${Math.round(a * 100)}%`; sr.input.setAttribute('aria-valuetext', `AI 准确率 ${Math.round(a * 100)}%`);
+      const R = C.map(([u1, u2, u3]) => {
+        const ai = u1 < a, hu = u2 < HUM;
+        const sure = o.signal === 'good' ? u3 < (ai ? 0.85 : 0.2) : u3 < 0.7;
+        const useAI = o.policy === 'all' || (o.policy === 'conf' && sure);
+        return { ai, hu, useAI, ok: useAI ? ai : hu };
+      });
+      const team = R.filter((x) => x.ok).length, aiAlone = R.filter((x) => x.ai).length, huAlone = R.filter((x) => x.hu).length;
+      const comm = R.filter((x) => x.useAI && !x.ai).length, overrode = R.filter((x) => !x.useAI && x.ai && !x.hu).length;
+      const W = widthOf(fig), cols = 10, gap = 4, cs = Math.min(26, (Math.min(W, 340) - gap * 9) / 10), gw = cols * cs + gap * 9, ox = (W - gw) / 2, top = 6, gh = 10 * cs + 9 * gap, H = top + gh + 64;
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模拟结果：100 个任务中答对 ${team} 个；AI 单独 ${aiAlone} 个，人单独 ${huAlone} 个；采纳了错误的 AI 答案 ${comm} 次。` }, box);
+      R.forEach((x, i) => {
+        const cx = ox + (i % cols) * (cs + gap), cy = top + Math.floor(i / cols) * (cs + gap), col = x.ok ? 'var(--blue)' : 'var(--red)';
+        if (x.useAI) el('rect', { x: cx, y: cy, width: cs, height: cs, fill: col }, svg);
+        else el('rect', { x: cx + 1, y: cy + 1, width: cs - 2, height: cs - 2, fill: 'var(--paper)', stroke: col, 'stroke-width': 2 }, svg);
+      });
+      const ly = top + gh + 22, lx = W >= 440 ? ox : 0;
+      el('rect', { x: lx, y: ly - 10, width: 11, height: 11, fill: 'var(--text-3)' }, svg); text(svg, lx + 16, ly, '实心：采用了 AI 的答案', 'lab-tick');
+      el('rect', { x: lx + 1, y: ly + 11, width: 9, height: 9, fill: 'var(--paper)', stroke: 'var(--text-3)', 'stroke-width': 2 }, svg); text(svg, lx + 16, ly + 20, '空心：采用了人自己的答案', 'lab-tick');
+      text(svg, lx, ly + 40, '蓝色：答对　红色：答错', 'lab-tick');
+      const best = Math.max(aiAlone, huAlone), gain = team - best;
+      let msg;
+      if (o.policy === 'all') msg = `全部采纳时，结果就是 AI 单独的准确率；AI 答错的 ${comm} 次都被照单全收，这就是自动化偏差中的“执行错误”。`;
+      else if (o.policy === 'none') msg = '不用 AI 时，结果就是人单独的准确率；当 AI 比人准确时，这是在浪费它的价值，相当于“弃用”。';
+      else if (o.signal === 'good') msg = `AI 的“把握”可靠时，人在 AI 没把握的任务上自己判断，避开了 AI 的大部分错误。${gain > 0 ? `这一次结合比较好的一方多答对了 ${gain} 个：这就是“互补”。` : '这一次结合没有超过较好的一方，试着调整 AI 的准确率。'}`;
+      else msg = `AI 对错都同样自信时，“有把握”这个线索没有信息，人无法分辨该在哪些任务上相信它；这一次有 ${overrode} 个任务是 AI 本来答对、却没有被采纳、而人自己答错了。${gain > 0 ? '' : '结合没有超过较好的一方单独工作。'}`;
+      out.innerHTML = `<ul class="lab-parts"><li><span>结合后答对（模拟结果）</span><b>${pct(team)}</b></li><li><span>AI 单独答对（模拟结果）</span><b>${pct(aiAlone)}</b></li><li><span>人单独答对（模拟结果）</span><b>${pct(huAlone)}</b></li><li><span>采纳了错误的 AI 答案</span><b>${comm} 次</b></li></ul>
+        <p>${msg}</p>
+        <p class="lab-note">真实研究：瓦卡罗等人（2024）的元分析发现，平均而言人与 AI 结合的表现差于较好的一方单独工作；班萨尔等人（2021）发现，AI 的解释让人更容易接受它的建议，无论建议对错。这些是论文的结论；上面的任务和百分比都是模型生成的。真实的 AI 给出的“把握”是否可靠，需要针对具体任务检验。</p>`;
+    };
+    gen();
+    sr.input.addEventListener('input', draw);
+    bindControls(host, o, draw);
+    action(actions, '换一批虚构的任务', () => { seed += 1; gen(); draw(); });
+    action(actions, '恢复默认设置', () => { sr.input.value = 80; o.policy = 'conf'; o.signal = 'good'; seed = 2004; gen(); host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === String(o[b.dataset.k])))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue, pairvar, hiddenprofile, bystander, decoy, savedefault, raters, reliance };
 })();
