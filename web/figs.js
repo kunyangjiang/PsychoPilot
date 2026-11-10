@@ -2679,6 +2679,292 @@
   }, { dur: 1200 });
 
 
+  /* =====================================================================
+     Stage 13 · self, social cognition and persuasion. Static schematics
+     (no buttons): boxes and arrows illustrate a stated idea; the only
+     numbers shown are published estimates, named in the note under them.
+     ===================================================================== */
+
+  // a box whose title and note both wrap; content is centred vertically in h
+  const bx13H = (w, title, sub, minH = 0) => {
+    const nt = title ? wrapZh(title, w - 20, 15).length : 0, ns = sub ? wrapZh(sub, w - 20, 12.5).length : 0;
+    return Math.max(minH, nt * 20 + ns * 17 + (nt && ns ? 4 : 0) + 22);
+  };
+  const bx13 = (p, x, y, w, title, sub, cls, minH = 0) => {
+    const g = el('g', {}, p), tl = title ? wrapZh(title, w - 20, 15) : [], ls = sub ? wrapZh(sub, w - 20, 12.5) : [];
+    const c = tl.length * 20 + ls.length * 17 + (tl.length && ls.length ? 4 : 0), h = Math.max(minH, c + 22);
+    el('rect', { x, y, width: w, height: h, rx: 6, class: 'fx-pill ' + cls }, g);
+    let yy = y + (h - c) / 2;
+    tl.forEach((l) => { tx(g, x + w / 2, yy + 15, l, 'fx-h', 'middle'); yy += 20; });
+    if (tl.length && ls.length) yy += 4;
+    ls.forEach((l) => { tx(g, x + w / 2, yy + 13, l, 'fx-s', 'middle'); yy += 17; });
+    return { g, h };
+  };
+  const weighArrow = (p, x1, y1, x2, y2, px, cls = '') => { const a = arrow(p, x1, y1, x2, y2, cls, 5 + px); a.querySelector('line').style.strokeWidth = px; return a; };
+
+  // one head box, then a grid of boxes; items: [title, note, cls, dots 1–3 or 0]
+  const fan13 = (fig, head, headSub, label, items, note, maxCols = 3) => figure(fig, (box, w, api) => {
+    const cols = Math.min(maxCols, w >= 640 ? 3 : w >= 400 ? 2 : 1), gap = 12, cw = (w - gap * (cols - 1)) / cols, hw = Math.min(w, 500);
+    const hh = bx13H(hw, head, headSub, 46), top = hh + 36, rh = [];
+    for (let r = 0; r * cols < items.length; r++) rh.push(Math.max(...items.slice(r * cols, r * cols + cols).map(([t, sub, , d]) => bx13H(cw - (d ? 40 : 0), t, sub, 56) )));
+    const H = top + rh.reduce((a, b) => a + b + gap, 0) - gap, s = svgIn(box, w, H, fig), gs = [];
+    const g0 = el('g', {}, s); gs.push(g0);
+    bx13(g0, (w - hw) / 2, 0, hw, head, headSub, 'b', hh);
+    tx(g0, 0, hh + 24, label, 'fx-n');
+    items.forEach(([t, sub, cls, d], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const r = Math.floor(i / cols), x = (i % cols) * (cw + gap), y = top + rh.slice(0, r).reduce((a, b) => a + b + gap, 0);
+      bx13(g, x, y, cw, t, sub, cls, rh[r]);
+      if (d) for (let k = 0; k < 3; k++) el('circle', { cx: x + cw - 12 - (2 - k) * 10, cy: y + 12, r: 3.4, class: k < d ? 'fx-node b' : 'fx-node m' }, g);
+    });
+    api.out.innerHTML = note;
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.09, 0.35)));
+  }, { dur: 1100 });
+
+  // optional top box → columns, each a head with steps hanging off a spine → optional bottom box
+  const split13 = (fig, o) => figure(fig, (box, w, api) => {
+    const n = o.cols.length, side = w >= 520 && n > 1, gap = 20, cw = side ? (w - gap * (n - 1)) / n : w, ind = 24, iw = cw - ind, tw = Math.min(w, 520);
+    const th = o.top ? bx13H(tw, o.top[0], o.top[1], 46) : 0;
+    const y0 = (o.top ? th + 26 : 0) + (o.scale ? 40 : 0);
+    const colH = o.cols.map(([h, hs, , kids]) => bx13H(cw, h, hs, 44) + kids.reduce((a, [t, sub]) => a + 12 + bx13H(iw, t, sub, 40), 0));
+    const body = side ? Math.max(...colH) : colH.reduce((a, b) => a + b + 24, 0) - 24;
+    const bh = o.bottom ? bx13H(tw, o.bottom[0], o.bottom[1], 46) : 0, H = y0 + body + (o.bottom ? 30 + bh : 0);
+    const s = svgIn(box, w, H, fig), gs = [], ends = [];
+    if (o.top) { const g = el('g', {}, s); gs.push(g); bx13(g, (w - tw) / 2, 0, tw, o.top[0], o.top[1], o.top[2] || 'b', th); }
+    if (o.scale) {
+      const g = el('g', {}, s); gs.push(g); const yy = th + 26 + 16;
+      arrow(g, w / 2, yy, w - 2, yy, '', 6); arrow(g, w / 2, yy, 2, yy, '', 6);
+      tx(g, 2, yy + 18, o.scale[0], 'fx-n'); tx(g, w - 2, yy + 18, o.scale[1], 'fx-n', 'end'); tx(g, w / 2, yy - 7, o.scale[2], 'fx-n fx-halo', 'middle');
+    }
+    o.cols.forEach(([h, hs, cls, kids], i) => {
+      const g = el('g', {}, s); gs.push(g);
+      const x = side ? i * (cw + gap) : 0, y = side ? y0 : y0 + colH.slice(0, i).reduce((a, b) => a + b + 24, 0);
+      if (o.top && side && !o.scale) el('line', { x1: w / 2, y1: th, x2: x + cw / 2, y2: y, class: 'fx-hair' }, g);
+      const hh = bx13(g, x, y, cw, h, hs, cls, 44).h;
+      let yy = y + hh; const sx = x + 11;
+      kids.forEach(([t, sub, kc]) => {
+        const kh = bx13H(iw, t, sub, 40); yy += 12;
+        el('line', { x1: sx, y1: yy - 12, x2: sx, y2: yy + kh / 2, class: 'fx-hair' }, g);
+        arrow(g, sx, yy + kh / 2, x + ind, yy + kh / 2, '', 5);
+        bx13(g, x + ind, yy, iw, t, sub, kc || 'b', kh); yy += kh;
+      });
+      ends.push([x + ind + iw / 2, yy]);
+    });
+    if (o.bottom) {
+      const g = el('g', {}, s); gs.push(g); const by = y0 + body + 30;
+      if (side) ends.forEach(([ex, ey]) => arrow(g, ex, ey + 3, Math.max((w - tw) / 2 + 20, Math.min((w + tw) / 2 - 20, ex)), by - 2, o.bottom[2] === 'r' ? 'r' : '', 6));
+      else arrow(g, w / 2, by - 26, w / 2, by - 2, o.bottom[2] === 'r' ? 'r' : '', 6);
+      bx13(g, (w - tw) / 2, by, tw, o.bottom[0], o.bottom[1], o.bottom[2] || 'b', bh);
+    }
+    api.out.innerHTML = o.note || '';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.4)));
+  }, { dur: 1200 });
+
+  /* ----- 13-01 · the self-concept as an organized, multidimensional structure (a fictional person) ----- */
+  F.selfmap = (fig) => fan13(fig, '自我概念（一个虚构的例子）', '此刻的情境：在工作会议上', '各个方面（圆点＝对整体自我评价的重要程度）', [
+    ['能力', '数据分析很好；写作一般；不会开车', 'r', 3],
+    ['性格', '和朋友在一起时外向，在陌生人面前拘谨', 'b', 2],
+    ['角色与关系', '项目负责人；女儿；某支球队的支持者', 'r', 3],
+    ['身体', '身高、外貌、健康状况', 'b', 1],
+    ['价值观', '看重公平和诚实', 'b', 3],
+    ['兴趣', '喜欢爬山和下棋', 'b', 1],
+  ], '<p>红框是工作会议这个情境中被激活的部分。换到家庭聚会，“女儿”这个角色和性格中的某些方面会更突出。</p><p>如果“数据分析很好”是这个人的核心看法，一份被退回的分析报告会比一盘输掉的棋更伤人。人物和内容都是虚构的。</p>');
+
+  /* ----- 13-01 · self-esteem, self-efficacy and performance; arrow weights after Sitzmann & Yeo (2013) ----- */
+  F.esteemeff = (fig) => figure(fig, (box, w, api) => {
+    const N = [['过去的表现', '以前的成绩和完成任务的经历', 'b'], ['自我效能', '“我能完成这项具体任务”', 'b'], ['之后的表现', '下一次任务中实际做得怎样', 'b']];
+    const E = [['较强', '约 .30–.40', 4], ['很弱', '约 .06', 1.2]];
+    const wide = w >= 600, gs = [];
+    let s, H;
+    if (wide) {
+      const gap = 84, cw = (w - 2 * gap) / 3, ch = Math.max(...N.map(([t, sub]) => bx13H(cw, t, sub, 70))), ey = ch + 70, ew = Math.min(360, w), eh = bx13H(ew, '自尊', '“总的来说，我是一个有价值的人”：笼统的整体评价', 56);
+      H = ey + eh; s = svgIn(box, w, H, fig);
+      N.forEach(([t, sub, c], i) => { const g = el('g', {}, s); gs.push(g); bx13(g, i * (cw + gap), 0, cw, t, sub, c, ch); });
+      E.forEach(([a, b, px], i) => {
+        const g = el('g', {}, s); gs.push(g); const x1 = (i + 1) * cw + i * gap + 6, x2 = x1 + gap - 12, y = ch / 2;
+        weighArrow(g, x1, y, x2, y, px); tx(g, (x1 + x2) / 2, y - 12, a, 'fx-n fx-halo', 'middle'); tx(g, (x1 + x2) / 2, y + 22, b, 'fx-n fx-halo', 'middle');
+      });
+      const g = el('g', {}, s); gs.push(g); const ex = (w - ew) / 2;
+      bx13(g, ex, ey, ew, '自尊', '“总的来说，我是一个有价值的人”：笼统的整体评价', 'm', eh);
+      [cw / 2, 2 * (cw + gap) + cw / 2].forEach((x) => el('line', { x1: x, y1: ch + 2, x2: x < w / 2 ? ex + 30 : ex + ew - 30, y2: ey, class: 'fx-hair fx-dash' }, g));
+      tx(g, w / 2, ch + 40, '与具体任务的表现关系较弱', 'fx-n fx-halo', 'middle');
+    } else {
+      const ch = Math.max(...N.map(([t, sub]) => bx13H(w, t, sub, 56))), step = ch + 62, eh = bx13H(w, '自尊', '“总的来说，我是一个有价值的人”：笼统的整体评价，与具体任务的表现关系较弱', 56);
+      H = 3 * ch + 2 * 62 + 28 + eh; s = svgIn(box, w, H, fig);
+      N.forEach(([t, sub, c], i) => { const g = el('g', {}, s); gs.push(g); bx13(g, 0, i * step, w, t, sub, c, ch); });
+      E.forEach(([a, b, px], i) => {
+        const g = el('g', {}, s); gs.push(g); const y1 = i * step + ch + 6, y2 = y1 + 50;
+        weighArrow(g, w * 0.3, y1, w * 0.3, y2, px); tx(g, w * 0.3 + 16, y1 + 22, a, 'fx-n'); tx(g, w * 0.3 + 16, y1 + 38, b, 'fx-n');
+      });
+      const g = el('g', {}, s); gs.push(g); bx13(g, 0, 3 * ch + 2 * 62 + 28, w, '自尊', '“总的来说，我是一个有价值的人”：笼统的整体评价，与具体任务的表现关系较弱', 'm', eh);
+    }
+    api.out.innerHTML = '<p>箭头上的数字是西茨曼和杨（2013）对“同一个人在不同时间”的元分析估计：过去的表现与之后的自我效能关系较强；自我效能与之后表现的关系约为 .23，控制了表现随时间提高的趋势后只剩约 .06。箭头粗细按这些估计示意，自尊一栏是概念示意，没有数字。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.12, 0.35)));
+  }, { dur: 1200 });
+
+  /* ----- 13-01 · upward and downward comparison, and what decides their effect ----- */
+  F.compare = (fig) => split13(fig, {
+    top: ['社会比较', '自由选择时，人们更常向上比较；最常见的反应是对比效应', 'b'],
+    cols: [
+      ['向上比较', '和比自己好的人比', 'b', [['对方的成就看起来可以达到', '可能受到鼓舞：“我也能做到”', 'b'], ['对方的成就看起来无法达到', '可能感到泄气，对自己的评价降低', 'r']]],
+      ['向下比较', '和处境更差的人比', 'b', [['处于负面情绪或受到威胁时', '可能得到安慰，恢复对自己的良好感觉', 'b'], ['另一种可能', '可能觉得自己不必做出改变', 'r']]],
+    ],
+    note: '<p>同一方向的比较，结果取决于条件：对方和自己是否相似，差距能否缩小，这个领域对自己是否重要。分支只是举例，不是全部的可能。</p>',
+  });
+
+  /* ----- 13-02 · one ambiguous behaviour, several explanations, and what would tell them apart ----- */
+  F.ambig = (fig) => fan13(fig, '看到的行为', '同事在会上没有回应你的提问', '几种可能的解释，以及每种解释让你预期看到什么', [
+    ['对我有意见', '内部原因，针对你。预期：他也常回避你的其他问题，但会回应别人', 'r', 0],
+    ['没听清', '外部原因。预期：会议室嘈杂或网络卡顿时，他对别人的提问也没有反应', 'b', 0],
+    ['正在想别的事', '内部的暂时状态。预期：他在这次会上整体都心不在焉', 'b', 0],
+    ['不知道答案', '内部原因，与知识有关。预期：会后他可能来找你，或者去查资料', 'b', 0],
+    ['会议节奏太快', '外部原因。预期：其他人的提问也常常没有得到回应', 'b', 0],
+  ], '<p>红框是人们常常最先想到的解释。几种解释对“他对别人怎样”“在别的场合怎样”“别人是否也这样”作出不同的预测：这正是凯利所说的区别性、一致性和共识性。情景是虚构的。</p>');
+
+  /* ----- 13-02 · why observers jump from behaviour to disposition ----- */
+  F.disp = (fig) => figure(fig, (box, w, api) => {
+    const gap = 16, cw = (w - gap) / 2, top = [['情境', '角色、规则、压力、他人的要求', 'm'], ['性格', '态度、能力、意图', 'b']];
+    const th = Math.max(...top.map(([t, sub]) => bx13H(cw, t, sub, 56))), bw = Math.min(w, 340), bh = bx13H(bw, '看到的行为', '例如：出题人显得比答题人更有学识', 50), by = th + 76;
+    const R = [['看不到情境', '不知道对方受到的压力和限制'], ['低估情境的影响', '知道情境，却以为它影响不大'], ['把行为理解得更极端', '先入为主地夸大了行为的含义'], ['修正不完全', '先自动归于性格，忙碌时来不及修正']];
+    const rc = w >= 400 ? 2 : 1, rw = (w - gap * (rc - 1)) / rc, rh = Math.max(...R.map(([t, sub]) => bx13H(rw, t, sub, 50))), ry = by + bh + 44;
+    const H = ry + Math.ceil(R.length / rc) * (rh + 10) - 10, s = svgIn(box, w, H, fig), gs = [];
+    const g1 = el('g', {}, s); gs.push(g1);
+    top.forEach(([t, sub, c], i) => bx13(g1, i * (cw + gap), 0, cw, t, sub, c, th));
+    const bx = (w - bw) / 2;
+    const g2 = el('g', {}, s); gs.push(g2);
+    bx13(g2, bx, by, bw, '看到的行为', '例如：出题人显得比答题人更有学识', 'b', bh);
+    const a1 = arrow(g2, cw / 2, th + 4, bx + bw * 0.25, by - 3, '', 6); a1.style.opacity = 0.45; a1.querySelector('line').style.strokeDasharray = '4 4';
+    arrow(g2, cw + gap + cw * 0.3, th + 4, bx + bw * 0.55, by - 3, '', 6);
+    const g3 = el('g', {}, s); gs.push(g3);
+    arrow(g3, bx + bw * 0.82, by - 3, cw + gap + cw * 0.72, th + 4, 'r', 7).querySelector('line').style.strokeWidth = 2.4;
+    tx(g3, w - 2, by - 8, '观察者的推断', 'fx-n fx-r fx-halo', 'end');
+    tx(g2, 2, th + 30, '常被忽视', 'fx-n fx-halo');
+    const g4 = el('g', {}, s); gs.push(g4);
+    tx(g4, 0, ry - 14, '为什么会这样（吉尔伯特和马隆，1995）', 'fx-n');
+    R.forEach(([t, sub], i) => bx13(g4, (i % rc) * (rw + gap), ry + Math.floor(i / rc) * (rh + 10), rw, t, sub, 'b', rh));
+    api.out.innerHTML = '<p>行为是情境和性格共同作用的结果。虚线表示情境的作用常常不显眼；红色箭头是观察者从行为直接推回性格的那一步。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.16, 0.35)));
+  }, { dur: 1200 });
+
+  /* ----- 13-03 · two inconsistent cognitions and the possible responses ----- */
+  F.dissonance = (fig) => fan13(fig, '两个矛盾的认知', '“我吸烟”和“吸烟有害健康”：如果注意到了，可能感到不适', '可能的反应（虚线框是常被忽略的两种情况）', [
+    ['改变行为', '戒烟，或者减少吸烟', 'b', 0],
+    ['改变一个认知', '“吸烟的危害被夸大了”', 'b', 0],
+    ['增加一致的认知', '“吸烟能帮我控制体重”', 'b', 0],
+    ['降低重要性', '“人总会因为什么原因去世”', 'b', 0],
+    ['没有注意到矛盾', '矛盾存在，但不在意识中，也就没有失调', 'm', 0],
+    ['注意到了，但不觉得不适', '例如觉得这不重要，或者认为是被迫的', 'm', 0],
+  ], '<p>前四种是费斯廷格列出的减少失调的方式；只有其中一部分涉及态度改变。后两种说明，看到一个人“言行不一”，并不能确定他正在经历失调。</p>');
+
+  /* ----- 13-03 · one induced-compliance result, four accounts ----- */
+  F.induced = (fig) => fan13(fig, '实验结果', '只拿到 1 美元就说“任务很有趣”的人，事后认为这个无聊的任务更有趣', '四种解释，各自作出不同的预测', [
+    ['认知失调', '说了违心话又缺少外部理由，产生不适，通过改变态度来减轻。预测：把不适归于别的原因时，态度改变会消失', 'b', 0],
+    ['自我知觉', '像旁观者一样，从自己的行为推断态度，不需要不适。预测：只读实验描述的旁观者，也能“推出”同样的结果', 'b', 0],
+    ['后果与责任', '只有觉得要为不好的后果负责，才会产生不适。预测：没有后果，或者是被迫的，态度改变会很弱', 'b', 0],
+    ['自我肯定', '违心的行为威胁到整体的自我形象。预测：先在别的方面肯定自己，态度改变就会减少', 'b', 0],
+  ], '<p>四种解释都能说明这个结果。区分它们，靠的是设计能让它们作出不同预测的实验，例如赞纳和库珀的“药片”实验。</p>', 2);
+
+  /* ----- 13-03 · spreading of alternatives: attitude change, or measurement error plus a revealed preference ----- */
+  F.postdec = (fig) => split13(fig, {
+    top: ['两个评价相近的选项', '第一次评价：A 和 B 的分数差不多', 'b'],
+    cols: [
+      ['路径一：态度改变', '', 'b', [['作出选择', '选了 A，放弃了 B', 'b'], ['产生失调', '“B 也有优点，A 也有缺点”', 'b'], ['调整评价', '提高 A，降低 B', 'b']]],
+      ['路径二：测量误差', '', 'm', [['第一次评价有误差', '其实本来就更喜欢 A，只是没有测出来', 'm'], ['选择透露了偏好', '选了本来就更喜欢的 A', 'm'], ['第二次评价更准确', '偏好没有变，只是这次测得更准', 'm']]],
+    ],
+    bottom: ['看到的结果相同', '选择之后，A 的评价更高，B 的评价更低', 'r'],
+    note: '<p>陈和瑞森（2010）证明，只要评价有误差、选择又部分反映真实偏好，即使态度完全没有改变，也会出现“评价分开”的模式。要区分两条路径，需要专门的对照条件。</p>',
+  });
+
+  /* ----- 13-04 · the dual-route idea and its limits ----- */
+  F.dualroute = (fig) => split13(fig, {
+    top: ['一条说服信息', '接收者有没有动机和能力仔细思考它？', 'b'],
+    scale: ['低', '高', '精细加工的程度（连续变化）'],
+    cols: [
+      ['精细加工程度低', '边缘路径', 'm', [['简单线索影响态度', '来源是否专业、论据的数量、别人的反应', 'm'], ['结果', '态度较容易改变', 'm']]],
+      ['精细加工程度高', '中心路径', 'b', [['论据质量决定态度', '强论据更有说服力，弱论据可能引起反驳', 'b'], ['结果', '态度较持久，较能抵抗反驳，也较能预测行为', 'b']]],
+    ],
+    bottom: ['模型的限制', '它不是人格类型；同一个变量可以扮演多种角色；两种加工也可以同时发生', 'r'],
+    note: '<p>同一个人，在关心的话题上会仔细思考，在不关心的话题上会依靠线索。左右两栏是一个连续体的两端，不是两类人。</p>',
+  });
+
+  /* ----- 13-04 · message, source, audience and context ----- */
+  F.persuade = (fig) => fan13(fig, '态度改变', '效果取决于下面四类因素的组合，而不是某一个“技巧”', '四类因素（彼此相互作用）', [
+    ['信息', '论据质量、框架、情绪诉求、是否提供可行的做法', 'b', 0],
+    ['来源', '专业性、可信度、与听众是否相似', 'b', 0],
+    ['听众', '原有态度、卷入程度、相关知识', 'b', 0],
+    ['情境', '时间是否充足、注意力、别人的反应', 'b', 0],
+  ], '<p>例如，来源的专业性在话题与听众无关时更重要；恐惧诉求在同时提供可行做法时效果最好。研究中的大多数效应都是这样的交互作用。</p>', 2);
+
+  /* ----- 13-04 · compliance, identification and internalization over time (illustrative curves) ----- */
+  const KEL = [
+    ['顺从', (u) => 0.08 + 0.72 / (1 + Math.exp(-(u - 0.24) / 0.02)) - 0.66 / (1 + Math.exp(-(u - 0.52) / 0.02)), 'r', ''],
+    ['认同', (u) => 0.08 + 0.52 / (1 + Math.exp(-(u - 0.26) / 0.03)) - 0.32 / (1 + Math.exp(-(u - 0.78) / 0.03)), 'b', 'fx-dash'],
+    ['内化', (u) => 0.08 + 0.58 / (1 + Math.exp(-(u - 0.42) / 0.08)), 'b', ''],
+  ];
+  F.durable = (fig) => figure(fig, (box, w) => {
+    const lab = w >= 520 ? 54 : 0, H = 250, L = 8, R = 10 + lab, T = 26, B = lab ? 40 : 100, s = svgIn(box, w, H, fig);
+    const X = (u) => L + u * (w - L - R), Y = (v) => H - B - v * (H - T - B) / 0.85;
+    el('line', { x1: L, x2: w - R, y1: Y(0), y2: Y(0), class: 'fx-ln' }, s);
+    tx(s, L, 14, '行为或态度的改变（示意）', 'fx-n'); tx(s, w - R, Y(0) + 17, '时间 →', 'fx-n', 'end');
+    const gm = el('g', {}, s);
+    [[0.22, '影响出现'], [0.5, '监督撤去'], [0.76, '关系变化']].forEach(([u, t]) => { el('line', { x1: X(u), x2: X(u), y1: T, y2: Y(0), class: 'fx-hair fx-dash' }, gm); tx(gm, X(u) + 4, T + 8, t, 'fx-n fx-halo'); });
+    const ds = [], g = el('g', {}, s);
+    KEL.forEach(([t, f, c, d], i) => {
+      const pts = []; for (let u = 0; u <= 1.0001; u += 0.005) pts.push([X(u), Y(f(u))]);
+      const pth = el('path', { d: pathOf(pts), class: `fx-ln fx-curve ${c === 'r' ? 'fx-lr' : 'fx-lb'} ${d}` }, s);
+      ds.push(d ? (v) => show(pth, v) : drawOn(pth));
+      if (lab) tx(g, w - R + 8, Y(f(1)) + 4 + (i === 0 ? 4 : i === 1 ? 0 : 0), t, 'fx-s ' + (c === 'r' ? 'fx-r' : 'fx-b'));
+      else { const yy = Y(0) + 40 + i * 18; el('line', { x1: L, x2: L + 20, y1: yy - 4, y2: yy - 4, class: `fx-ln ${c === 'r' ? 'fx-lr' : 'fx-lb'} ${d}` }, g); tx(g, L + 28, yy, t, 'fx-s'); }
+    });
+    return (t) => { show(gm, stage(t, 0, 0.3)); ds.forEach((d, i) => d(stage(t, 0.15 + i * 0.12, 0.55))); show(g, stage(t, 0.6, 0.4)); };
+  }, { dur: 1400 });
+
+  /* ----- 13-05 · one gesture, many causes ----- */
+  F.onecue = (fig) => fan13(fig, '看到的动作', '交叉双臂', '可能的原因，以及需要什么信息才能判断', [
+    ['觉得冷', '看看室温，周围的人是否也这样', 'b', 0],
+    ['舒服或习惯', '他平时坐着、站着是否也常这样', 'b', 0],
+    ['椅子没有扶手', '换一把椅子，姿势是否改变', 'b', 0],
+    ['在专心思考', '是否同时在看材料、在听别人发言', 'b', 0],
+    ['感到不安', '紧张可能来自被评价，不一定与说的话有关', 'b', 0],
+    ['不同意、在防御', '流行读物最常给出的解释；需要听他实际说了什么', 'r', 0],
+  ], '<p>红框是流行读物给这个动作的“固定含义”。它只是许多可能中的一种，而且没有研究表明它是最常见的一种。了解这个人平时的样子和当时的情境，比记住动作的“含义”有用得多。</p>');
+
+  /* ----- 13-05 · from facial movement to inferred intention: uncertainty grows with each step ----- */
+  F.facemove = (fig) => figure(fig, (box, w, api) => {
+    const ST = [['面部动作', '眉毛下压、嘴唇收紧（可以客观描述，例如用 FACS 编码）'], ['命名为表情', '“这是一个愤怒的表情”'], ['推断情绪', '“他很生气”'], ['推断意图或品质', '“他想攻击我”“他在说谎”']];
+    const U = [0.12, 0.4, 0.66, 0.94], wide = w >= 640, gs = [];
+    let s;
+    if (wide) {
+      const gap = 30, cw = (w - 3 * gap) / 4, ch = Math.max(...ST.map(([t, sub]) => bx13H(cw, t, sub, 92))), top = 76, H = top + ch + 62;
+      s = svgIn(box, w, H, fig);
+      const ga = el('g', {}, s); gs.push(ga);
+      const x1 = cw / 2, x2 = 3 * (cw + gap) + cw / 2;
+      const arc = el('path', { d: `M${x1},${top - 4} C${x1 + 60},${top - 40} ${x2 - 60},${top - 40} ${x2},${top - 6}`, class: 'fx-ln fx-lr fx-dash' }, ga);
+      arrow(ga, x2 - 6, top - 14, x2, top - 4, 'r', 7); arc.style.strokeWidth = 1.6;
+      tx(ga, w / 2, top - 52, '网上的“读脸术”：从第 1 步直接跳到第 4 步', 'fx-n fx-r fx-halo', 'middle');
+      ST.forEach(([t, sub], i) => {
+        const g = el('g', {}, s); gs.push(g); const x = i * (cw + gap);
+        bx13(g, x, top, cw, `${i + 1}　${t}`, sub, i ? 'm' : 'b', ch);
+        if (i) arrow(g, x - gap + 4, top + ch / 2, x - 4, top + ch / 2, '', 6);
+        const bw = cw * U[i]; el('rect', { x: x + (cw - bw) / 2, y: top + ch + 16, width: bw, height: 10, class: 'fx-band1' }, g);
+        tx(g, x + cw / 2, top + ch + 44, i ? '推断' : '描述', 'fx-n', 'middle');
+      });
+    } else {
+      const ch = Math.max(...ST.map(([t, sub]) => bx13H(w, t, sub, 50))), step = ch + 62, rh = bx13H(w, '网上的“读脸术”', '常常从第 1 步直接跳到第 4 步', 46), H = 4 * ch + 3 * 62 + 46 + 24 + rh;
+      s = svgIn(box, w, H, fig);
+      ST.forEach(([t, sub], i) => {
+        const g = el('g', {}, s); gs.push(g); const y = i * step;
+        bx13(g, 0, y, w, `${i + 1}　${t}`, sub, i ? 'm' : 'b', ch);
+        const bw = w * U[i]; el('rect', { x: (w - bw) / 2, y: y + ch + 12, width: bw, height: 10, class: 'fx-band1' }, g);
+        if (i < 3) arrow(g, w / 2, y + ch + 28, w / 2, y + step - 4, '', 6);
+      });
+      const g = el('g', {}, s); gs.push(g); bx13(g, 0, 4 * ch + 3 * 62 + 46 + 24, w, '网上的“读脸术”', '常常从第 1 步直接跳到第 4 步', 'r', rh);
+    }
+    api.out.innerHTML = '<p>每个步骤下面的色条表示不确定性的大小（示意，不是测量值）。只有第 1 步是对看到的动作的描述；后面每一步都需要额外的假设，而这些假设的证据一步比一步弱。</p>';
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.13, 0.35)));
+  }, { dur: 1200 });
+
+
   /* ===== Case 01 · 第七份证词: seven witnesses' statements over four interviews (fictional story data) ===== */
   F.c1testimony = (fig) => figure(fig, (box, w) => {
     const narrow = w < 460, nameW = narrow ? 50 : 84, colW = (w - nameW) / 4;

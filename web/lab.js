@@ -2470,5 +2470,142 @@
   }
 
 
-  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect };
+
+  /* =====================================================================
+     Stage 13 · social cognition and persuasion. Three model demos; every
+     number comes from an assumption stated on screen, not from a study.
+     ===================================================================== */
+  const logit = (p) => Math.log(p / (1 - p)), expit = (x) => 1 / (1 + Math.exp(-x));
+
+  /* 13-02 · impress: the same four pieces of information, in two orders.
+     An ideal updater adds every clue's weight of evidence (order cannot matter);
+     an anchored judge gives the k-th clue weight (1 − a)^(k − 1). */
+  const IMP = [
+    ['上周在走廊里，他没有和你打招呼', 0.8],
+    ['你听说他对你负责的项目有些不满', 0.9],
+    ['这次会上，他也没有回应另外两位同事的提问', -1.2],
+    ['会后，他主动发消息问你刚才的问题', -1.0],
+  ];
+  const IMPO = { neg: [0, 1, 2, 3], pos: [2, 3, 0, 1] };
+  function impress(host) {
+    const o = { order: 'neg' };
+    const { fig, out, actions } = shell(host, '信息的顺序与先入为主',
+      '同事在会上没有回应你的提问，你想知道他是不是对你有意见。接下来你会陆续得到四条信息：两条让“有意见”更可信，两条让它更不可信。选择信息出现的顺序，再调节判断者“先入为主”的程度，比较两种判断者最后的结论。',
+      [['order', '信息出现的顺序', [['neg', '不利的信息在前'], ['pos', '有利的信息在前']]]],
+      '每条信息让“有意见”变得更可信或更不可信多少，是为了说明原理设定的数字；“先入为主的程度”也是一个假设的参数，不是测量出来的。', MODEL);
+    const sa = slider('先入为主的程度（后面的信息被打折扣）：', 0, 60, 10, 40);
+    const box = document.createElement('div'); fig.append(sa.box, box);
+    const path = (ord, a) => { let x = 0; const ps = [0.5]; ord.forEach((j, k) => { x += IMP[j][1] * (1 - a) ** k; ps.push(expit(x)); }); return ps; };
+    const draw = () => {
+      const a = Number(sa.input.value) / 100, ord = IMPO[o.order], other = IMPO[o.order === 'neg' ? 'pos' : 'neg'];
+      sa.val.textContent = ` ${Math.round(a * 100)}%`; sa.input.setAttribute('aria-valuetext', `${Math.round(a * 100)}%`);
+      const ideal = path(ord, 0), anch = path(ord, a), anchO = path(other, a);
+      const W = widthOf(fig), L = 40, R = 12, T = 22, B = 30, ph = 190, H = ph;
+      const X = (k) => L + k / 4 * (W - L - R), Y = (p) => T + (1 - p) * (ph - T - B);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：看完四条信息后，理想的判断者认为“有意见”的可能性约 ${Math.round(ideal[4] * 100)}%，先入为主的判断者约 ${Math.round(anch[4] * 100)}%。` }, box);
+      el('line', { x1: L, x2: W - R, y1: Y(0), y2: Y(0), class: 'lab-axis' }, svg);
+      el('line', { x1: L, x2: L, y1: Y(1), y2: Y(0), class: 'lab-axis' }, svg);
+      [0, 0.5, 1].forEach((p) => text(svg, L - 6, Y(p) + 4, `${Math.round(p * 100)}%`, 'lab-tick', 'end'));
+      el('line', { x1: L, x2: W - R, y1: Y(0.5), y2: Y(0.5), class: 'fx-hair fx-dash' }, svg);
+      [0, 1, 2, 3, 4].forEach((k) => text(svg, X(k), Y(0) + 16, k ? (W < 480 ? `第${k}条` : `第 ${k} 条`) : '开始', 'lab-tick', k ? (k === 4 ? 'end' : 'middle') : 'start'));
+      text(svg, L, 12, '“他对我有意见”的可能性（假设）', 'lab-tick');
+      line(svg, ideal.map((p, k) => [X(k), Y(p)]), 'fx-ln fx-lb fx-dash');
+      line(svg, anch.map((p, k) => [X(k), Y(p)]), 'fx-ln fx-lr');
+      ideal.forEach((p, k) => el('circle', { cx: X(k), cy: Y(p), r: 3.5, class: 'fx-node b' }, svg));
+      anch.forEach((p, k) => el('circle', { cx: X(k), cy: Y(p), r: 4, class: 'fx-node r' }, svg));
+      const f = (p) => `${Math.round(p * 100)}%`;
+      out.innerHTML = `<p class="fx-keys"><span><i class="k" style="background:var(--blue)"></i>理想的判断者：每条信息同样对待</span><span><i class="k" style="background:var(--red)"></i>先入为主的判断者</span></p>
+        <ul class="lab-parts">${ord.map((j, k) => `<li><span>第 ${k + 1} 条：${IMP[j][0]}</span><b>${IMP[j][1] > 0 ? '更可信' : '更不可信'}</b></li>`).join('')}</ul>
+        <ul class="lab-parts"><li><span>理想的判断者，看完四条之后（两种顺序都一样）</span><b>${f(ideal[4])}</b></li><li><span>先入为主的判断者，按现在的顺序</span><b>${f(anch[4])}</b></li><li><span>先入为主的判断者，按相反的顺序</span><b>${f(anchO[4])}</b></li></ul>
+        <p>${a === 0 ? '把每条信息同样对待时，顺序不影响最后的结论。' : `同样的四条信息，只是顺序不同，先入为主的判断者最后的结论相差 ${Math.round(Math.abs(anch[4] - anchO[4]) * 100)} 个百分点。`}${a && anch[4] > 0.5 !== ideal[4] > 0.5 ? '而且这一次，他得出了和理想的判断者方向相反的结论。' : ''}</p>
+        <p class="lab-note">这个模型只描述了一种可能的机制：后来的信息被打了折扣。真实的印象形成还受到别的因素影响，例如本讲提到的，能够重新解释原有信息的新证据，可以大幅改变已有的印象。</p>`;
+    };
+    sa.input.addEventListener('input', draw);
+    bindControls(host, o, draw);
+    action(actions, '恢复默认设置', () => { sa.input.value = 40; o.order = 'neg'; host.querySelectorAll('.lab-opts .choice').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.v === 'neg'))); draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 13-04 · discern: "more fake news identified" can come from better discrimination
+     or from simply calling more items fake. Real items ~ N(0, 1), fake items ~ N(d', 1)
+     on a "looks suspicious" scale; an item is called fake when it lies above the criterion k.
+     Before the intervention: d' = 1, k = 0.5 (no bias). */
+  function discern(host) {
+    const { fig, out, actions } = shell(host, '识别能力提高了，还是只是更爱说“假”？',
+      '设想一项干预（例如一个游戏）之后，人们要判断一些新闻是真是假。调节干预之后的两个量：区分真假的能力，以及判断标准（多容易把一条新闻说成“假”）。比较干预前后识别出的假新闻和被误判的真新闻。',
+      [], '两个分布、干预前的数值和你设定的干预后数值都是假设的，用来说明信号检测的道理，不是任何一项研究的数据。', MODEL);
+    const sd = slider('干预后，区分真假的能力：', 0, 2, 0.1, 1), sk = slider('干预后，判断标准（越往左，越容易说“假”）：', -1, 1.5, 0.1, 0.5);
+    const box = document.createElement('div'); fig.append(sd.box, sk.box, box);
+    const preset = (d, k) => { sd.input.value = d; sk.input.value = k; draw(); };
+    const draw = () => {
+      const d = Number(sd.input.value), k = Number(sk.input.value);
+      sd.val.textContent = ` ${fmt(d, 1)}`; sk.val.textContent = ` ${fmt(k, 1)}`;
+      sd.input.setAttribute('aria-valuetext', fmt(d, 1)); sk.input.setAttribute('aria-valuetext', fmt(k, 1));
+      const hit0 = 1 - nPhi(0.5 - 1), fa0 = 1 - nPhi(0.5), hit = 1 - nPhi(k - d), fa = 1 - nPhi(k);
+      const W = widthOf(fig), H = 206, L = 10, R = 10, T = 30, base = H - 40, lo = -3, hi = 4.5;
+      const X = (v) => L + (v - lo) / (hi - lo) * (W - L - R), Y = (q) => base - q * (base - T);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：干预后，识别出 ${Math.round(hit * 100)}% 的假新闻，把 ${Math.round(fa * 100)}% 的真新闻误判为假。` }, box);
+      let sh = `M${X(k)},${base}`; for (let v = k; v <= hi + 1e-9; v += 0.05) sh += ` L${X(v)},${Y(Math.exp(-0.5 * v * v))}`; sh += ` L${X(hi)},${base} Z`;
+      el('path', { d: sh, class: 'fx-band1' }, svg);
+      el('path', { d: bell(X, Y, 0, 1, lo, hi), class: 'fx-ln fx-lb fx-curve' }, svg);
+      el('path', { d: bell(X, Y, d, 1, lo, hi), class: 'fx-ln fx-lr fx-curve' }, svg);
+      el('line', { x1: L, x2: W - R, y1: base, y2: base, class: 'lab-axis' }, svg);
+      el('line', { x1: X(k), x2: X(k), y1: T - 18, y2: base, class: 'fx-ln' }, svg);
+      text(svg, X(k) + (k > 2.6 ? -4 : 4), T - 8, '判断标准', 'lab-tick', k > 2.6 ? 'end' : 'start');
+      text(svg, X(0), base + 16, '真新闻', 'lab-tick fx-b', 'middle'); text(svg, X(d), base + (X(d) - X(0) < 60 ? 32 : 16), '假新闻', 'lab-tick fx-r', 'middle');
+      text(svg, W - R, base + 32, '看起来可疑 →', 'lab-tick', 'end');
+      const p = (x) => `${Math.round(x * 100)}%`, dh = hit - hit0, dfa = fa - fa0;
+      out.innerHTML = `<ul class="lab-parts"><li><span>识别出的假新闻（干预前 → 后）</span><b>${p(hit0)} → ${p(hit)}</b></li><li><span>被误判为“假”的真新闻（干预前 → 后）</span><b>${p(fa0)} → ${p(fa)}</b></li><li><span>区分真假的能力（干预前 → 后）</span><b>1.0 → ${fmt(d, 1)}</b></li></ul>
+        <p>${dh > 0.02 && d <= 1.001 ? '识别出的假新闻变多了，但区分能力没有提高：被误判为“假”的真新闻也同样变多了。只报告第一个数字，会让干预看起来有效。' : dh > 0.02 && d > 1.001 && dfa <= 0.02 ? '识别出的假新闻变多，而被误判的真新闻没有增加：这才是区分能力真的提高了。' : dh > 0.02 ? '两种变化同时存在：区分能力提高了一些，同时人们也更倾向于回答“假”。' : '识别出的假新闻没有变多。'}</p>
+        <p class="lab-note">图中阴影是被判断为“假”的真新闻。信号检测论把“区分能力”和“判断倾向”分开计算；真实研究对接种游戏得出过两种结论：一项对几项早期研究的重新分析发现接近第一种情况，一项范围更大的元分析报告接近第二种情况。这里的数字是假设的，不来自其中任何一项。</p>`;
+    };
+    [sd, sk].forEach((s) => s.input.addEventListener('input', draw));
+    action(actions, '情况一：只是更爱说“假”', () => preset(1, -0.2));
+    action(actions, '情况二：区分能力提高', () => preset(1.7, 0.85));
+    action(actions, '恢复默认设置', () => preset(1, 0.5), 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+  /* 13-05 · liecue: a cue that differs between liars and truth tellers by d standard
+     deviations (equal spread). Anyone above the midpoint d/2 is flagged as lying.
+     Base rate b = share of liars among the people judged. */
+  function liecue(host) {
+    const { fig, out, actions } = shell(host, '一个“真实存在”的线索，能用来判断一个人吗？',
+      '设想某个行为线索（例如说话中的停顿）在说谎的人中平均多一些。调节两组的平均差别有多大，以及被判断的人中说谎者占多少，看看用这个线索给人贴上“说谎”标签会有多少错误。',
+      [], '线索、分布和比例都是假设的，用来说明计算的道理；它不代表任何一种真实的说谎线索，真实线索的效应大多比这里的默认值更小或更不确定。', MODEL);
+    const sd = slider('两组平均差别（效应量 d）：', 0, 3, 0.05, 0.4), sb = slider('被判断的人中，说谎者所占比例：', 5, 50, 5, 20);
+    const box = document.createElement('div'); fig.append(sd.box, sb.box, box);
+    const draw = () => {
+      const d = Number(sd.input.value), b = Number(sb.input.value) / 100, k = d / 2;
+      sd.val.textContent = ` ${fmt(d, 2)}`; sb.val.textContent = ` ${Math.round(b * 100)}%`;
+      sd.input.setAttribute('aria-valuetext', fmt(d, 2)); sb.input.setAttribute('aria-valuetext', `${Math.round(b * 100)}%`);
+      const hit = 1 - nPhi(k - d), fa = 1 - nPhi(k), acc = nPhi(d / 2), flagged = b * hit + (1 - b) * fa, ppv = flagged ? b * hit / flagged : 0;
+      const W = widthOf(fig), H = 196, L = 10, R = 10, T = 26, base = H - 40, lo = -3.2, hi = 3.2 + d;
+      const X = (v) => L + (v - lo) / (hi - lo) * (W - L - R), Y = (q) => base - q * (base - T);
+      box.innerHTML = '';
+      const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模型：效应量 ${fmt(d, 2)} 时，用这个线索判断的准确率约 ${Math.round(acc * 100)}%；被标为说谎的人中，真正说谎的约占 ${Math.round(ppv * 100)}%。` }, box);
+      el('path', { d: bell(X, Y, 0, 1, lo, hi), class: 'fx-ln fx-lb fx-curve' }, svg);
+      el('path', { d: bell(X, Y, d, 1, lo, hi), class: 'fx-ln fx-lr fx-curve' }, svg);
+      el('line', { x1: L, x2: W - R, y1: base, y2: base, class: 'lab-axis' }, svg);
+      el('line', { x1: X(k), x2: X(k), y1: T - 14, y2: base, class: 'fx-ln fx-dash' }, svg);
+      text(svg, X(k) + 4, T - 6, '超过这里就判为“说谎”', 'lab-tick');
+      text(svg, X(0) - 6, base + 16, '说真话的人', 'lab-tick fx-b', 'end'); text(svg, X(d) + 6, base + 16, '说谎的人', 'lab-tick fx-r');
+      text(svg, W - R, base + 34, '线索出现得越多 →', 'lab-tick', 'end');
+      const p = (x) => `${Math.round(x * 100)}%`;
+      out.innerHTML = `<ul class="lab-parts"><li><span>两组各占一半时，判断的准确率（随机猜测为 50%）</span><b>${p(acc)}</b></li><li><span>说真话的人中，被错判为“说谎”的</span><b>${p(fa)}</b></li><li><span>被判为“说谎”的人中，真正在说谎的</span><b>${p(ppv)}</b></li></ul>
+        <p>${d < 0.15 ? '差别这么小时，这个线索几乎不提供信息。' : acc < 0.65 ? '平均差别是真实的，但两组的分布大部分重叠：用它判断某一个人，准确率仍然接近随机。' : acc < 0.85 ? '这已经是相当大的差别了，但仍然会把相当多说真话的人判为说谎。' : '只有在差别非常大时，准确率才会达到一些产品宣称的水平；目前研究中的非言语线索远远达不到这样的大小。'}${b < 0.3 && ppv < 0.5 ? '而且，当说谎的人本来就是少数时，被贴上“说谎”标签的人中，大多数其实说的是真话。' : ''}</p>
+        <p class="lab-note">要让准确率达到 90%，两组的平均差别需要约 2.56 个标准差。这里还假设线索没有个人差异、不受紧张等其他原因影响；真实情况下，判断只会更难。</p>`;
+    };
+    [sd, sb].forEach((s) => s.input.addEventListener('input', draw));
+    action(actions, '恢复默认设置', () => { sd.input.value = 0.4; sb.input.value = 20; draw(); }, 'lab-clear');
+    draw();
+    onResize(draw);
+  }
+
+
+  window.PPLab = { experiment, confound, studies, sdt, muller, stroop, change, pavlov, rw, schedules, habit, serial, span, cue, misinfo, spacing, garden, stream, label, ninedot, uses, anchor, prospect, frame, sunk, discount, calib, regulate, adapt, reward, procras, proreact, delay, cutoff, rankmean, iqerror, overlap, lookinterp, riskpred, xsect, impress, discern, liecue };
 })();
