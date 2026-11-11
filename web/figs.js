@@ -5483,5 +5483,57 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.1, 0.3)));
   }, { dur: 1600 });
 
+  /* ===== Case 04 · 消失的显著性: effect estimates with 95% CIs (all data fictional) =====
+     rows: [label, sub-label, d, lo, hi, highlight]; o: { min, max, ticks, band (± bound or 0), bandLabel, hiLabel } */
+  const c4forest = (fig, rows, o) => figure(fig, (box, w) => {
+    const pad = 18, x0 = pad, x1 = w - pad, X = (v) => x0 + (x1 - x0) * (v - o.min) / (o.max - o.min);
+    const textW = w - 4, s = svgIn(box, w, 10, fig);
+    const head = 22, axisY0 = head;
+    const bandRect = o.band ? el('rect', { x: X(-o.band), width: X(o.band) - X(-o.band), y: head - 6, class: 'fx-band2' }, s) : null;
+    const zero = el('line', { x1: X(0), x2: X(0), y1: head - 6, class: 'fx-hair' }, s);
+    tx(s, X(0), 12, '0', 'fx-n', 'middle');
+    if (o.band) tx(s, X(o.band) + 4, 12, o.bandLabel, 'fx-n', 'start');
+    let y = axisY0 + 8;
+    const gs = rows.map(([label, sub, d, lo, hi, hl]) => {
+      const g = el('g', {}, s);
+      const ll = wrapZh(label, textW, 13.5);
+      lines(g, 0, y + 14, ll, hl ? 'fx-h fx-r' : 'fx-h', 19);
+      let ny = y + 14 + (ll.length - 1) * 19 + 18;
+      const fmt = (v) => (v < 0 ? '−' : '') + Math.abs(v).toFixed(2);
+      tx(g, 0, ny, `${sub}　·　${fmt(d)}  [${fmt(lo)}, ${fmt(hi)}]`, 'fx-s');
+      const cy = ny + 20;
+      el('line', { x1: X(lo), x2: X(hi), y1: cy, y2: cy, class: hl ? 'fx-ln fx-lr' : 'fx-ln' }, g);
+      [lo, hi].forEach((v) => el('line', { x1: X(v), x2: X(v), y1: cy - 5, y2: cy + 5, class: hl ? 'fx-ln fx-lr' : 'fx-ln' }, g));
+      el('circle', { cx: X(d), cy, r: 6, class: hl ? 'fx-node r' : 'fx-node b' }, g);
+      y = cy + 24;
+      return g;
+    });
+    const axY = y + 4;
+    el('line', { x1: x0, x2: x1, y1: axY, y2: axY, class: 'fx-hair' }, s);
+    o.ticks.forEach((v) => { el('line', { x1: X(v), x2: X(v), y1: axY, y2: axY + 5, class: 'fx-hair' }, s); tx(s, X(v), axY + 19, (v < 0 ? '−' : '') + Math.abs(v), 'fx-n', 'middle'); });
+    tx(s, (x0 + x1) / 2, axY + 38, '效应量（d）', 'fx-s', 'middle');
+    const h = axY + 46;
+    zero.setAttribute('y2', axY); if (bandRect) bandRect.setAttribute('height', axY - head + 6);
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.15, 0.35)));
+  }, { dur: 1500 });
+
+  /* the same 64 people, four ways of analysing them (fictional; the fourth was published) */
+  F.c4forks = (fig) => c4forest(fig, [
+    ['全部64人，原始坚持时间', 'p = 0.22', 0.31, -0.18, 0.80],
+    ['去掉6名怀疑者，原始时间', 'p = 0.10', 0.44, -0.08, 0.96],
+    ['全部64人，600秒截断', 'p = 0.12', 0.40, -0.09, 0.89],
+    ['去掉6人并截断（发表的那一种）', 'p = 0.03', 0.58, 0.05, 1.11, true],
+  ], { min: -0.4, max: 1.2, ticks: [-0.4, 0, 0.4, 0.8, 1.2] });
+
+  /* five studies of the same sentence, with the ±0.3 bound 周牧 set in advance (fictional) */
+  F.c4estimates = (fig) => c4forest(fig, [
+    ['预实验一（纸条，未发表）', '40人', 0.10, -0.52, 0.72],
+    ['预实验二（念出来，未发表）', '36人', -0.05, -0.70, 0.60],
+    ['原研究（发表的分析）', '58人', 0.58, 0.05, 1.11, true],
+    ['林砚的预注册复现（屏幕显示）', '148人', 0.06, -0.26, 0.38],
+    ['补实验（念出来，主试在场）', '60人', 0.21, -0.30, 0.72],
+  ], { min: -0.8, max: 1.2, ticks: [-0.8, -0.4, 0, 0.4, 0.8, 1.2], band: 0.3, bandLabel: '±0.3' });
+
   window.PPFig = F;
 })();
