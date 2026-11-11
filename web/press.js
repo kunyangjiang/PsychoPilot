@@ -202,7 +202,7 @@
       box.classList.toggle('is-revealed', open);
       btns.forEach((x) => x.setAttribute('aria-pressed', String(open && x === b)));
       ans.innerHTML = open
-        ? `${b.dataset.a === 'same' ? '对，' : '被骗了：'}两个小方块是<b>同一种颜色</b>，中间那条色带就是证据。你从来看不到一块“孤立”的颜色，周围的颜色总在改写它。阿尔伯斯用一整本《色彩的互动》，演示的就是这件事。<br><a href="course.html?id=04-02">04-02 视觉错觉与知觉建构 →</a>`
+        ? `${b.dataset.a === 'same' ? '对，' : '被骗了：'}两个小方块是<b>同一种颜色</b>，中间那条色带就是证据。周围的颜色，总在改写它。<br><a href="course.html?id=04-02">04-02 视觉错觉与知觉建构 →</a>`
         : '';
     }));
   }

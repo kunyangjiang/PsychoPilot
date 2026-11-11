@@ -7,7 +7,7 @@ window.PP = (() => {
   /* emblem = the classic stimulus or figure each Part is identified by */
   const parts = [
     { id: 1, numeral: 'I', title: '心理学的科学基础', short: '科学基础', stages: ['01', '02', '03', '04'],
-      emblem: '缪勒-莱尔错觉', desc: '心理学凭什么算科学？实验、测量、统计、大脑与知觉。后面五卷，都建在这块地基上。' },
+      emblem: '缪勒-莱尔错觉', desc: '心理学凭什么算科学？实验、测量、统计、大脑与知觉。' },
     { id: 2, numeral: 'II', title: '学习、记忆与认知', short: '学习与认知', stages: ['05', '06', '07', '08'],
       emblem: '内克尔立方体', desc: '你怎样学会、记住、说话、判断，又怎样有规律地出错。' },
     { id: 3, numeral: 'III', title: '情绪、动机、人格与人的发展', short: '情绪与人格', stages: ['09', '10', '11', '12'],
@@ -17,7 +17,7 @@ window.PP = (() => {
     { id: 5, numeral: 'V', title: '心理障碍、治疗与健康', short: '心理健康', stages: ['16', '17'],
       emblem: '维度连续谱', desc: '心理障碍怎样被理解、诊断和治疗；哪些帮助有证据，哪些只是听起来有道理。' },
     { id: 6, numeral: 'VI', title: '金钱、工作、数字生活与心理学前沿', short: '生活与前沿', stages: ['18', '19', '20', '21'],
-      emblem: '前景理论价值曲线', desc: '把心理学带回日常：钱、工作、屏幕与 AI。最后，看心理学怎样修正自己。' },
+      emblem: '前景理论价值曲线', desc: '把心理学带回日常：钱、工作、屏幕与 AI。' },
   ];
 
   const raw = {
