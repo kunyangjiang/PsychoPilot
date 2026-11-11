@@ -51,6 +51,7 @@
   </div>
 
   <script src="curriculum.js"></script>
+  <script src="cases.js"></script>
   <script>
     (() => {
       const { courses, byId, courseUrl, partUrl } = window.PP;
@@ -58,9 +59,9 @@
       const p = c.stage.part;
       const $ = (s) => document.querySelector(s);
       document.title = `${c.id} ${c.title} · PsychoPilot`;
-      // Back goes to the page the reader entered the lessons from (home, a volume, an interest route),
-      // and keeps pointing there while they step through next / previous lessons. Opened directly
-      // or from elsewhere: the lesson's own volume.
+      // Back goes to the page the reader entered the lessons from (home, a volume, an interest route,
+      // a case's further-reading list), and keeps pointing there while they step through next / previous
+      // lessons. Opened directly or from elsewhere: the lesson's own volume.
       let back = { href: partUrl(p), t: `第 ${p.numeral} 卷 · ${p.short}` };
       try {
         const ref = document.referrer ? new URL(document.referrer) : null;
@@ -69,8 +70,10 @@
           const q = ref.searchParams;
           const part = /\/part$/.test(path) && window.PP.parts.find((x) => String(x.id) === q.get('p'));
           const topic = /\/part$/.test(path) && window.PP.topics.find((x) => x.id === q.get('topic'));
+          const kase = /\/case$/.test(path) && window.PPCases && window.PPCases.byId(q.get('id'));
           const from = part ? { href: partUrl(part), t: `第 ${part.numeral} 卷 · ${part.short}` }
             : topic ? { href: window.PP.topicUrl(topic), t: topic.label }
+            : kase ? { href: window.PPCases.caseUrl(kase), t: `案例 ${kase.no} · ${kase.title}` }
             : /(^|\/)(index)?$/.test(path) ? { href: 'index.html', t: 'PsychoPilot' } : null;
           if (from) sessionStorage.setItem('pp.from', JSON.stringify(from)); else sessionStorage.removeItem('pp.from');
         } else if (path === null) sessionStorage.removeItem('pp.from');
