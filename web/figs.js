@@ -5660,5 +5660,79 @@
     };
   }, { dur: 1800 });
 
+  /* ===== Case 07 · 情书算法: one silence, two readings (fictional; inner thoughts paraphrase the story) ===== */
+  F.c7same = (fig) => figure(fig, (box, w) => {
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const ev = '陆衡发来一句：“家里有点事，我回槐镇几天。”之后四天，几乎没有消息。';
+    const sides = [
+      ['陆衡心里（她看不见）', 'b', ['还什么都不确定，先别说', '说了，她只会更担心', '等稳定一点，当面说清楚']],
+      ['程溪心里（他看不见）', 'r', ['他把我关在门外了', '是不是不想要我了', '又是那种关门的沉默']],
+    ];
+    const two = w >= 520, gap = 14, cw = two ? (w - gap) / 2 : w;
+    // the observable event
+    const g0 = el('g', {}, s), ll = wrapZh(ev, w - 32, 13), eh = ll.length * 18 + 40;
+    tx(g0, 0, 15, '看得见的事', 'fx-h', 'start');
+    el('rect', { x: 1, y: 24, width: w - 2, height: eh - 8, rx: 10, class: 'fx-pill m' }, g0);
+    lines(g0, 16, 24 + (eh - 8) / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+    gs.push(g0);
+    let top = 24 + eh + 22, y = top, bottom = top;
+    sides.forEach(([title, c, items], k) => {
+      const g = el('g', {}, s), x0 = two ? k * (cw + gap) : 0;
+      if (!two && k) y += 10;
+      const yy = two ? top : y;
+      if (two || !k) arrow(g, x0 + cw / 2, 24 + eh - 8 + 3, x0 + cw / 2, yy - 4, c);
+      tx(g, x0, yy + 16, title, c === 'r' ? 'fx-h fx-r' : 'fx-h', 'start');
+      let iy = yy + 28;
+      items.forEach((t) => {
+        const il = wrapZh(t, cw - 28, 13), ih = il.length * 18 + 18;
+        el('rect', { x: x0 + 1, y: iy, width: cw - 2, height: ih, rx: 8, class: 'fx-pill ' + c }, g);
+        lines(g, x0 + 14, iy + ih / 2 - (il.length - 1) * 9 + 4.5, il, c === 'r' ? 'fx-s fx-r' : 'fx-s', 18);
+        iy += ih + 8;
+      });
+      gs.push(g); y = iy; bottom = Math.max(bottom, iy);
+    });
+    const h = bottom + 2;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.4)));
+  }, { dur: 1400 });
+
+  /* ===== Case 07: the pursue–withdraw loop, and two small exits the characters found (schematic) ===== */
+  F.c7loop = (fig) => figure(fig, (box, w) => {
+    const steps = [
+      ['程溪', '越不安，越想问清楚，问得越来越急', 'r'],
+      ['陆衡', '觉得自己在被评判，脑子里的话更乱了', 'b'],
+      ['陆衡', '先退开：“我们改天再说。”', 'b'],
+      ['程溪', '门轻轻关上，沉默像小时候那样，更不安了', 'r'],
+    ];
+    const exits = ['退开之前，先扔一句：“我在，我很乱，晚点说。”', '猜之前，先直接问：“你是不是忘了？”'];
+    const xr = w - 10, pw = w - 30, labW = 54, tw = pw - labW - 14;
+    const s = svgIn(box, w, 10, fig);
+    let y = 4; const gs = [], spans = [];
+    steps.forEach(([who, t, c], i) => {
+      const g = el('g', {}, s), ll = wrapZh(t, tw, 13), h = Math.max(42, ll.length * 18 + 20);
+      el('rect', { x: 1, y, width: pw - 2, height: h, rx: 10, class: 'fx-pill ' + c }, g);
+      tx(g, 14, y + h / 2 + 5, who, c === 'r' ? 'fx-h fx-r' : 'fx-h', 'start');
+      lines(g, labW + 4, y + h / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+      if (i < steps.length - 1) arrow(g, pw / 2, y + h + 3, pw / 2, y + h + 21);
+      spans.push([y, y + h]); gs.push(g); y += h + 24;
+    });
+    const lg = el('g', {}, s), ly = (spans[3][0] + spans[3][1]) / 2, fy = (spans[0][0] + spans[0][1]) / 2;
+    el('line', { x1: pw, y1: ly, x2: xr, y2: ly, class: 'fx-ln fx-lr fx-dash' }, lg);
+    el('line', { x1: xr, y1: ly, x2: xr, y2: fy, class: 'fx-ln fx-lr fx-dash' }, lg);
+    arrow(lg, xr, fy, pw + 1, fy, 'r');
+    const eg = el('g', {}, s);
+    y = y - 24 + 26;
+    tx(eg, 0, y + 15, '故事里试过的两个出口（不是万能办法）', 'fx-h', 'start'); y += 26;
+    exits.forEach((t) => {
+      const ll = wrapZh(t, w - 30, 13), h = ll.length * 18 + 18;
+      el('rect', { x: 1, y, width: w - 2, height: h, rx: 8, class: 'fx-pill m' }, eg);
+      lines(eg, 14, y + h / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+      y += h + 8;
+    });
+    const h = y;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => { gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.3))); show(lg, stage(t, 0.6, 0.2)); show(eg, stage(t, 0.78, 0.22)); };
+  }, { dur: 1800 });
+
   window.PPFig = F;
 })();

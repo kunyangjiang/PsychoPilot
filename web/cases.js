@@ -10,10 +10,10 @@ window.PPCases = (() => {
     { id: 'c4', title: '消失的显著性', genre: '复制危机 · 学术剧', sub: '一个写进教材的发现，在博士生的重复实验里消失了；没有人造假，可每个人都得重新回答它到底说明了什么' },
     { id: 'c5', title: '无限滚动', genre: '行为科学 · 科技伦理', sub: '一张只说下一件事的卡片，让人再也不会错过什么；可当他想离开，整座城市都在替它把预言变成真的' },
     { id: 'c6', title: '第三考场', genre: '学校心理学 · 青春成长', sub: '一模随机排座，她被分进旧楼的第三考场；那一年，一沓卡片、一间旧实验室和一通凌晨两点的电话，让她重新回答自己是谁' },
-    { id: 'c7', title: '情书算法', genre: '婚恋应用研究 · 都市爱情' },
+    { id: 'c7', title: '情书算法', genre: '婚恋应用研究 · 都市爱情', sub: '六封信让两个陌生人以为看见了彼此；见面以后，他们才开始学怎样读懂一段沉默' },
     { id: 'c8', title: '测量心灵的人', genre: '实验心理学史 · 历史小说' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;
