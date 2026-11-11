@@ -159,7 +159,7 @@
       draw();
     };
     const draw = () => {
-      const W = widthOf(fig), H = W < 480 ? 280 : 330, L = 48, B = 40, xm = 200, ym = 8;
+      const W = widthOf(fig), H = W < 480 ? 280 : 330, L = 48, B = W < 480 ? 48 : 40, xm = 200, ym = 8;
       const x = (v) => L + (v / xm) * (W - L - 16), y = (v) => H - B - (Math.min(v, ym) / ym) * (H - B - 14);
       fig.innerHTML = '';
       const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': '模拟数据散点图：横轴为冰淇淋销量，纵轴为溺水事故数' }, fig);
@@ -229,7 +229,7 @@
       const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `模拟的 ${shown.length} 项研究的效果估计与置信区间` }, fig);
       el('line', { x1: x(0), x2: x(0), y1: top - 10, y2: H - 28, class: 'lab-zero' }, svg);
       el('line', { x1: x(o.d), x2: x(o.d), y1: top - 10, y2: H - 28, class: 'lab-true' }, svg);
-      text(svg, x(0), top - 16, '0：没有效果', 'lab-tick', 'middle');
+      text(svg, o.d !== 0 ? x(0) - 6 : x(0), top - 16, '0：没有效果', 'lab-tick', o.d !== 0 ? 'end' : 'middle');
       if (o.d !== 0) text(svg, x(o.d) + 6, top - 16, '真实效果', 'lab-tick lab-red');
       shown.forEach((s, i) => {
         const yy = top + i * rowH + 4;

@@ -488,7 +488,7 @@
 
   /* ===== 02-05 · why a "significant" result may be false (illustrative numbers) ===== */
   F.ppv = (fig) => figure(fig, (box, w) => {
-    const h = 330, s = svgIn(box, w, h, fig);
+    const foot = wrapZh('80 个显著结果中，只有 35 个（约 44%）是真的', w - 8, 14).length > 1 ? ['80 个显著结果中，', '只有 35 个（约 44%）是真的'] : ['80 个显著结果中，只有 35 个（约 44%）是真的'], h = 310 + foot.length * 20, s = svgIn(box, w, h, fig);
     const node = (g, x, y, num, lab, cls = '') => { tx(g, x, y, num, 'fx-num ' + cls, 'middle'); tx(g, x, y + 20, lab, 'fx-s', 'middle'); };
     const g0 = el('g', {}, s), g1 = el('g', {}, s), g2 = el('g', {}, s), g3 = el('g', {}, s);
     const x = (f) => f * w;
@@ -506,7 +506,7 @@
     el('rect', { x: bL, y: by, width: split - bL, height: 26, class: 'fx-seg b' }, g3);
     el('rect', { x: split, y: by, width: bL + bW - split, height: 26, class: 'fx-seg r' }, g3);
     tx(g3, bL + (split - bL) / 2, by + 18, '35 个真', 'fx-t fx-inv', 'middle'); tx(g3, split + (bL + bW - split) / 2, by + 18, '45 个假', 'fx-t fx-inv', 'middle');
-    tx(g3, w / 2, by + 50, '80 个显著结果中，只有 35 个（约 44%）是真的', 'fx-t', 'middle');
+    lines(g3, w / 2, by + 50, foot, 'fx-t', 20, 'middle');
     return (t) => [g0, g1, g2, g3].forEach((g, i) => show(g, stage(t, i * 0.24, 0.24)));
   }, { dur: 2000 });
 
@@ -735,7 +735,7 @@
       omit: ['学会之后，预期的奖励却没有来', '线索出现时照样放电；到了本该给奖励的时刻什么也没有发生，放电反而短暂停顿，低于平时的水平。预测误差为负。'],
     };
     figure(fig, (box, w, api) => {
-      const L = 8, R = 8, T = 30, rh = 64, rowH = 10, h = T + rh + 16 + TR * rowH + 58, s = svgIn(box, w, h, fig);
+      const L = 8, R = 8, T = 30, rh = 64, rowH = 10, foot = wrapZh('时间 →　每一行是一次试验，每一道竖线是一次放电', w - L, 12).length > 1 ? ['时间 →　每一行是一次试验，', '每一道竖线是一次放电'] : ['时间 →　每一行是一次试验，每一道竖线是一次放电'], h = T + rh + 16 + TR * rowH + 42 + foot.length * 16, s = svgIn(box, w, h, fig);
       const X = (x) => L + x * (w - L - R), { trials, rate } = sim(S.mode);
       const ry0 = T + rh + 16, base = T + rh;
       tx(s, 0, 14, TXT[S.mode][0], 'fx-h');
@@ -751,7 +751,7 @@
         tx(s, X(x), ay + 20, lab, 'fx-s', 'middle');
       };
       ev(CS, '线索', false); ev(RW, S.mode === 'omit' ? '奖励（没有出现）' : '奖励', S.mode === 'omit');
-      tx(s, L, ay + 42, '时间 →　每一行是一次试验，每一道竖线是一次放电', 'fx-n');
+      lines(s, L, ay + 42, foot, 'fx-n', 16);
       const dl = { before: [[RW, '＋']], after: [[CS, '＋'], [RW, '0']], omit: [[CS, '＋'], [RW, '−']] }[S.mode];
       const dlab = dl.map(([x, v]) => tx(s, X(x) - 6, T + 8, '预测误差 ' + v, v === '−' ? 'fx-s fx-b fx-halo' : v === '0' ? 'fx-s fx-halo' : 'fx-s fx-r fx-halo', 'end')); // left of the event line, where the curve is flat
       const mx = 0.5, Yr = (v) => base - Math.min(1, v / mx) * (rh - 6);
@@ -781,7 +781,8 @@
     const path = el('path', { d: pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(' '), class: 'fx-ln fx-lr fx-curve' }, s);
     const len = (path.getTotalLength && path.getTotalLength()) || 2000;
     path.style.strokeDasharray = len;
-    const note = tx(s, X(40), Y(0.2), '同样处理，几乎没有影响', 'fx-s fx-halo', 'middle');
+    const note = w < 480 ? el('g', {}, s) : tx(s, X(40), Y(0.2), '同样处理，几乎没有影响', 'fx-s fx-halo', 'middle');
+    if (w < 480) lines(note, w - R, Y(0.3), ['同样处理，', '几乎没有影响'], 'fx-s fx-halo', 16, 'end');
     return (t) => { path.style.strokeDashoffset = len * (1 - ease(t)); show(note, stage(t, 0.85, 0.15)); };
   }, { dur: 1600 });
 
