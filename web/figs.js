@@ -5593,5 +5593,72 @@
     };
   }, { dur: 1800 });
 
+  /* ===== Case 06 · 第三考场: the working-memory “desk”, calm vs worried (schematic, not a measurement) ===== */
+  F.c6wm = (fig) => figure(fig, (box, w) => {
+    const panels = [
+      ['平静的时候', [['P 点的高 = 2', 'b'], ['A (0, 0, 0)', 'b'], ['向量 AB', 'b'], ['向量 AD', 'b'], ['法向量 n', 'b'], ['', 'm']]],
+      ['担心的时候', [['妈妈的表', 'r'], ['第三考场', 'r'], ['杨可做完了吗', 'r'], ['冲刺班名单', 'r'], ['P 点的高 = ？', 'b'], ['A (0, 0, 0)', 'b']]],
+    ];
+    const s = svgIn(box, w, 10, fig), gap = 8, cw = (w - gap) / 2, ch = 34;
+    let y = 0; const gs = [];
+    panels.forEach(([title, slots]) => {
+      const g = el('g', {}, s);
+      tx(g, 0, y + 16, title, 'fx-h', 'start');
+      const top = y + 28;
+      el('rect', { x: 0.5, y: top - 6, width: w - 1, height: 3 * ch + 2 * gap + 12, rx: 8, class: 'fx-band2' }, g);
+      slots.forEach(([t, c], i) => {
+        const cx = (i % 2) * (cw + gap), cy = top + Math.floor(i / 2) * (ch + gap);
+        el('rect', { x: cx + 6, y: cy, width: cw - 12, height: ch, rx: 6, class: 'fx-pill ' + c }, g);
+        if (t) tx(g, cx + cw / 2, cy + ch / 2 + 5, t, c === 'r' ? 'fx-s fx-r' : 'fx-s', 'middle');
+      });
+      gs.push(g); y = top + 3 * ch + 2 * gap + 22;
+    });
+    const h = y - 6;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.45, 0.4)));
+  }, { dur: 1400 });
+
+  /* ===== Case 06: one week, two ways to review the same chapter (fictional schedule; bars are qualitative) ===== */
+  F.c6study = (fig) => figure(fig, (box, w) => {
+    const days = ['一', '二', '三', '四', '五', '六', '日'], labW = 46, dw = (w - labW) / 7;
+    const rows = [['苏念', { 0: '读', 1: '读', 2: '读' }, 'b'], ['罗佳', { 0: '写', 2: '测', 5: '测' }, 'r']];
+    const s = svgIn(box, w, 10, fig), cxd = (i) => labW + dw * i + dw / 2;
+    days.forEach((d, i) => tx(s, cxd(i), 14, d, 'fx-s', 'middle'));
+    let y = 24; const gs = [];
+    rows.forEach(([who, marks, c]) => {
+      const g = el('g', {}, s);
+      tx(g, 0, y + 22, who, c === 'r' ? 'fx-h fx-r' : 'fx-h', 'start');
+      days.forEach((d, i) => {
+        const m = marks[i];
+        el('rect', { x: labW + dw * i + 2, y, width: dw - 4, height: 34, rx: 5, class: m ? 'fx-pill ' + c : 'fx-band2' }, g);
+        if (m) tx(g, cxd(i), y + 22, m, c === 'r' ? 'fx-s fx-r' : 'fx-s', 'middle');
+      });
+      gs.push(g); y += 44;
+    });
+    const leg = el('g', {}, s);
+    const legLines = wrapZh('读＝把笔记从头看一遍　写＝合上书写问题卡片　测＝只看正面，自己答', w - 2, 12.5);
+    lines(leg, 0, y + 6, legLines, 'fx-s', 18);
+    y += 6 + legLines.length * 18 + 14;
+    const bars = el('g', {}, s), trackW = w - labW - 4;
+    tx(bars, 0, y, '下周一的感受与结果（示意）', 'fx-h', 'start'); y += 12;
+    const items = [['苏念', '复习完觉得自己会了', 0.9, 'b'], ['', '一周后能写出来的', 0.45, 'b'], ['罗佳', '复习完觉得自己会了', 0.6, 'r'], ['', '一周后能写出来的', 0.75, 'r']];
+    const fills = [];
+    items.forEach(([who, lab, v, c]) => {
+      y += who ? 22 : 6;
+      if (who) tx(bars, 0, y + 12, who, c === 'r' ? 'fx-s fx-r' : 'fx-s', 'start');
+      tx(bars, labW, y + 12, lab, 'fx-s', 'start');
+      y += 18;
+      el('rect', { x: labW, y, width: trackW, height: 10, rx: 3, class: 'fx-band2' }, bars);
+      fills.push([el('rect', { x: labW, y, width: 0, height: 10, rx: 3, class: c === 'r' ? 'fx-bar' : 'fx-bar b' }, bars), trackW * v]);
+      y += 10;
+    });
+    const h = y + 8;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => {
+      gs.forEach((g, i) => show(g, stage(t, i * 0.2, 0.3))); show(leg, stage(t, 0.35, 0.2)); show(bars, stage(t, 0.45, 0.15));
+      fills.forEach(([r, wv], i) => r.setAttribute('width', wv * stage(t, 0.55 + i * 0.08, 0.25)));
+    };
+  }, { dur: 1800 });
+
   window.PPFig = F;
 })();
