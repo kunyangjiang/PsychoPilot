@@ -70,7 +70,24 @@
   if (!lessonId && document.readyState === 'complete') finish();
   document.addEventListener('pp:lesson-ready', () => { ready = true; if (document.readyState === 'complete') finish(); else addEventListener('load', finish, { once: true }); });
   if (lessonId) setTimeout(() => { settled = true; }, 6000); // lessons without a manuscript never send the event
-  addEventListener('pageshow', (e) => { if (e.persisted) { try { if (sessionStorage.getItem(FLAG) === here) sessionStorage.removeItem(FLAG); } catch {} } });
+  // back from the page cache (phones use it far more than desktops): this script does not run again, and
+  // with scrollRestoration set to 'manual' some browsers (WebKit on iPhone) show the cached page at the top.
+  // Put the reader back where this page was when they left it, unless they have already started scrolling.
+  addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    try { if (sessionStorage.getItem(FLAG) === here) sessionStorage.removeItem(FLAG); } catch {}
+    const s = json(sessionStorage, KEY)[here];
+    if (s == null) return;
+    let moved = false;
+    const stop = () => { moved = true; };
+    ['wheel', 'touchstart', 'keydown'].forEach((t) => addEventListener(t, stop, { once: true, passive: true }));
+    const back = () => {
+      if (moved) return;
+      const y = typeof s === 'object' ? (s.m ? yOfMark(s.m) : s.y) : s;
+      if (Math.abs(scrollY - y) > 2) scrollTo({ top: Math.max(0, y), behavior: 'instant' });
+    };
+    back(); requestAnimationFrame(back); setTimeout(back, 120); setTimeout(back, 400);
+  });
 
   // a short note after jumping into the middle of a lesson, with a way back to the start
   function note() {
