@@ -5535,5 +5535,63 @@
     ['补实验（念出来，主试在场）', '60人', 0.21, -0.30, 0.72],
   ], { min: -0.8, max: 1.2, ticks: [-0.8, -0.4, 0, 0.4, 0.8, 1.2], band: 0.3, bandLabel: '±0.3' });
 
+  /* ===== Case 05 · 无限滚动: the fictional 下一条 feedback loop (story example; not real platform data) ===== */
+  F.c5loop = (fig) => figure(fig, (box, w) => {
+    const steps = [
+      ['系统', '预测：何川这周六可能去看妈妈，把握一般', 'r'],
+      ['系统', '在妈妈的平板上，把“川 回家 吃饭”排到第一个按钮', 'r'],
+      ['妈妈', '按下按钮，消息发到何川的手机上', 'b'],
+      ['何川', '周六去了青松，按下“说中了”', 'b'],
+      ['系统', '记作一次应验：这条路走得通，下次更早、更常这样推', 'r'],
+    ];
+    const xr = w - 10, pw = w - 30, labW = 54, tw = pw - labW - 14;
+    const s = svgIn(box, w, 10, fig);
+    let y = 4; const gs = [], spans = [];
+    steps.forEach(([who, t, c], i) => {
+      const g = el('g', {}, s), ll = wrapZh(t, tw, 13), h = Math.max(42, ll.length * 18 + 20);
+      el('rect', { x: 1, y, width: pw - 2, height: h, rx: 10, class: 'fx-pill ' + c }, g);
+      tx(g, 14, y + h / 2 + 5, who, c === 'r' ? 'fx-h fx-r' : 'fx-h', 'start');
+      lines(g, labW + 4, y + h / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+      if (i < steps.length - 1) arrow(g, pw / 2, y + h + 3, pw / 2, y + h + 21);
+      spans.push([y, y + h]); gs.push(g); y += h + 24;
+    });
+    const lg = el('g', {}, s), ly = (spans[4][0] + spans[4][1]) / 2, fy = (spans[0][0] + spans[0][1]) / 2;
+    el('line', { x1: pw, y1: ly, x2: xr, y2: ly, class: 'fx-ln fx-lr fx-dash' }, lg);
+    el('line', { x1: xr, y1: ly, x2: xr, y2: fy, class: 'fx-ln fx-lr fx-dash' }, lg);
+    arrow(lg, xr, fy, pw + 1, fy, 'r');
+    const h = y - 24 + 6;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => { gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.3))); show(lg, stage(t, 0.72, 0.28)); };
+  }, { dur: 1800 });
+
+  /* ===== Case 05: a forecast that helps make itself true (fictional probabilities) ===== */
+  F.c5ladder = (fig) => figure(fig, (box, w) => {
+    const rows = [
+      ['只预测，什么都不推', 35, 'b'],
+      ['推给妈妈：把“川 回家 吃饭”排在第一个按钮', 55, 'r'],
+      ['妈妈按下按钮，消息到了何川的手机上', 80, 'r'],
+      ['再推给何川：“今天给妈妈打个电话”', 90, 'r'],
+    ];
+    const s = svgIn(box, w, 10, fig), trackW = w - 50, bh = 14;
+    let y = 6; const gs = [], bars = [];
+    rows.forEach(([label, p, c]) => {
+      const g = el('g', {}, s), ll = wrapZh(label, w - 4, 13);
+      lines(g, 0, y + 14, ll, 'fx-s', 18);
+      const by = y + 14 + (ll.length - 1) * 18 + 10;
+      el('rect', { x: 0, y: by, width: trackW, height: bh, rx: 3, class: 'fx-band2' }, g);
+      const bar = el('rect', { x: 0, y: by, width: 0, height: bh, rx: 3, class: c === 'b' ? 'fx-bar b' : 'fx-bar' }, g);
+      tx(g, w, by + 12, p + '%', 'fx-n', 'end');
+      bars.push([bar, trackW * p / 100]); gs.push(g); y = by + bh + 16;
+    });
+    const fg = el('g', {}, s), fl = wrapZh('周六，何川去了。系统记下：预测准确。', w - 4, 14);
+    lines(fg, 0, y + 12, fl, 'fx-h fx-r', 20);
+    const h = y + 12 + (fl.length - 1) * 20 + 10;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => {
+      gs.forEach((g, i) => { const k = stage(t, i * 0.16, 0.3); show(g, Math.min(1, k * 2)); bars[i][0].setAttribute('width', bars[i][1] * k); });
+      show(fg, stage(t, 0.8, 0.2));
+    };
+  }, { dur: 1800 });
+
   window.PPFig = F;
 })();
