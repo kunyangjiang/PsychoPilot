@@ -5734,5 +5734,76 @@
     return (t) => { gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.3))); show(lg, stage(t, 0.6, 0.2)); show(eg, stage(t, 0.78, 0.22)); };
   }, { dur: 1800 });
 
+  /* ===== Case 08 · 测量心灵的人: documented timeline 1899–1916, with the novella's invented span marked apart ===== */
+  F.c8time = (fig) => figure(fig, (box, w) => {
+    const rows = [
+      ['1899', '儿童心理研究自由协会成立；比奈 1902 年起任主席', 'b'],
+      ['1904', '教育部成立委员会，讨论跟不上的孩子怎么办；比奈和布尔纳维尔都是委员', 'b'],
+      ['1905', '比奈和西蒙发表四篇文章：三十道题，主要用来区分智力障碍的程度；普通儿童的数据是初步的', 'b'],
+      ['1905', '格朗日奥贝尔街小学建立教育实验室', 'b'],
+      ['1907', '试验班开办（1907—1908 年）', 'b'],
+      ['1907—1910', '小说故事发生的时间（虚构）', 'm'],
+      ['1908', '按年龄排列的量表发表：三岁到十三岁，十一个年龄，三百多名儿童', 'b'],
+      ['1909', '4 月 15 日，允许各地申请在普通小学附设辅导班的法律颁布', 'b'],
+      ['1911', '比奈修订量表，同年去世', 'b'],
+      ['1912', '施特恩提出“智力商数”', 'b'],
+      ['1916', '英译本出版；美国斯坦福修订版出版', 'b'],
+    ];
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const yw = w >= 420 ? 86 : 74, pw = w - yw - 2;
+    let y = 2;
+    rows.forEach(([yr, t, c]) => {
+      const g = el('g', {}, s), ll = wrapZh(t, pw - 26, 13), h = ll.length * 18 + 18;
+      tx(g, 0, y + h / 2 + 5, yr, c === 'm' ? 'fx-s' : 'fx-h', 'start');
+      el('rect', { x: yw + 1, y, width: pw - 2, height: h, rx: 8, class: 'fx-pill ' + c }, g);
+      lines(g, yw + 13, y + h / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+      gs.push(g); y += h + 8;
+    });
+    const h = y;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.07, 0.3)));
+  }, { dur: 1600 });
+
+  /* ===== Case 08: from performance to decision (the child's result is fictional) ===== */
+  F.c8steps = (fig) => figure(fig, (box, w) => {
+    const steps = [
+      ['一　看到的表现（虚构）', ['1908 年 3 月，阿黛尔十岁五个月：钱币、重量题和同龄孩子一样好；看图说话、读一段话、说日期没做出来。按当时的规则，算作八岁的水平。']],
+      ['二　对表现的解释', ['能力落后', '没学过、没机会学', '那天紧张、太累']],
+      ['三　可能的决定', ['留在普通班', '进辅导班试读', '送去瓦莱基金会']],
+      ['四　落到孩子身上', ['每天走进哪个教室、能分到多少时间、别人怎么叫她']],
+    ];
+    const s = svgIn(box, w, 10, fig), gs = [], gap = 8, three = w >= 560;
+    let y = 0;
+    steps.forEach(([title, items], k) => {
+      const g = el('g', {}, s);
+      tx(g, 0, y + 15, title, 'fx-h', 'start'); y += 26;
+      if (items.length > 1 && three) {
+        const cw = (w - gap * 2) / 3, ls = items.map((t) => wrapZh(t, cw - 24, 13)), hh = Math.max(...ls.map((l) => l.length)) * 18 + 18;
+        ls.forEach((ll, i) => {
+          const x = i * (cw + gap);
+          el('rect', { x: x + 1, y, width: cw - 2, height: hh, rx: 8, class: 'fx-pill b' }, g);
+          lines(g, x + 12, y + hh / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+        });
+        y += hh;
+      } else {
+        items.forEach((t, i) => {
+          const ll = wrapZh(t, w - 28, 13), hh = ll.length * 18 + 18;
+          el('rect', { x: 1, y, width: w - 2, height: hh, rx: 8, class: 'fx-pill ' + (k === 0 ? 'm' : k === 3 ? 'r' : 'b') }, g);
+          lines(g, 14, y + hh / 2 - (ll.length - 1) * 9 + 4.5, ll, 'fx-s', 18);
+          y += hh + (i < items.length - 1 ? gap : 0);
+        });
+      }
+      if (k < steps.length - 1) {
+        arrow(g, 18, y + 4, 18, y + 34);
+        tx(g, 32, y + 24, '这一步需要新的证据和判断', 'fx-s fx-r', 'start');
+        y += 40;
+      }
+      gs.push(g);
+    });
+    const h = y + 2;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.3)));
+  }, { dur: 1600 });
+
   window.PPFig = F;
 })();
