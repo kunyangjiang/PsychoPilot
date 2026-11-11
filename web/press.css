@@ -21,6 +21,7 @@
 
   --head: "Jost", "Futura", "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
   --body: "Source Han Sans SC", "Noto Sans SC", "PingFang SC", "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+  --write: "LXGW WenKai", "LXGW WenKai Screen", "Kaiti SC", "STKaiti", "KaiTi", "楷体", "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif;
   --mono: "IBM Plex Mono", "Cascadia Mono", Consolas, ui-monospace, monospace;
 
   --gutter: clamp(18px, 4.5vw, 72px);
@@ -256,6 +257,14 @@ a.case-row .case-s { color: var(--red); }
 .l-points { margin: 1em 0 0; padding-left: 1.4em; }
 .l-points li { margin-top: .5em; padding-left: .2em; }
 .l-points li::marker { font: 600 .9em var(--mono); color: var(--red); }
+/* written text inside a story (letters, messages, notes on paper): upright 楷体 in blue ink, never fake italics */
+.l-text .l-letter { margin-top: 1.3em; padding: .15em 0 .15em 1.1em; border-left: 2px solid rgba(34, 48, 90, .3); font-family: var(--write); font-size: 1.06em; line-height: 1.85; color: var(--blue); }
+.l-text .l-letter > p { margin-top: .55em; }
+.l-text .l-letter > p:first-child { margin-top: 0; }
+.l-text .l-letter .l-sign { text-align: right; }
+.l-text .l-letter + p { margin-top: 1.3em; }
+.l-text .l-w { font-family: var(--write); font-style: normal; font-size: 1.06em; color: var(--blue); }
+.l-text .l-x { display: inline-block; width: 5.5em; height: .5em; margin: 0 .25em; vertical-align: middle; background: currentColor; border-radius: 2px; opacity: .75; }
 .l-aside { margin-top: 1.2em !important; padding-left: 16px; border-left: 3px solid var(--red); color: var(--text-2); font-size: 15px; }
 .l-table { margin-top: 1.4em; overflow-x: auto; }
 .l-table table { width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.6; }
