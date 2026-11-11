@@ -5415,5 +5415,73 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.075, 0.25)));
   }, { dur: 1800 });
 
+  /* ===== Case 03 · 完美公司的秘密: the quick reckoning people make before speaking up (fictional scenes) ===== */
+  F.c3silence = (fig) => figure(fig, (box, w) => {
+    // [the question people ask themselves, the scene in the story, the name research gives it]
+    const rows = [
+      ['说了，会不会被认出来？', '邵宁删掉了“跟压测那次一样”：那次压测，只有她一个人做过。', '怕承担后果'],
+      ['说了，有没有用？', '祁衡：“说出来除了让大家紧张，有什么用？”老钟的周报写了十一周，没人回。', '觉得说了没用'],
+      ['没有方案，能不能说？', '贺峥把压测报告写成“已知风险，可控”。程总说过：要带着方案来。', '“什么话不能说”的内隐规则'],
+      ['别人都没说，是不是只有我这么想？', '电梯里：“那你刚才怎么不说？”“你不也没说。”', '多数无知'],
+    ];
+    const x0 = 24, textW = w - x0 - 16, s = svgIn(box, w, 10, fig);
+    const spine = el('line', { x1: 8, x2: 8, class: 'fx-hair' }, s);
+    let y = 4, first = 0;
+    const gs = rows.map(([q, scene, tag], i) => {
+      const g = el('g', {}, s);
+      tx(g, x0, y + 14, tag, 'fx-s fx-r');
+      const ql = wrapZh(q, textW, 15);
+      lines(g, x0, y + 38, ql, 'fx-h', 21);
+      const cy = y + 33; if (!i) first = cy;
+      el('circle', { cx: 8, cy, r: 5.5, class: 'fx-node b' }, g);
+      let ny = y + 38 + (ql.length - 1) * 21 + 23;
+      const sl = wrapZh(scene, textW, 12.5);
+      lines(g, x0, ny, sl, 'fx-s', 17);
+      y = ny + (sl.length - 1) * 17 + 30;
+      return g;
+    });
+    const end = el('g', {}, s), ey = y + 10;
+    el('circle', { cx: 8, cy: ey, r: 7, class: 'fx-node r' }, end);
+    tx(end, x0, ey + 6, '先别说', 'fx-h');
+    const el2 = wrapZh('这笔账算得很快，快到算的人自己都没注意。只要有一个答案是“不”，结论往往就是这三个字。', textW, 12.5);
+    lines(end, x0, ey + 32, el2, 'fx-s', 17);
+    y = ey + 32 + (el2.length - 1) * 17 + 10;
+    spine.setAttribute('y1', first); spine.setAttribute('y2', ey);
+    s.setAttribute('viewBox', `0 0 ${w} ${y}`); s.setAttribute('height', y);
+    gs.push(end);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.35)));
+  }, { dur: 1600 });
+
+  /* ===== Case 03 · 完美公司的秘密: who knew what before the 27 May review, and what was said (fictional) ===== */
+  F.c3meeting = (fig) => figure(fig, (box, w) => {
+    const narrow = w < 520, depts = ['测试', '客服', '实施', '销售', '产品'], colW = narrow ? 30 : 52, saidW = narrow ? 46 : 64;
+    const textW = w - depts.length * colW - saidW - 10;
+    // which departments knew it ('*' = everyone), and whether it was raised in the meeting
+    const rows = [
+      ['上线日期定在六月初', '*', true], ['程远希望六一八之前上线', '*', true], ['新版本的界面更好用', '*', true],
+      ['压力测试约六成峰值时开始超时', '测试', false], ['三月以来客户多次投诉高峰时段卡顿', '客服', false],
+      ['客户临时接入两个新分仓，负载增加约三成', '实施', false], ['新合同：高峰期可用性不达标，按小时扣款', '销售', false],
+    ];
+    const split = 3, gap = 14, headH = 44;
+    const wrapped = rows.map(([t]) => wrapZh(t, textW, 12.5));
+    const rowHs = wrapped.map((l) => Math.max(30, l.length * 17 + 13));
+    const tops = []; let y = headH + 8;
+    rowHs.forEach((hh, i) => { if (i === split) y += gap; tops.push(y); y += hh; });
+    const h = y + 6, s = svgIn(box, w, h, fig);
+    const cx = (k) => textW + 10 + colW * k + colW / 2, sx = w - saidW / 2;
+    depts.forEach((d, k) => tx(s, cx(k), 34, d, 'fx-s', 'middle'));
+    lines(s, sx, 17, ['会上', '提到'], 'fx-s fx-r', 17, 'middle');
+    el('line', { x1: w - saidW, y1: 4, x2: w - saidW, y2: h - 4, class: 'fx-hair' }, s);
+    el('line', { x1: 0, y1: tops[split] - gap / 2, x2: w, y2: tops[split] - gap / 2, class: 'fx-hair fx-dash' }, s);
+    const gs = rows.map(([, who, said], i) => {
+      const g = el('g', {}, s), mid = tops[i] + rowHs[i] / 2, n = wrapped[i].length;
+      lines(g, 0, mid - (n - 1) * 8.5 + 4.5, wrapped[i], 'fx-s', 17);
+      depts.forEach((d, k) => { if (who === '*' || who === d) el('circle', { cx: cx(k), cy: mid, r: 5.5, class: 'fx-node b' }, g); else el('circle', { cx: cx(k), cy: mid, r: 2, class: 'fx-node m' }, g); });
+      el('circle', { cx: sx, cy: mid, r: 6.5, class: said ? 'fx-node r' : 'fx-node m' }, g);
+      return g;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.1, 0.3)));
+  }, { dur: 1600 });
+
   window.PPFig = F;
 })();
