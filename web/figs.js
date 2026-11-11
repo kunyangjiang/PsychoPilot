@@ -5374,5 +5374,46 @@
     };
   }, { dur: 1600 });
 
+  /* ===== Case 02 · 夜班: the night's clues and which explanation each one fits (fictional story data) ===== */
+  F.c2night = (fig) => figure(fig, (box, w) => {
+    const narrow = w < 520, colW = narrow ? 54 : 118, timeW = narrow ? 42 : 52, textW = w - 2 * colW - timeW - 6;
+    // f = fits, p = fits only weakly, o = does not explain it
+    const rows = [
+      ['20:20', '唱戏，睡得很少', 'ff'], ['20:20', '被害的话，看见去世的母亲', 'ff'], ['20:50', '以往复发也从唱戏开始', 'fo'],
+      ['22:40', '喝水时手粗大地抖', 'of'], ['23:20', '注意力抓不住，一小时内时好时坏', 'pf'], ['23:30', '走路不稳，指鼻时摇晃', 'of'],
+      ['23:45', '新加利尿药和止痛药，腹泻三天', 'of'], ['00:20', '肌酐升到上个月的三倍', 'of'], ['03:05', '血锂 3.1 mmol/L', 'of'],
+      ['04:20', '意识水平下降，肌阵挛', 'of'],
+    ];
+    const legend = [['f', '相符'], ['p', '只能勉强说明'], ['o', '说明不了']];
+    const per = narrow ? 2 : 3, legW = (w - 4) / per, legLines = Math.ceil(legend.length / per);
+    const heads = [['躁狂', '复发'], ['锂中毒', '所致谵妄']];
+    const y0 = legLines * 22 + 14 + 2 * 17 + 10, gap = 14, split = 3;
+    const wrapped = rows.map(([, t]) => wrapZh(t, textW, 12.5));
+    const rowHs = wrapped.map((l) => Math.max(30, l.length * 17 + 13));
+    const tops = []; let y = y0;
+    rowHs.forEach((hh, i) => { if (i === split) y += gap; tops.push(y); y += hh; });
+    const h = y + 8, s = svgIn(box, w, h, fig);
+    const cx = (k) => w - colW * (1.5 - k);
+    const mark = (p, kind, x, yy, r = 6.5) => {
+      if (kind === 'o') return el('circle', { cx: x, cy: yy, r, class: 'fx-node m' }, p);
+      if (kind === 'p') { const g = el('g', {}, p); el('circle', { cx: x, cy: yy, r, class: 'fx-node m' }, g); el('circle', { cx: x, cy: yy, r: r * 0.45, class: 'fx-node' }, g); return g; }
+      return el('circle', { cx: x, cy: yy, r, class: 'fx-node' }, p);
+    };
+    legend.forEach(([k, label], i) => {
+      const x = (i % per) * legW, yy = 12 + Math.floor(i / per) * 22;
+      mark(s, k, x + 8, yy - 4, 5.5); tx(s, x + 20, yy, label, 'fx-s');
+    });
+    heads.forEach((hd, k) => lines(s, cx(k), legLines * 22 + 16, hd, k ? 'fx-s fx-r' : 'fx-s fx-b', 17, 'middle'));
+    el('line', { x1: 0, y1: tops[split] - gap / 2, x2: w, y2: tops[split] - gap / 2, class: 'fx-hair fx-dash' }, s);
+    const gs = rows.map(([tm, , fit], i) => {
+      const g = el('g', {}, s), mid = tops[i] + rowHs[i] / 2, n = wrapped[i].length;
+      tx(g, 0, mid + 4.5, tm, 'fx-n');
+      lines(g, timeW, mid - (n - 1) * 8.5 + 4.5, wrapped[i], 'fx-s', 17);
+      [...fit].forEach((kind, k) => { const m = mark(g, kind, cx(k), mid); if (kind === 'f') m.setAttribute('class', 'fx-node ' + (k ? 'r' : 'b')); if (kind === 'p') m.lastChild.setAttribute('class', 'fx-node ' + (k ? 'r' : 'b')); });
+      return g;
+    });
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.075, 0.25)));
+  }, { dur: 1800 });
+
   window.PPFig = F;
 })();
