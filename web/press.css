@@ -17,6 +17,7 @@
   --paper-2: #e8dfcf;
   --blue: #22305a;      /* ink 1 */
   --red: #e2533a;       /* ink 2 */
+  --pen: #2c4fa3;       /* fountain-pen blue for written text in the cases */
   --text: #1d2440;
   --text-2: #4c516a;
   --text-3: #8a8a94;
@@ -262,13 +263,14 @@ a.case-row .case-s { color: var(--red); }
 .l-points { margin: 1em 0 0; padding-left: 1.4em; }
 .l-points li { margin-top: .5em; padding-left: .2em; }
 .l-points li::marker { font: 600 .9em var(--mono); color: var(--red); }
-/* written text inside a story (letters, messages, notes on paper): upright 楷体 in blue ink, never fake italics */
-.l-text .l-letter { margin-top: 1.3em; padding: .15em 0 .15em 1.1em; border-left: 2px solid rgba(34, 48, 90, .3); font-family: var(--write); font-size: 1.06em; line-height: 1.85; color: var(--blue); }
+/* written text inside a story (letters, messages, notes on paper): upright 楷体 in fountain-pen blue, never fake italics.
+   The pen blue must stay clearly apart from --text; the faint stroke keeps the thin 楷体 strokes legible. */
+.l-text .l-letter { margin-top: 1.3em; padding: .6em 1em; border-left: 3px solid var(--pen); border-radius: 0 4px 4px 0; background: var(--paper-2); font-family: var(--write); font-size: 1.1em; line-height: 1.85; color: var(--pen); -webkit-text-stroke: .3px currentColor; }
 .l-text .l-letter > p { margin-top: .55em; }
 .l-text .l-letter > p:first-child { margin-top: 0; }
 .l-text .l-letter .l-sign { text-align: right; }
 .l-text .l-letter + p { margin-top: 1.3em; }
-.l-text .l-w { font-family: var(--write); font-style: normal; font-size: 1.06em; color: var(--blue); }
+.l-text .l-w { font-family: var(--write); font-style: normal; font-size: 1.1em; color: var(--pen); -webkit-text-stroke: .3px currentColor; }
 .l-text .l-x { display: inline-block; width: 5.5em; height: .5em; margin: 0 .25em; vertical-align: middle; background: currentColor; border-radius: 2px; opacity: .75; }
 .l-aside { margin-top: 1.2em !important; padding-left: 16px; border-left: 3px solid var(--red); color: var(--text-2); font-size: 15px; }
 .l-table { margin-top: 1.4em; overflow-x: auto; }
