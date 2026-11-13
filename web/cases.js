@@ -1,4 +1,4 @@
-/* PsychoPilot — Cases (catalog v0.3, sealed). Eight original novellas set in psychology work,
+/* PsychoPilot — Cases (catalog v0.4, sealed: 23 planned, listed here only once written). Original novellas built on psychology,
    each followed by Case Notes (fiction vs. documented, the research behind each turn, questions,
    references). Manuscripts live in cases/<id>.html and are read by lesson.js through case.html?id=<id>. */
 window.PPCases = (() => {
@@ -12,8 +12,9 @@ window.PPCases = (() => {
     { id: 'c6', title: '第三考场', genre: '学校心理学', sub: '一模随机排座，她被分进旧楼的第三考场；那一年，一沓卡片、一间旧实验室和一通凌晨两点的电话，让她重新回答自己是谁' },
     { id: 'c7', title: '情书算法', genre: '婚恋应用研究', sub: '六封信让两个陌生人以为看见了彼此；见面以后，他们才开始学怎样读懂一段沉默' },
     { id: 'c8', title: '测量心灵的人', genre: '实验心理学史', sub: '巴黎，1908 年：一个读不好书的洗衣妇女儿，两张测验表，和一群想替她做决定的大人' },
+    { id: 'c9', title: '全镇最烂的话剧团', genre: '社会心理学', sub: '连续九年垫底的业余剧社排《麦克白》：贡献表加起来 240%，每个人都在悄悄补救别人的错' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;

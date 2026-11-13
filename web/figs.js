@@ -5805,5 +5805,39 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.3)));
   }, { dur: 1600 });
 
+  /* ===== Case 09 · the contribution chart: self-reported shares add up to 240% (invented comic illustration) ===== */
+  F.c9chart = (fig) => figure(fig, (box, w) => {
+    const rows = [['玛格丽特', 45], ['普丽娅', 40], ['艾米', 40], ['杰弗里', 35], ['丹尼斯', 30], ['贝芙', 20], ['莱斯', 15], ['三姐妹（合写）', 10], ['基兰', 5]];
+    const total = rows.reduce((a, r) => a + r[1], 0);
+    const L = w < 420 ? 96 : 120, R = 44, rh = 24, top = 8;
+    const X = (p) => L + (p / total) * (w - L - R);
+    const s = svgIn(box, w, 10, fig), gs = [];
+    rows.forEach(([name, v], i) => {
+      const g = el('g', {}, s), y = top + i * rh;
+      tx(g, L - 10, y + 15, name, 'fx-s', 'end');
+      el('rect', { x: L, y: y + 4, width: X(v) - L, height: 14, rx: 3, class: 'fx-pill b' }, g);
+      tx(g, X(v) + 6, y + 15, v + '%', 'fx-n', 'start');
+      gs.push(g);
+    });
+    let y = top + rows.length * rh + 34;
+    const sum = el('g', {}, s);
+    tx(sum, L - 10, y + 17, '加在一起', 'fx-s fx-strong', 'end');
+    let acc = 0;
+    rows.forEach(([, v], i) => {
+      el('rect', { x: X(acc), y, width: X(acc + v) - X(acc), height: 22, class: i % 2 ? 'fx-pill b' : 'fx-pill r' }, sum);
+      acc += v;
+    });
+    gs.push(sum);
+    const lim = el('g', {}, s);
+    el('line', { x1: X(100), x2: X(100), y1: top - 4, y2: y + 34, class: 'fx-ln fx-dash' }, lim);
+    const note = wrapZh('100%：所有人的份额加起来，最多只能有这么多', Math.max(120, w - X(100) - 12), 12.5);
+    lines(lim, X(100) + 6, y + 50, note, 'fx-s', 17);
+    tx(lim, X(total), y - 7, '合计 ' + total + '%', 'fx-num fx-r', 'end');
+    gs.push(lim);
+    const h = y + 50 + note.length * 17;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.06, 0.25)));
+  }, { dur: 1800 });
+
   window.PPFig = F;
 })();
