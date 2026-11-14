@@ -15,8 +15,9 @@ window.PPCases = (() => {
     { id: 'c9', title: '全镇最烂的话剧团', genre: '社会心理学', sub: '连续九年垫底的业余剧社排《麦克白》：贡献表加起来 240%，每个人都在悄悄补救别人的错' },
     { id: 'c10', title: '第七夜的客人', genre: '睡眠与意识', sub: '远野山村的老民宿，每间客房都压着一张卡片：夜里有人叫你的名字，不要应' },
     { id: 'c11', title: '泥地', genre: '运动与团队心理学', sub: '灯被剪了，球队在车灯底下训练；半决赛那天，他们的十号在内地参加职业选拔' },
+    { id: 'c12', title: '愿望只能买半个', genre: '情绪与社会心理学', sub: '国王许愿要全城的人都爱他，从此只剩一个学徒能对他说“不”' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;

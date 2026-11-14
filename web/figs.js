@@ -6013,5 +6013,46 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.35)));
   }, { dur: 1600 });
 
+  // Case 12: what the love wish removed (the outward "no" toward the king) and where the feeling went instead
+  F.c12route = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '卖炭的老周', say: '说出口：“太英明了。”', inn: '心里：炭税从一个涨到三个，下个月要卖车', out: '去了别处：一脚踢飞空鱼筐' },
+      { n: '穿红袄的小姑娘', say: '说出口：“爱。”国王看成了害羞', inn: '心里：害怕', out: '去了别处：躲在娘的裙子后面' },
+      { n: '甘丞相', say: '说出口：“陛下圣明。”', inn: '心里：不该出城迎战', out: '去了别处：一张只写数字的纸' },
+      { n: '盐坊的女人', say: '说出口：笑着说“国王真好”', inn: '心里：儿子才十六岁', out: '去了别处：撞翻了烤鱼的炉子' },
+    ];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const key = el('g', {}, s), kl = wrapZh('红色虚线：愿拿走的那一层，即对国王表示不同意的能力', w - 34, 12.5);
+    el('line', { x1: 0, x2: 24, y1: 10, y2: 10, class: 'fx-ln fx-lr fx-dash' }, key);
+    lines(key, 32, 14, kl, 'fx-s', LH);
+    gs.push(key);
+    const cells = P.map((p) => ({ p, say: wrapZh(p.say, cw - 20, 12.5), inn: wrapZh(p.inn, cw - 20, 12.5), out: wrapZh(p.out, cw - 4, 12.5) }));
+    const hOf = (c) => 22 + c.say.length * LH + 12 + 34 + c.inn.length * LH + 12 + 26 + c.out.length * LH;
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    let y = 14 + kl.length * LH + 14;
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = y + rowH.slice(0, r).reduce((a, b) => a + b + 26, 0);
+      const g = el('g', {}, s);
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      const sTop = oy + 22, sh = c.say.length * LH + 12;
+      el('rect', { x: ox + 0.75, y: sTop, width: cw - 1.5, height: sh, rx: 8, class: 'fx-pill b' }, g);
+      lines(g, ox + 10, sTop + 19, c.say, 'fx-s', LH);
+      const band = sTop + sh + 16;
+      el('line', { x1: ox, x2: ox + cw, y1: band, y2: band, class: 'fx-ln fx-lr fx-dash' }, g);
+      const iTop = band + 18, ih = c.inn.length * LH + 12;
+      el('rect', { x: ox + 0.75, y: iTop, width: cw - 1.5, height: ih, rx: 3, class: 'fx-box' }, g);
+      lines(g, ox + 10, iTop + 19, c.inn, 'fx-s fx-strong', LH);
+      arrow(g, ox + cw / 2, iTop, ox + cw / 2, band + 3, 'r', 6);
+      arrow(g, ox + 14, iTop + ih, ox + 14, iTop + ih + 16, '', 6);
+      lines(g, ox, iTop + ih + 30, c.out, 'fx-s', LH);
+      gs.push(g);
+    });
+    const h = y + rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 26 + 6;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1600 });
+
   window.PPFig = F;
 })();

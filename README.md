@@ -16,7 +16,7 @@ A plain static site in `web/`: HTML, CSS and vanilla JavaScript (canvas drawings
 
 ## Cases v0.4 Roadmap
 
-Original psychology novellas, each followed by Case Notes, read through `web/case.html?id=cN`. A case is added to `web/cases.js` only when its page is written and approved.
+Twenty-one original psychology novellas, each followed by Case Notes, read through `web/case.html?id=cN`. A case is added to `web/cases.js` only when its page is written and approved.
 
 | Case | Title | Primary genre | Status |
 |---|---|---|---|
@@ -31,25 +31,23 @@ Original psychology novellas, each followed by Case Notes, read through `web/cas
 | 09 | 全镇最烂的话剧团 | British ensemble farce | Published |
 | 10 | 第七夜的客人 | Japanese supernatural horror | Published |
 | 11 | 泥地 | Brazilian sports drama and comedy | Published |
-| 12 | 愿望只能买半个 | Dark comic fantasy adventure | Planned |
+| 12 | 愿望只能买半个 | Dark comic fantasy adventure | In review |
 | 13 | 城里没有妖怪 | Historical Chinese folk horror | Planned |
 | 14 | 表情说明书 | Alien science-fiction comedy | Planned |
 | 15 | 她回来的三天 | Mexican magical realism | Planned |
-| 16 | 一杆秤 | Chinese social realism | Planned |
-| 17 | 最后一道菜不能上 | French culinary family comedy | Planned |
-| 18 | 海底没有星星 | Cosmic horror | Planned |
-| 19 | 皇帝决定当普通人 | Ancient Chinese political satire | Planned |
-| 20 | 笑声传过山谷 | Historical African social drama | Planned |
-| 21 | 人民公园的星期六 | Late-life romantic comedy | Planned |
-| 22 | 第二只手 | Italian psychological body horror | Planned |
-| 23 | 雪线以上还有一个人 | Karakoram survival adventure | Planned |
+| 16 | 海底没有星星 | Cosmic horror | Planned |
+| 17 | 皇帝决定当普通人 | Ancient Chinese political satire | Planned |
+| 18 | 笑声传过山谷 | Historical African social drama | Planned |
+| 19 | 人民公园的星期六 | Late-life romantic comedy | Planned |
+| 20 | 第二只手 | Italian psychological body horror | Planned |
+| 21 | 雪线以上还有一个人 | Karakoram survival adventure | Planned |
 
 Special editorial refinements:
 
 - **Case 09:** a sustained comedy mechanism, and real consequences for the characters after the performance.
 - **Case 12:** magic can only take away, never give.
 - **Case 14:** facial expressions are interpreted from context, not read by any special emotion-recognition ability.
-- **Case 20:** local cultural explanations are respected, but kept distinct from medical evidence.
+- **Case 18:** local cultural explanations are respected, but kept distinct from medical evidence.
 
 ## Run locally
 
