@@ -250,6 +250,9 @@ a.case-row .case-s { color: var(--red); }
 .l-toc a { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 6px; padding: 8px 0; color: var(--text-2); line-height: 1.5; }
 .l-toc a b { font: 600 12px/1.9 var(--mono); color: var(--text-3); }
 .l-toc a:hover { color: var(--red); }
+.l-toc a[aria-current] { color: var(--text); }
+.l-toc a[aria-current] b { color: var(--red); }
+.l-toc-s { display: none; }
 .l-text { max-width: 40em; font-size: 17px; line-height: 1.9; }
 .l-text > p, .l-text section > p { margin-top: 1em; }
 .l-text .l-open { margin-top: 0; font: 700 clamp(1.25rem, 2vw, 1.5rem)/1.6 var(--head); }
@@ -354,7 +357,19 @@ a.case-row .case-s { color: var(--red); }
   .stack { height: 340px; }
   .stamp { justify-self: start; width: 120px; font-size: 1rem; }
   .l-body { grid-template-columns: 1fr; padding-top: 28px; }
-  .l-toc { display: none; }
+  /* the contents list folds into a sticky bar (lesson.js tocMenu) */
+  .l-toc { position: sticky; top: 0; z-index: 40; margin-top: -12px; background: var(--paper); border-bottom: 2px solid var(--text); font-size: 15px; }
+  .l-toc-d > .lab { display: none; }
+  .l-toc-s { display: flex; align-items: center; gap: 12px; min-height: 48px; cursor: pointer; list-style: none; -webkit-tap-highlight-color: transparent; }
+  .l-toc-s::-webkit-details-marker { display: none; }
+  .l-toc-s .lab { flex: none; }
+  .l-toc-cur { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 600; color: var(--text); }
+  .l-toc-s::after { content: ""; flex: none; width: 9px; height: 9px; margin: 0 4px 4px 0; border: solid var(--text); border-width: 0 2px 2px 0; transform: rotate(45deg); transition: transform .25s var(--ease); }
+  .l-toc-d[open] > .l-toc-s::after { transform: translateY(4px) rotate(-135deg); }
+  .l-toc-s:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+  .l-toc ol { margin: 0; max-height: min(60vh, 440px); overflow-y: auto; overscroll-behavior: contain; border-top: 1px solid var(--rule); padding-bottom: 6px; }
+  .l-toc a { padding: 11px 0; }
+  .l-text section, .l-refs li { scroll-margin-top: 72px; }
 }
 @media (max-width: 600px) {
   .l-text { font-size: 16px; line-height: 1.85; }

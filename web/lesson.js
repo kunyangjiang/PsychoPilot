@@ -39,7 +39,9 @@
       if (numbered) { n += 1; h.insertAdjacentHTML('afterbegin', `<span class="num" aria-hidden="true">${n}</span>`); }
       items.push(`<li><a href="#${sec.id}">${numbered ? `<b>${n}</b>` : '<b>·</b>'}${h.textContent.replace(/^\d+/, '')}</a></li>`);
     });
-    toc.innerHTML = `<p class="lab">Contents</p><ol>${items.join('')}</ol>`;
+    // a <details> so that on narrow screens the list folds into a sticky bar (tocMenu below);
+    // on wide screens it stays open and the bar's summary line is hidden
+    toc.innerHTML = `<details class="l-toc-d" open><summary class="l-toc-s"><span class="lab">Contents</span><span class="l-toc-cur"></span></summary><p class="lab">Contents</p><ol>${items.join('')}</ol></details>`;
 
     // [n] → citation link (outside the reference list)
     body.querySelectorAll(':scope > p, section:not(.l-refs) p, section:not(.l-refs) td, section:not(.l-refs) li').forEach((el) => {
@@ -50,6 +52,7 @@
     wrap.className = 'l-body';
     wrap.append(toc, body);
     $('#lesson').replaceWith(wrap);
+    tocMenu(toc, body);
     document.querySelectorAll('.stamp, .l-note').forEach((el) => el.remove());
 
     const demo = $('[data-demo="obvious"]', body);
@@ -69,6 +72,44 @@
     const note = $('.l-note');
     if (note) note.insertAdjacentHTML('beforeend', '<p>正文暂时没有加载成功，请刷新页面再试。</p>');
   });
+
+  /* Contents menu. Wide screens: the list sits open beside the text. Narrow screens (≤900px): it folds
+     into a sticky bar that names the section being read; tapping it opens the list, and choosing a
+     section, pressing Esc or tapping elsewhere folds it again. */
+  function tocMenu(nav, text) {
+    const d = $('details', nav), cur = $('.l-toc-cur', nav), sum = $('summary', nav);
+    const links = [...nav.querySelectorAll('ol a')];
+    const secs = links.map((a) => document.getElementById(a.hash.slice(1)));
+    const narrow = matchMedia('(max-width: 900px)');
+    const fit = () => { d.open = !narrow.matches; };
+    fit();
+    narrow.addEventListener('change', fit);
+    sum.addEventListener('click', (e) => { if (!narrow.matches) e.preventDefault(); });
+    links.forEach((a) => a.addEventListener('click', () => { if (narrow.matches) d.open = false; }));
+    nav.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && narrow.matches && d.open) { d.open = false; sum.focus(); }
+    });
+    document.addEventListener('click', (e) => {
+      if (narrow.matches && d.open && !nav.contains(e.target)) d.open = false;
+    });
+    // the section being read: the last one whose heading has passed the top fifth of the screen
+    let on = -2, queued = false; // -2: nothing marked yet, so the first pass always writes the label
+    const mark = () => {
+      queued = false;
+      const line = innerHeight * 0.2 + (narrow.matches ? nav.offsetHeight : 0);
+      let i = -1;
+      secs.forEach((s, k) => { if (s && s.getBoundingClientRect().top <= line) i = k; });
+      if (i === on) return;
+      if (on >= 0) links[on].removeAttribute('aria-current');
+      on = i;
+      if (i >= 0) links[i].setAttribute('aria-current', 'location');
+      cur.textContent = i >= 0 ? links[i].textContent.replace(/^[\d·]+/, (m) => m + ' ') : '本讲目录';
+    };
+    const ask = () => { if (!queued) { queued = true; requestAnimationFrame(mark); } };
+    addEventListener('scroll', ask, { passive: true });
+    addEventListener('resize', ask);
+    mark();
+  }
 
   /* ---------------------------------------------------------------------
      Demonstration: "这还用研究？" Half the statements are reversed on purpose.
