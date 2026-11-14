@@ -6110,5 +6110,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.05, 0.3)));
   }, { dur: 1400 });
 
+  F.c14layers = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '金成浩，在球场', r: ['高兴到了极点', '张嘴，拧眉，拳头往上举', '为全垒打欢呼', '说明书只看脸：怒'] },
+      { n: '朴善姬，在会议室', r: ['着急，下了决心', '皱眉、眯眼、直视，落在要强调的词上', '“我要做翻译”', '瑞妍凭习惯：她担心丈夫'] },
+      { n: '专班的官员', r: ['紧张，疲惫', '打分80%以上的笑', '礼貌地拒绝', '密珠：心里欢迎，嘴上说不'] },
+      { n: '海湾里的大瓶子', r: ['没有人知道', '变红，冒一串碎泡', '按老约号报警', '李队长起初：要动手'] },
+    ];
+    const K = ['心里', '露出来的', '想让对方知道的', '被读成'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p) => ({ p, r: p.r.map((t) => wrapZh(t, cw - 20, 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s);
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10, last = j === K.length - 1;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: last ? 8 : 3, class: last ? 'fx-pill b' : 'fx-box' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, last ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();
