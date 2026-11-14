@@ -16,8 +16,9 @@ window.PPCases = (() => {
     { id: 'c10', title: '第七夜的客人', genre: '睡眠与意识', sub: '远野山村的老民宿，每间客房都压着一张卡片：夜里有人叫你的名字，不要应' },
     { id: 'c11', title: '泥地', genre: '运动与团队心理学', sub: '灯被剪了，球队在车灯底下训练；半决赛那天，他们的十号在内地参加职业选拔' },
     { id: 'c12', title: '愿望只能买半个', genre: '情绪与社会心理学', sub: '国王许愿要全城的人都爱他，从此只剩一个学徒能对他说“不”' },
+    { id: 'c13', title: '城里没有妖怪', genre: '传言与群体心理', sub: '京城闹黑眚的消息传到县城，十二岁的打更孩子说了一句话，怀疑落在了收生婆身上' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;

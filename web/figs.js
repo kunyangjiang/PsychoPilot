@@ -6054,5 +6054,61 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1600 });
 
+  F.c13time = (fig) => figure(fig, (box, w) => {
+    const R = [
+      [1, '七月庚戌（初九）', '京师黑眚见，奉天门侍卫喧哗'],
+      [0, '七月十五', '中元，满城露宿'],
+      [0, '七月十六', '田大从京里回来'],
+      [0, '七月二十一', '春桃夜里受伤'],
+      [0, '七月二十三', '知县贴出告示'],
+      [1, '七月乙丑（二十四）', '宪宗在宫中祷告天地，四事自责'],
+      [0, '八月初一', '小满看见墙头上的东西'],
+      [0, '八月初三', '开始夜搜'],
+      [0, '八月初七', '秦二娘上堂'],
+      [0, '八月十一', '揭帖被当众烧掉'],
+      [0, '八月十三', '风雨夜'],
+      [0, '八月十五', '中秋'],
+      [1, '同年，月份未查明', '李子龙案'],
+      [1, '成化十三年正月', '设西厂'],
+    ];
+    const two = w >= 560, LH = 17, gap = 10;
+    const ax = two ? w / 2 : 7, bw = two ? w / 2 - 24 : w - 22;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const key = el('g', {}, s);
+    if (two) {
+      tx(key, ax - 16, 14, '京城 · 史料记载', 'fx-s fx-strong', 'end');
+      tx(key, ax + 16, 14, '淶陰县 · 小说虚构', 'fx-s fx-strong');
+    } else {
+      el('rect', { x: 0.75, y: 2, width: 22, height: 14, rx: 7, class: 'fx-pill b' }, key);
+      tx(key, 30, 14, '史料记载（京城）', 'fx-s');
+      el('rect', { x: 0.75, y: 24, width: 22, height: 14, rx: 2, class: 'fx-box' }, key);
+      tx(key, 30, 36, '小说虚构（淶陰县）', 'fx-s');
+    }
+    gs.push(key);
+    let y = two ? 34 : 56;
+    const top = y;
+    const rows = R.map(([doc, d, t]) => {
+      const tl = wrapZh(t, bw - 20, 12.5), h = 10 + LH + tl.length * LH + 6;
+      const bx = two ? (doc ? ax - 16 - bw : ax + 16) : ax + 15;
+      const r = { doc, d, tl, h, bx, y };
+      y += h + gap;
+      return r;
+    });
+    el('line', { x1: ax, x2: ax, y1: top - 6, y2: y - gap + 4, class: 'fx-ln' }, s);
+    rows.forEach((r) => {
+      const g = el('g', {}, s);
+      el('rect', { x: r.bx + 0.75, y: r.y, width: bw - 1.5, height: r.h, rx: r.doc ? 10 : 3, class: r.doc ? 'fx-pill b' : 'fx-box' }, g);
+      tx(g, r.bx + 10, r.y + 10 + 12, r.d, 'fx-s fx-strong');
+      lines(g, r.bx + 10, r.y + 10 + 12 + LH, r.tl, 'fx-s', LH);
+      const my = r.y + r.h / 2, ex = two ? (r.doc ? r.bx + bw : r.bx) : r.bx;
+      el('line', { x1: ax, x2: ex, y1: my, y2: my, class: r.doc ? 'fx-ln' : 'fx-ln fx-dash' }, g);
+      el('circle', { cx: ax, cy: my, r: 3.5, class: r.doc ? 'fx-pill b' : 'fx-box' }, g);
+      gs.push(g);
+    });
+    const h = y - gap + 8;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.05, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();
