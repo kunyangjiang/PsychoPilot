@@ -6143,5 +6143,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1400 });
 
+  F.c15night = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '奥雷里奥记得的', r: ['“你走了就回不来了”，是一句提醒', '十九年里没再想起过', '封了路，过不去', '对自己说：是封路'] },
+      { n: '罗莎记得的', r: ['听女儿说：“就别想再回来了”', '是她让他别来，怕他喝了酒', '他不知道在哪儿喝酒', '跟女儿说：你爸去喝酒了'] },
+      { n: '卢西娅记得的', r: ['“就别想再回来了”，像一句判决', '不知道有这通电话', '他不想来', '对自己说：他不要我回来'] },
+      { n: '本子上写着的', r: ['“就再也回不来了”', '十三点四十，罗莎来电话：不要来。好。', '十六点十分，路开了。我下了车。没有喝。', '没有写为什么下车'] },
+    ];
+    const K = ['那句话', '那通电话', '那天下午', '后来怎么讲'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p, i) => ({ p, r: p.r.map((t) => wrapZh(t, cw - (i === P.length - 1 ? 30 : 20), 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s), book = i === P.length - 1;
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: book ? 8 : 3, class: book ? 'fx-pill b' : 'fx-box' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, book ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();
