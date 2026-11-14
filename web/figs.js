@@ -5919,5 +5919,99 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.08, 0.25)));
   }, { dur: 1800 });
 
+  // Case 11: the last ninety seconds of the semifinal, drawn from the story's own match sheet (not data)
+  F.c11play = (fig) => figure(fig, (box, w) => {
+    const ph = Math.round(Math.min(w * 0.5, 230)), gap = 16, lh = 18;
+    // players: [u, v, name, label u, label v, anchor]; u runs from Barro's goal (left) to Vila Ipê's, v from Tião's left
+    const panels = [
+      { t: '一　补时第一分钟：红泥的角球', note: '比戈德和巴蒂斯塔都上前了。巴蒂斯塔头球，道格拉斯扑出，茹尼尼奥一脚把球解围到中线。红泥后场只剩克里斯、福米加和蒂昂。',
+        us: [[0.015, 0.5, '蒂昂', 0.03, 0.66, 'start'], [0.5, 0.66, '克里斯', 0.48, 0.69, 'end'], [0.47, 0.4, '福米加', 0.45, 0.43, 'end'], [0.93, 0.62, '巴蒂斯塔', 0.95, 0.78, 'end'], [0.88, 0.47, '比戈德', 0.86, 0.5, 'end']],
+        them: [[0.985, 0.5, ''], [0.95, 0.37, '茹尼尼奥', 0.93, 0.29, 'end'], [0.56, 0.28, '蒂亚吉尼奥', 0.58, 0.2, 'start'], [0.58, 0.74, '凯基', 0.6, 0.77, 'start']],
+        arrows: [[0.995, 0.02, 0.932, 0.59, 1], [0.94, 0.39, 0.575, 0.29, 1]] },
+      { t: '二　反击：二打二，没有人喊话', note: '克里斯和福米加都扑向凯基。蒂亚吉尼奥在禁区左侧，没有人管。',
+        us: [[0.015, 0.5, '蒂昂', 0.03, 0.66, 'start'], [0.2, 0.64, '克里斯', 0.21, 0.79, 'middle'], [0.22, 0.52, '福米加', 0.22, 0.46, 'middle']],
+        them: [[0.13, 0.27, '蒂亚吉尼奥', 0.16, 0.17, 'start'], [0.13, 0.73, '凯基', 0.11, 0.76, 'end']],
+        arrows: [[0.5, 0.66, 0.215, 0.64, 2], [0.47, 0.4, 0.235, 0.515, 2], [0.56, 0.28, 0.145, 0.27, 1], [0.13, 0.29, 0.13, 0.7, 1]] },
+      { t: '三　补时第二分钟：二比三', note: '凯基射向蒂昂的左边，蒂昂扑到了，球往旁边弹到禁区左侧，没有经过湖；蒂亚吉尼奥推射入网。',
+        us: [[0.02, 0.42, '蒂昂', 0.005, 0.68, 'start'], [0.17, 0.66, '克里斯', 0.19, 0.69, 'start'], [0.19, 0.56, '福米加', 0.21, 0.53, 'start']],
+        them: [[0.07, 0.25, '蒂亚吉尼奥', 0.1, 0.19, 'start'], [0.13, 0.73, '凯基', 0.15, 0.86, 'start']],
+        arrows: [[0.13, 0.73, 0.028, 0.44, 1], [0.025, 0.41, 0.062, 0.265, 1], [0.07, 0.25, 0.006, 0.47, 1]] },
+    ];
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const pw = w - 2, x0 = 1;
+    let y = 0;
+    panels.forEach((p) => {
+      const g = el('g', {}, s);
+      tx(g, 0, y + 14, p.t, 'fx-s fx-strong');
+      const top = y + 24, X = (u) => x0 + u * pw, Y = (v) => top + v * ph;
+      el('rect', { x: X(0), y: Y(0), width: pw, height: ph, class: 'fx-box' }, g);
+      el('line', { x1: X(0.5), x2: X(0.5), y1: Y(0), y2: Y(1), class: 'fx-hair' }, g);
+      el('circle', { cx: X(0.5), cy: Y(0.5), r: ph * 0.13, class: 'fx-hair' }, g);
+      [[0, 1], [1, -1]].forEach(([e, d]) => {
+        el('rect', { x: Math.min(X(e), X(e + d * 0.16)), y: Y(0.2), width: pw * 0.16, height: ph * 0.6, class: 'fx-hair' }, g);
+        el('line', { x1: X(e), x2: X(e), y1: Y(0.43), y2: Y(0.57), class: 'fx-ln', 'stroke-width': 3 }, g);
+      });
+      el('ellipse', { cx: X(0.08), cy: Y(0.43), rx: pw * 0.022, ry: ph * 0.065, class: 'fx-pill b' }, g);
+      tx(g, X(0.08), Y(0.365) - 4, '湖', 'fx-n', 'middle');
+      p.arrows.forEach(([a, b, c, d, k]) => arrow(g, X(a), Y(b), X(c), Y(d), k === 1 ? 'r' : '', 6));
+      const lab = ([u, v, n, lu, lv, an], cls) => {
+        el('circle', { cx: X(u), cy: Y(v), r: 5, class: cls }, g);
+        if (n) tx(g, X(lu), Y(lv), n, 'fx-n', an);
+      };
+      p.us.forEach((d) => lab(d, 'fx-node'));
+      p.them.forEach((d) => lab(d, 'fx-node m'));
+      const ls = wrapZh(p.note, w - 4, 12.5);
+      lines(g, 0, top + ph + 18, ls, 'fx-s', lh);
+      y = top + ph + 18 + (ls.length - 1) * lh + gap + 8;
+      gs.push(g);
+    });
+    const leg = el('g', {}, s), yl = y + 4;
+    el('circle', { cx: 6, cy: yl - 4, r: 5, class: 'fx-node' }, leg); tx(leg, 16, yl, '红泥', 'fx-s');
+    el('circle', { cx: 66, cy: yl - 4, r: 5, class: 'fx-node m' }, leg); tx(leg, 76, yl, '伊佩村', 'fx-s');
+    arrow(leg, 136, yl - 4, 160, yl - 4, 'r', 6); tx(leg, 166, yl, '球的路线', 'fx-s');
+    const x2 = w < 330 ? 0 : 236, y2 = w < 330 ? yl + 20 : yl;
+    arrow(leg, x2, y2 - 4, x2 + 24, y2 - 4, '', 6); tx(leg, x2 + 30, y2, '跑动', 'fx-s');
+    gs.push(leg);
+    const h = y2 + 8;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.22, 0.3)));
+  }, { dur: 2200 });
+
+  // Case 11: who actually coordinated the back line — Bigode's calls before and after he went up for the corner (from the story)
+  F.c11voice = (fig) => figure(fig, (box, w) => {
+    const narrow = w < 460, pw = narrow ? w : (w - 24) / 2, ph = 170;
+    const nodes = { 蒂昂: [0.5, 0.9], 克里斯: [0.85, 0.55], 比戈德: [0.5, 0.5], 巴蒂斯塔: [0.15, 0.55], 福米加: [0.5, 0.14] };
+    const panels = [
+      { t: '第七十到第八十分钟', sub: '比戈德不停地喊：谁跟谁，谁别出去', gone: [], talk: true },
+      { t: '最后一个角球之后', sub: '比戈德和巴蒂斯塔在对方禁区；剩下的三个人之间没有声音', gone: ['比戈德', '巴蒂斯塔'], talk: false },
+    ];
+    const s = svgIn(box, w, 10, fig), gs = [];
+    let hmax = 0;
+    panels.forEach((p, i) => {
+      const ox = narrow ? 0 : i * (pw + 24), oy = narrow ? i * (ph + 92) : 0, g = el('g', {}, s);
+      tx(g, ox, oy + 14, p.t, 'fx-s fx-strong');
+      const sl = wrapZh(p.sub, pw - 4, 12.5);
+      lines(g, ox, oy + 32, sl, 'fx-s', 17);
+      const top = oy + 32 + sl.length * 17, X = (u) => ox + 20 + u * (pw - 40), Y = (v) => top + v * (ph - 30);
+      if (p.talk) ['蒂昂', '克里斯', '巴蒂斯塔', '福米加'].forEach((n) => {
+        el('line', { x1: X(nodes['比戈德'][0]), y1: Y(nodes['比戈德'][1]), x2: X(nodes[n][0]), y2: Y(nodes[n][1]), class: 'fx-ln fx-lr' }, g);
+      });
+      Object.entries(nodes).forEach(([n, [u, v]]) => {
+        const out = p.gone.includes(n);
+        el('circle', { cx: X(u), cy: Y(v), r: 7, class: out ? 'fx-ghost' : (n === '比戈德' ? 'fx-node r' : 'fx-node') }, g);
+        tx(g, X(u), Y(v) + (v > 0.8 ? 22 : -12), out ? n + '（不在）' : n, out ? 'fx-n' : 'fx-s fx-strong', 'middle');
+      });
+      hmax = Math.max(hmax, top + ph);
+      gs.push(g);
+    });
+    const leg = el('g', {}, s), yl = hmax + 6;
+    el('line', { x1: 0, x2: 22, y1: yl - 4, y2: yl - 4, class: 'fx-ln fx-lr' }, leg);
+    tx(leg, 28, yl, '场上的口头协调', 'fx-s');
+    gs.push(leg);
+    const h = yl + 8;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.3, 0.35)));
+  }, { dur: 1600 });
+
   window.PPFig = F;
 })();
