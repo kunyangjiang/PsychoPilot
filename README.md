@@ -31,7 +31,7 @@ Twenty-one original psychology novellas, each followed by Case Notes, read throu
 | 09 | 全镇最烂的话剧团 | British ensemble farce | Published |
 | 10 | 第七夜的客人 | Japanese supernatural horror | Published |
 | 11 | 泥地 | Brazilian sports drama and comedy | Published |
-| 12 | 愿望只能买半个 | Dark comic fantasy adventure | In review |
+| 12 | 愿望只能买半个 | Dark comic fantasy adventure | Published |
 | 13 | 城里没有妖怪 | Historical Chinese folk horror | Planned |
 | 14 | 表情说明书 | Alien science-fiction comedy | Planned |
 | 15 | 她回来的三天 | Mexican magical realism | Planned |
