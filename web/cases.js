@@ -13,8 +13,9 @@ window.PPCases = (() => {
     { id: 'c7', title: '情书算法', genre: '婚恋应用研究', sub: '六封信让两个陌生人以为看见了彼此；见面以后，他们才开始学怎样读懂一段沉默' },
     { id: 'c8', title: '测量心灵的人', genre: '实验心理学史', sub: '巴黎，1908 年：一个读不好书的洗衣妇女儿，两张测验表，和一群想替她做决定的大人' },
     { id: 'c9', title: '全镇最烂的话剧团', genre: '社会心理学', sub: '连续九年垫底的业余剧社排《麦克白》：贡献表加起来 240%，每个人都在悄悄补救别人的错' },
+    { id: 'c10', title: '第七夜的客人', genre: '睡眠与意识', sub: '远野山村的老民宿，每间客房都压着一张卡片：夜里有人叫你的名字，不要应' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;

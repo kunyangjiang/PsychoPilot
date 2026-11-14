@@ -5839,5 +5839,85 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.06, 0.25)));
   }, { dur: 1800 });
 
+  // Case 10: which parts of wakefulness and REM sleep meet in sleep paralysis (schematic, no data)
+  F.c10states = (fig) => figure(fig, (box, w) => {
+    const cols = ['清醒', '快速眼动睡眠', '睡眠麻痹'];
+    const rows = [
+      ['意识', [['醒着', 'b'], ['在梦里', 'r'], ['醒着', 'b']]],
+      ['肌肉', [['能动', 'b'], ['被抑制', 'r'], ['被抑制', 'r']]],
+      ['梦的图像', [['没有', 'b'], ['活跃', 'r'], ['叠进房间', 'r']]],
+    ];
+    const L = w < 420 ? 58 : 84, R = 4, top = 30, rh = 42;
+    const cw = (w - L - R) / 3, ph = 26;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const head = el('g', {}, s);
+    cols.forEach((c, j) => tx(head, L + cw * j + cw / 2, top - 12, c, j === 2 ? 'fx-s fx-strong' : 'fx-s', 'middle'));
+    rows.forEach(([name], i) => tx(head, L - 8, top + i * rh + ph / 2 + 5, name, 'fx-s', 'end'));
+    gs.push(head);
+    [0, 1, 2].forEach((j) => {
+      const g = el('g', {}, s);
+      rows.forEach(([, cells], i) => {
+        const [t, k] = cells[j], x = L + cw * j + 4, y = top + i * rh;
+        el('rect', { x, y, width: cw - 8, height: ph, rx: 13, class: 'fx-pill ' + k }, g);
+        tx(g, x + (cw - 8) / 2, y + ph / 2 + 4.5, t, 'fx-s fx-strong', 'middle');
+      });
+      gs.push(g);
+    });
+    const yb = top + rows.length * rh + 6, xs = L + cw * 2 + 4;
+    const out = el('g', {}, s);
+    el('line', { x1: xs + (cw - 8) / 2, x2: xs + (cw - 8) / 2, y1: yb - 10, y2: yb + 8, class: 'fx-ln fx-lr' }, out);
+    const res = wrapZh('动不了，感到有人在场，胸口受压，害怕', w - 16, 12.5);
+    lines(out, w - R, yb + 26, res, 'fx-s fx-strong', 18, 'end');
+    gs.push(out);
+    const leg = el('g', {}, s), yl = yb + 26 + res.length * 18 + 14;
+    el('rect', { x: 0, y: yl - 10, width: 22, height: 12, rx: 6, class: 'fx-pill b' }, leg);
+    tx(leg, 28, yl, '清醒时的特征', 'fx-s');
+    const x2 = w < 360 ? 0 : 130, y2 = w < 360 ? yl + 20 : yl;
+    el('rect', { x: x2, y: y2 - 10, width: 22, height: 12, rx: 6, class: 'fx-pill r' }, leg);
+    tx(leg, x2 + 28, y2, '快速眼动睡眠的特征', 'fx-s');
+    gs.push(leg);
+    const h = y2 + 10;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.14, 0.3)));
+  }, { dur: 1800 });
+
+  // Case 10: the seven nights in the story, marked by how well sleep paralysis accounts for each (summary of the fiction, not data)
+  F.c10nights = (fig) => figure(fig, (box, w) => {
+    const rows = [
+      ['第一夜', 1, '佳代子：入住第一夜，动不了，胸口受压，看见妹妹坐在被子那头'],
+      ['第二夜', 0, '亮：半睡半醒时听见前女友叫他，录音里只有一团噪声'],
+      ['第三夜', 0, '悠斗：迷糊中应了母亲的声音；母亲同一夜梦见他应声'],
+      ['第四夜', 0, '美津：起来走到地炉边，看见哥哥小时候的样子'],
+      ['', 1, '西田：入住第一夜，动不了，身边有一个看不见的人'],
+      ['第五夜', 0, '安藤：白衣长发的女人，说法前后变了三次'],
+      ['第六夜', -1, '修：在账本里读到一九八九年的那一页'],
+      ['第七夜', 0, '修：坐在书桌前，能动，不是典型的睡眠麻痹，听见有人叫他，应了'],
+    ];
+    const L = w < 420 ? 50 : 64, mx = L + 8, tx0 = mx + 14, tw = w - tx0 - 2, lh = 18;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    let y = 14;
+    const pos = rows.map(([, , t]) => { const ls = wrapZh(t, tw, 12.5), y0 = y; y += ls.length * lh + 10; return [y0, ls]; });
+    el('line', { x1: mx, x2: mx, y1: pos[0][0] - 4, y2: pos[pos.length - 1][0] + 4, class: 'fx-hair' }, s);
+    rows.forEach(([n, k, ], i) => {
+      const [y0, ls] = pos[i], g = el('g', {}, s);
+      if (n) tx(g, L - 6, y0 + 4, n, 'fx-n', 'end');
+      if (k === 1) el('circle', { cx: mx, cy: y0, r: 5, class: 'fx-node r' }, g);
+      else if (k === 0) el('circle', { cx: mx, cy: y0, r: 5, class: 'fx-node m' }, g);
+      else el('rect', { x: mx - 4, y: y0 - 1, width: 8, height: 2, class: 'fx-node' }, g);
+      lines(g, tx0, y0 + 4.5, ls, 'fx-s', lh);
+      gs.push(g);
+    });
+    const leg = el('g', {}, s), yl = y + 8;
+    el('circle', { cx: 6, cy: yl - 4, r: 5, class: 'fx-node r' }, leg);
+    tx(leg, 16, yl, '睡眠麻痹能较好解释', 'fx-s');
+    const x2 = w < 360 ? 0 : 150, y2 = w < 360 ? yl + 20 : yl;
+    el('circle', { cx: x2 + 6, cy: y2 - 4, r: 5, class: 'fx-node m' }, leg);
+    tx(leg, x2 + 16, y2, '只能部分解释，或无法确定', 'fx-s');
+    gs.push(leg);
+    const h = y2 + 8;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.08, 0.25)));
+  }, { dur: 1800 });
+
   window.PPFig = F;
 })();

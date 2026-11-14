@@ -28,8 +28,8 @@ Original psychology novellas, each followed by Case Notes, read through `web/cas
 | 06 | 第三考场 | Coming-of-age / educational drama | Published |
 | 07 | 情书算法 | Contemporary romance | Published |
 | 08 | 测量心灵的人 | Historical psychological fiction | Published |
-| 09 | 全镇最烂的话剧团 | British ensemble farce | In development |
-| 10 | 第七夜的客人 | Japanese supernatural horror | Planned |
+| 09 | 全镇最烂的话剧团 | British ensemble farce | Published |
+| 10 | 第七夜的客人 | Japanese supernatural horror | Published |
 | 11 | 泥地 | Brazilian sports drama and comedy | Planned |
 | 12 | 愿望只能买半个 | Dark comic fantasy adventure | Planned |
 | 13 | 城里没有妖怪 | Historical Chinese folk horror | Planned |
