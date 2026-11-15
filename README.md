@@ -34,8 +34,8 @@ Twenty-one original psychology novellas, each followed by Case Notes, read throu
 | 12 | 愿望只能买半个 | Dark comic fantasy adventure | Published |
 | 13 | 城里没有妖怪 | Historical Chinese folk horror | In review |
 | 14 | 表情说明书 | Alien science-fiction comedy | In review |
-| 15 | 她回来的三天 | Mexican magical realism | In review |
-| 16 | 海底没有星星 | Cosmic horror | Planned |
+| 15 | 她回来的三天 | Mexican magical realism | Published |
+| 16 | 海底没有星星 | Cosmic horror | In review |
 | 17 | 皇帝决定当普通人 | Ancient Chinese political satire | Planned |
 | 18 | 笑声传过山谷 | Historical African social drama | Planned |
 | 19 | 人民公园的星期六 | Late-life romantic comedy | Planned |
