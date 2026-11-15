@@ -6275,5 +6275,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1400 });
 
+  F.c19sheets = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '报道里常写的', r: ['出生年份几乎每张都写，照片和名字反而少', '写“工作稳定”之类，收入常常直接写出来', '有没有房，常常直接写', '多是父母的电话；有的孩子并不知道自己被挂了出去'] },
+      { n: '沈月娥替宁宁写的', r: ['一九八七年生，属兔；一米六五（其实一米六二）', '外企白领（其实在国企做精算）', '闵行有房', '沈女士（母亲）'] },
+      { n: '宁宁自己会说的', r: ['三十八岁，不想结婚', '精算师，每天算的就是风险', '自己的房子，自己还贷款，一只叫小数点的猫', '本人'] },
+      { n: '老顾替沈月娥写的', r: ['一九五九年生；一米五八，她改成一米五九', '挡车工二十年，有热水瓶为证', '杨浦，有。不搬。', '写成了他自己，后来被女儿划掉，改成“本人”'] },
+    ];
+    const K = ['年龄和身高', '工作', '住房', '联系人'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p, i) => ({ p, r: p.r.map((t) => wrapZh(t, cw - (i > 0 ? 30 : 20), 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s), book = i > 0;
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: book ? 8 : 3, class: book ? 'fx-pill b' : 'fx-box' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, book ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();

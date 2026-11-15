@@ -38,7 +38,7 @@ Twenty-one original psychology novellas, each followed by Case Notes, read throu
 | 16 | 海底没有星星 | Cosmic horror | In review |
 | 17 | 皇帝决定当普通人 | Ancient Chinese political satire | In review |
 | 18 | 笑声传过山谷 | Historical African social drama | Published |
-| 19 | 人民公园的星期六 | Late-life romantic comedy | Planned |
+| 19 | 人民公园的星期六 | Late-life romantic comedy | Published |
 | 20 | 第二只手 | Italian psychological body horror | Planned |
 | 21 | 雪线以上还有一个人 | Karakoram survival adventure | Planned |
 
