@@ -6209,5 +6209,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1400 });
 
+  F.c17chain = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '往下传：出宫吃面', r: ['官家对梁怀恩：“就你一个人跟着，不叫任何人知道。”', '梁怀恩对皇城司：“不许任何人跟着，也不许任何人知道。”皇城司听成：要很多人跟着，一个都不能被看见', '府里的密札：“务使街市景象，与图无异。”', '陆蒙的情况说明，被批成：“照此逐条整治”'] },
+      { n: '往上传：桥头的味道', r: ['陆蒙：“气味颇异，请于左近另置一所。”', '书吏改成：“稍有不便，已饬该厢随时洒扫。”', '到胡府尹手里：“通济桥洒扫事，已饬办。”', '胡府尹批了一个字：“可”'] },
+      { n: '往上传：程直的奏报', r: ['程直写了十一页，第九页自劾：察访本身也助长了粉饰', '中丞：“实情是实情，奏报是奏报。”抽掉第九页', '官家看到十页：胡守素擅自粉饰', '官家始终不知道，其中有一只手是他自己的'] },
+      { n: '往上传：桥头的面价', r: ['骆三娘平时卖十五文', '三月初一到初三卖八文，差的七文市易务补', '察实司写明：八文只是那三天的价', '梁怀恩每月付十五文，回宫说：“还是八文。”'] },
+    ];
+    const K = ['第一手', '第二手', '第三手', '最后'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p, i) => ({ p, r: p.r.map((t) => wrapZh(t, cw - (i === P.length - 1 ? 30 : 20), 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s), book = i === P.length - 1;
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: book ? 8 : 3, class: book ? 'fx-pill b' : 'fx-box' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, book ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();

@@ -36,7 +36,7 @@ Twenty-one original psychology novellas, each followed by Case Notes, read throu
 | 14 | 表情说明书 | Alien science-fiction comedy | In review |
 | 15 | 她回来的三天 | Mexican magical realism | Published |
 | 16 | 海底没有星星 | Cosmic horror | In review |
-| 17 | 皇帝决定当普通人 | Ancient Chinese political satire | Planned |
+| 17 | 皇帝决定当普通人 | Ancient Chinese political satire | In review |
 | 18 | 笑声传过山谷 | Historical African social drama | Planned |
 | 19 | 人民公园的星期六 | Late-life romantic comedy | Planned |
 | 20 | 第二只手 | Italian psychological body horror | Planned |
