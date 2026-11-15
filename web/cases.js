@@ -21,8 +21,9 @@ window.PPCases = (() => {
     { id: 'c15', title: '她回来的三天', genre: '自传体记忆与哀伤', sub: '亡灵节的中午，死去六年的妻子回到瓦哈卡的厨房，嫌咖啡太淡；她记得的那段婚姻，跟丈夫记得的不一样' },
     { id: 'c16', title: '海底没有星星', genre: '知觉与社会规范', sub: '深海采矿船从四千三百米的海底捡上来一块石头，每个人在上面看见的都不一样；第九天起，所有人看见了同一样东西' },
     { id: 'c17', title: '皇帝决定当普通人', genre: '层级沟通与组织沉默', sub: '官家想微服出宫吃一碗面，看看二十二年前那幅画上的街市是不是真的；一句“谁也不许知道”，让全城照着画改了一遍' },
+    { id: 'c18', title: '笑声传过山谷', genre: '群体性心因性疾病', sub: '一九六二年，刚刚独立的坦噶尼喀，一所女子中学里，一百五十九个女孩有九十五个先后笑着哭着停不下来；医生什么都没查出来' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;

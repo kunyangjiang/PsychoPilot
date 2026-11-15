@@ -6242,5 +6242,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1400 });
 
+  F.c18record = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '一九六三年的报告记录', r: ['卡沙沙女中：一月三十日三名学生开始发作；到三月十八日关门，一百五十九人中九十五人发作', '关门约十天后，恩珊巴一带：约一万人中二百一十七人发作', '重开后又有五十七人发作，六月底再关；拉马申耶女中一百五十四人中四十八人；坎扬格雷卡一家人，附近两所男校关门', '报告写成时仍在扩散，没有结束日期'] },
+      { n: '后来的说法', r: ['“一个笑话引起”“全班一起大笑”：原报告没有这样写', '“传遍全国”：原报告没有这样写', '约一千人、十四所学校、持续到一九六四年：后来的整理，原报告没有这样统计', '大约两年后平息，没有人死亡'] },
+      { n: '报告没有记录的', r: ['最早的三个学生是谁，发病前发生了什么', '恩珊巴的发作和回家的女孩之间，除了时间先后，还有什么关系', '学校怎样对待反复发作的学生', '这些孩子后来的学业和生活'] },
+      { n: '小说虚构的', r: ['玛丽在针线课上被罚出教室；乔伊丝记下九十五', '埃丝特在河边发作，村里人怪她，她从此不笑', '记录卡上的那一行字；门口念信', '埃丝特住进姑妈家；九月里，她真的笑了'] },
+    ];
+    const K = ['一月三十日到三月十八日', '三月底到五月', '五月二十一日到六月底', '之后'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p, i) => ({ p, r: p.r.map((t) => wrapZh(t, cw - (i === P.length - 1 ? 30 : 20), 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s), book = i === P.length - 1;
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: book ? 8 : 3, class: book ? 'fx-pill b' : 'fx-box' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, book ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();
