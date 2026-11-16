@@ -6308,5 +6308,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1400 });
 
+  F.c20nights = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '他身体里感觉到的', r: ['睡梦中断臂一下一下地动（特蕾莎记下了时间）', '幻手一直攥着拳，夜里没有推过凿子', '攥拳，疼', '拳头张开、按住、推凿子，停不下来', '没有特别的感觉'] },
+      { n: '他想要的', r: ['醒来不记得做过梦', '不在工坊，没有想', '亲手把那只手做完，证明是自己的', '想让它停下来', '教会莉娅收尾那一下'] },
+      { n: '他实际做的', r: ['在家睡觉', '在托拉诺和海边', '用假肢夹着凿子打了两锤', '整夜坐在椅子上（录像为证）', '握着莉娅的手腕在边角料上走'] },
+      { n: '第二天石头上测到的', r: ['少了约四十立方厘米，地上有粉', '出现一只张开的左手；约九百立方厘米不见了，没有粉；指关节高出三毫米', '食指关节旁一个打伤的白斑', '背面变薄、透光，只有一小撮粉', '手背上多了一道歪的钩，没有人承认'] },
+    ];
+    const K = ['六月二十日夜', '八月封门十六天', '八月二十九日夜', '十月二日守夜', '十月四日以后'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p) => ({ p, r: p.r.map((t) => wrapZh(t, cw - 20, 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s), measured = i === 3;
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: measured ? 3 : 8, class: measured ? 'fx-box' : 'fx-pill b' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, measured ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();
