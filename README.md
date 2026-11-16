@@ -32,15 +32,15 @@ Twenty-one original psychology novellas, each followed by Case Notes, read throu
 | 10 | 第七夜的客人 | Japanese supernatural horror | Published |
 | 11 | 泥地 | Brazilian sports drama and comedy | Published |
 | 12 | 愿望只能买半个 | Dark comic fantasy adventure | Published |
-| 13 | 城里没有妖怪 | Historical Chinese folk horror | In review |
-| 14 | 表情说明书 | Alien science-fiction comedy | In review |
+| 13 | 城里没有妖怪 | Historical Chinese folk horror | Published |
+| 14 | 表情说明书 | Alien science-fiction comedy | Published |
 | 15 | 她回来的三天 | Mexican magical realism | Published |
-| 16 | 海底没有星星 | Cosmic horror | In review |
-| 17 | 皇帝决定当普通人 | Ancient Chinese political satire | In review |
+| 16 | 海底没有星星 | Cosmic horror | Published |
+| 17 | 皇帝决定当普通人 | Ancient Chinese political satire | Published |
 | 18 | 笑声传过山谷 | Historical African social drama | Published |
 | 19 | 人民公园的星期六 | Late-life romantic comedy | Published |
 | 20 | 第二只手 | Italian psychological body horror | Published |
-| 21 | 雪线以上还有一个人 | Karakoram survival adventure | Planned |
+| 21 | 雪线以上还有一个人 | Karakoram survival adventure | Published |
 
 Special editorial refinements:
 

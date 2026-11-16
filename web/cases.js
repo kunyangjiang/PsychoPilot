@@ -24,8 +24,9 @@ window.PPCases = (() => {
     { id: 'c18', title: '笑声传过山谷', genre: '群体性心因性疾病', sub: '一九六二年，刚刚独立的坦噶尼喀，一所女子中学里，一百五十九个女孩有九十五个先后笑着哭着停不下来；医生什么都没查出来' },
     { id: 'c19', title: '人民公园的星期六', genre: '晚年亲密关系与家庭边界', sub: '两个替孩子相亲的上海老人，为了香樟树底下一张长椅吵了一个春天；孩子们彼此不来电，两个老的倒是越吵越离不开' },
     { id: 'c20', title: '第二只手', genre: '幻肢、身体拥有感与作者身份', sub: '替大师雕了三十年石头的手艺人失去了左手；那只手还攥着拳，工坊里没做完的雕像却在没人的夜里继续变' },
+    { id: 'c21', title: '雪线以上还有一个人', genre: '存在感体验、高海拔认知与不确定下的决策', sub: '一九八八年冬天，一个巴尔蒂高山协作和一个波兰登山者被困在六千米的雪洞里；两个人都觉得洞里还有第三个人，一个叫她往上，一个叫他往下' },
   ];
-  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20']; // ids whose manuscript is finished and approved for reading
+  const READY = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11', 'c12', 'c13', 'c14', 'c15', 'c16', 'c17', 'c18', 'c19', 'c20', 'c21']; // ids whose manuscript is finished and approved for reading
   cases.forEach((c, i) => { c.index = i; c.no = String(i + 1).padStart(2, '0'); c.ready = READY.includes(c.id); });
   const byId = (id) => cases.find((c) => c.id === id);
   const caseUrl = (c) => `case.html?id=${c.id}`;

@@ -6341,5 +6341,38 @@
     return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
   }, { dur: 1400 });
 
+  F.c21presence = (fig) => figure(fig, (box, w) => {
+    const P = [
+      { n: '埃娃感觉到的', r: ['没有', '右肩后面有一个人，没有声音，像是从上面下来的', '还在；觉得他要往上走', '他好像先出去了，朝着山脊', '还在，只是“在那里”', '留在洞里，没有跟出来'] },
+      { n: '哈桑感觉到的', r: ['没有', '没有', '门口有人背对着坐；好像听见一个词：“下去”', '还在门口', '还在门口', '不在门口了，不知道什么时候走的'] },
+      { n: '他们实际做的', r: ['挖雪洞；对讲机没电，备用电池忘在大本营', '烧雪，记录', '哈桑关炉子，捅开通气孔', '往上试走一段，退回', '找竹竿；哈桑点炉子，手指冻伤', '两人在本子上签字，下山'] },
+      { n: '环境能证实的', r: ['上面两人下午已从帐篷旁下撤（事后才知道）', '洞里约零下五度', '通气孔冻死，火苗发黄，两人头痛', '风板断裂；下午冰瀑中段冰塔崩塌', '红胶布竹竿：竖着插的，插得很深', '高度表读数一夜降了六十米：气压回升'] },
+    ];
+    const K = ['二月十四日', '十五日傍晚', '十五日半夜', '十六日', '十七日', '十八日凌晨'];
+    const cols = w < 560 ? 2 : 4, gap = 14, cw = (w - gap * (cols - 1)) / cols, LH = 17;
+    const s = svgIn(box, w, 10, fig), gs = [];
+    const cells = P.map((p) => ({ p, r: p.r.map((t) => wrapZh(t, cw - 20, 12.5)) }));
+    const hOf = (c) => 22 + c.r.reduce((a, l) => a + 18 + l.length * LH + 10 + 8, 0);
+    const rows = Math.ceil(cells.length / cols), rowH = [];
+    for (let r = 0; r < rows; r++) rowH.push(Math.max(...cells.slice(r * cols, r * cols + cols).map(hOf)));
+    cells.forEach((c, i) => {
+      const r = Math.floor(i / cols), ox = (i % cols) * (cw + gap), oy = rowH.slice(0, r).reduce((a, b) => a + b + 22, 0);
+      const g = el('g', {}, s), measured = i === 3;
+      tx(g, ox, oy + 12, c.p.n, 'fx-s fx-strong');
+      let y = oy + 22;
+      c.r.forEach((l, j) => {
+        tx(g, ox, y + 12, K[j], 'fx-s');
+        const bh = l.length * LH + 10;
+        el('rect', { x: ox + 0.75, y: y + 18, width: cw - 1.5, height: bh, rx: measured ? 3 : 8, class: measured ? 'fx-box' : 'fx-pill b' }, g);
+        lines(g, ox + 10, y + 18 + 17, l, measured ? 'fx-s fx-strong' : 'fx-s', LH);
+        y += 18 + bh + 8;
+      });
+      gs.push(g);
+    });
+    const h = rowH.reduce((a, b) => a + b, 0) + (rows - 1) * 22 + 4;
+    s.setAttribute('viewBox', `0 0 ${w} ${h}`); s.setAttribute('height', h);
+    return (t) => gs.forEach((g, i) => show(g, stage(t, i * 0.18, 0.3)));
+  }, { dur: 1400 });
+
   window.PPFig = F;
 })();
