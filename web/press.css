@@ -20,7 +20,7 @@
   --pen: #2c4fa3;       /* fountain-pen blue for written text in the cases */
   --text: #1d2440;
   --text-2: #4c516a;
-  --text-3: #8a8a94;
+  --text-3: #67687a;
   --rule: rgba(34, 48, 90, .16);
   --on-blue: #f2ece1;
   --mid: #8b7f8f;       /* the Albers grey: two inks overprinted, thinned */
@@ -111,7 +111,8 @@ button { font: inherit; color: inherit; }
 .plate-cap h2 small { font: 500 12px var(--mono); letter-spacing: .1em; color: var(--text-3); margin-left: 8px; text-transform: uppercase; }
 .plate-cap p { grid-column: 2; color: var(--text-2); font-size: 15px; max-width: 34em; }
 .laws { display: flex; gap: 6px; margin-top: 14px; grid-column: 2; }
-.laws button { width: 30px; height: 6px; border: 0; border-radius: 3px; background: var(--rule); cursor: pointer; padding: 0; transition: background .3s, width .4s var(--ease); }
+.laws button { position: relative; width: 30px; height: 6px; border: 0; border-radius: 3px; background: var(--rule); cursor: pointer; padding: 0; transition: background .3s, width .4s var(--ease); }
+.laws button::before { content: ""; position: absolute; inset: -12px -3px; }
 .laws button[aria-pressed="true"] { background: var(--red); width: 46px; }
 
 /* ---------- Section heads ---------- */
@@ -156,7 +157,7 @@ button { font: inherit; color: inherit; }
 
 /* ---------- Interests + footer ---------- */
 .links { font: 700 clamp(1.3rem, 2.4vw, 2rem)/1.7 var(--head); }
-.links a { background: linear-gradient(var(--red), var(--red)) 0 92% / 0 .14em no-repeat; transition: background-size .45s var(--ease); }
+.links a { white-space: nowrap; background: linear-gradient(var(--red), var(--red)) 0 92% / 0 .14em no-repeat; transition: background-size .45s var(--ease); }
 .links a:hover { background-size: 100% .14em; }
 .links .sep { color: var(--text-3); font-weight: 300; margin-inline: .3em; }
 /* workplace case studies: a ruled list on the home page */
@@ -398,6 +399,11 @@ a.case-row .case-s { color: var(--red); }
 @media (max-width: 900px) {
   .hero, .exp, .foot { grid-template-columns: 1fr; }
   .plate { margin-top: 8px !important; }
+  /* phones and tablets: show the squares before asking about them */
+  .exp { row-gap: 0; }
+  .exp > div:first-child { display: contents; }
+  .exp .choices, .exp .answer { order: 2; }
+  .exp .albers { order: 1; margin-top: 24px; }
 }
 @media (max-width: 600px) {
   .mast { flex-wrap: wrap; column-gap: 8px; row-gap: 0; }

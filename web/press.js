@@ -92,8 +92,8 @@
       { zh: '接近律', en: 'Proximity', d: '靠得近的，就是一伙。边框是你的大脑画上去的。',
         set(d, i) {
           const g = i % 6, k = Math.floor(i / 6), cx = [.2, .5, .8][g % 3], cy = [.3, .72][Math.floor(g / 3)];
-          const side = 5, a = (k % side) - (side - 1) / 2, b = Math.floor(k / side) - 2.2;
-          d.tx = cx + a * .03; d.ty = cy + b * .036; d.tr = k < 26 ? 1 : 0; d.tred = 0;
+          const side = 5, a = (k % side) - (side - 1) / 2, b = Math.floor(k / side) - 2;
+          d.tx = cx + a * .03; d.ty = cy + b * .036; d.tr = k < 25 ? 1 : 0; d.tred = 0;
         } },
       { zh: '相似律', en: 'Similarity', d: '同一个方阵，只换了颜色：行，就变成了列。',
         set(d, i) { const [x, y] = grid(i); d.tx = .06 + x * .88; d.ty = .06 + y * .88; d.tr = 1; d.tred = (i % COLS) % 2 === 0 ? 1 : 0; } },
@@ -198,12 +198,9 @@
   function initAlbers() {
     const box = $('#albers'), ans = $('#answer'), btns = [...document.querySelectorAll('.choice')];
     btns.forEach((b) => b.addEventListener('click', () => {
-      const open = !box.classList.contains('is-revealed');
-      box.classList.toggle('is-revealed', open);
-      btns.forEach((x) => x.setAttribute('aria-pressed', String(open && x === b)));
-      ans.innerHTML = open
-        ? `${b.dataset.a === 'same' ? '对，' : '被骗了：'}两个小方块是<b>同一种颜色</b>，中间那条色带就是证据。周围的颜色，总在改写它。<br><a href="course.html?id=04-02">04-02 视觉错觉与知觉建构 →</a>`
-        : '';
+      box.classList.add('is-revealed');
+      btns.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      ans.innerHTML = `${b.dataset.a === 'same' ? '对，' : '被骗了：'}两个小方块是<b>同一种颜色</b>，中间那条色带就是证据。周围的颜色，总在改写它。<br><a href="course.html?id=04-02">04-02 视觉错觉与知觉建构 →</a>`;
     }));
   }
 
