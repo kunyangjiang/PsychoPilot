@@ -147,7 +147,9 @@ button { font: inherit; color: inherit; }
 .exp p { margin-top: 18px; color: var(--text-2); max-width: 28em; }
 .choices { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
 .choice { border: 2px solid var(--text); background: var(--paper); border-radius: 999px; padding: 9px 20px; font-weight: 600; cursor: pointer; transition: transform .3s var(--ease), box-shadow .3s; }
-.choice:hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--text); }
+@media (hover: hover) and (pointer: fine) {
+  .choice:not([aria-pressed="true"]):hover { transform: translate(-2px, -2px); box-shadow: 3px 3px 0 var(--text); }
+}
 .choice[aria-pressed="true"] { background: var(--text); color: var(--paper); }
 .answer { margin-top: 20px; min-height: 3.5em; font-size: 15px; }
 .answer a { border-bottom: 2px solid var(--red); font-weight: 600; }
